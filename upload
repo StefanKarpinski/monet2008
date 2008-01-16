@@ -1,0 +1,5 @@
+#!/bin/sh
+upload_host=${upload_host:-coltrane}
+perl -i -ple 's/^nan/0.0/' paper.pdf
+rsync -v paper.pdf $upload_host:public_html/papers/monet.pdf
+rsync -v paper.tex $upload_host:public_html/papers/monet.tex
