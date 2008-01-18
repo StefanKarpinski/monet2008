@@ -17,19 +17,19 @@
   - Individual:
     - each flow corresponds to a specific trace flow with an associated packet trace
     - flow size & start time taken from trace
-    - overrides distribution of time-size packet behavior with flow-specific version
+    - overrides distributions of size/interval packet behaviors with flow-specific versions
   - Nonparametric:
     - flow size is sampled from inherited distribution of flow sizes
     - start time relative to previous session flow sampled from inherited distribution
-    - distribution of time-size packet behavior inherited from destination node
+    - inherits distributions of size/interval packet behaviors from destination node
   - Parametric:
     - flow size is samples from BiPareto model fitted to inherited distribution
     - start time relative to previous session flow sampled Lognormal fitted to inherited
-    - distribution of time-size packet behavior inherited from destination node
+    - inherits distributions of size/interval packet behaviors from destination node
   - Uniform:
     - all flows have size equal to inherited mean
     - average inter-flow interval used between all flows
-    - distribution of time-size packet behavior inherited from destination node
+    - inherits distributions of size/interval packet behaviors from destination node
 
 - Packet:
   - Individual:    each packet corresponds to a specific trace packet

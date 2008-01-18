@@ -1,7 +1,8 @@
 - Network:
   - collection of nodes
   - collection of flows
-  - distribution of time-size packet behaviors
+  - distribution of packet sizes
+  - distribution of inter-packet intervals
   - distribution of intervals between flow start times (per session)
   - distribution of flow sizes
 
@@ -9,7 +10,8 @@
   - collection of source flows
   - collection of destination flows
   - session start time
-  - distribution of time-size packet behaviors
+  - distribution of packet sizes
+  - distribution of inter-packet intervals
   - distribution of intervals between flow start times
   - distribution of flow sizes
 
@@ -18,7 +20,8 @@
   - destination
   - start time
   - size (byte count)
-  - distribution of time-size packet behaviors
+  - distribution of packet sizes
+  - distribution of inter-packet intervals
 
 - Packet:
   - send time
