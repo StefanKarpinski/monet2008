@@ -1,0 +1,31 @@
+- Packet:
+  - Individual: each packet corresponds to a specific trace packet
+  - Sampled:    packet sizes and intervals are sample from inherited distributions
+  - Parametric: packet sizes and intervals are drawn from inherited parametric distributions
+  - Uniform:    all packet sizes and inter-packet intervals are equal to inherited mean
+
+- Flow:
+  - Individual:
+    - each flow corresponds to a specific trace flow with an associated packet trace
+    - overrides distribution of time-size packet behavior
+  - Sampled:
+    - flow size is sampled from inherited distribution of flow sizes
+  - Parametric:
+    - flow size is samples BiPareto distribution with inherited parameters
+  - Uniform:
+    - all flows have size equal to inherited mean
+
+- Node:
+  - Individual:
+    - each node corresponds to a specific trace node with associated trace flows
+    - session start time assigned from trace
+    - overrides all distributions
+  - Sampled:
+    - generic flows assigned to nodes by sampling
+    - session start time assigned from pool of start times
+  - Parametric:
+    - generic flows assigned to nodes according to BiPareto model
+    - session start time randomly chosen from viable range
+  - Uniform:
+    - all nodes have average number of generic flows
+    - session start times uniformly cover viable range

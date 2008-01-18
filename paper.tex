@@ -8,15 +8,16 @@
 \usepackage{cite,amsmath,amssymb,rotating,multirow,bigstrut,url,wrapfig}
 \usepackage[hyperfigures,bookmarks,bookmarksopen,bookmarksnumbered,colorlinks,linkcolor=black,citecolor=black,filecolor=blue,menucolor=black,pagecolor=blue,frenchlinks=true,pdftitle={\thetitle}]{hyperref}
 
-\hyphenation{op-tical net-works semi-conduc-tor IEEEtran}
+\hyphenation{net-works IEEEtran}
 \bibliographystyle{IEEEtran}
 
 \newcommand{\email}[1]{$\left<{\textit{#1}}\right>$}
 \newcommand{\caps}[1]{{\small{#1}}}
 
-\title{%
-%\vspace{-0.2em}
-\thetitle%
+\title{
+\thetitle\\
+\vspace{0.2em}
+\LARGE{On The Inadequacy of Uniform Modeling for WLAN Workloads}
 }
 \author{
 {\large{Stefan~Karpinski, Elizabeth~M.~Belding, Kevin~C.~Almeroth}}\\
@@ -182,7 +183,9 @@ We separate traffic generation into three levels of behavior: network, flow and 
 
 %\subsubsection*{Network Behavior Models}
 
-For each level of behavior we define a spectrum of models. The gold standard of realism at each level is provided by the ``trace'' model for that level, which replicates the node, flow or packet behavior of the original trace exactly. The most rudimentary model at each level is the ``uniform'' model, which treats all entities identically---be they nodes, flows or packets. Despite being so simplistic (or perhaps because of it), the uniform behavior models are by far the most commonly for workload generation in experiments. Between these extremes on the spectrum of realism, we consider one or two models with intermediate degrees of complexity and fidelity. At the packet level, we define the ``sample'' model, which is in essence a per-flow variable bit-rate (\caps{VBR}) model: each packet's size is determined by randomly sampling a value from the packet size distribution given by the flow model; the interval until the next packet is then sampled from the given interval distribution.\footnote{Note that the uniform packet model (\textit{i.e.} {\scriptsize{CBR}}), can be considered to be a special case of the sample model where the size and time distributions are both constant.} The intermediate model at the flow level is designated as ``proportional'': the distributions of inter-packet ...
+%We consider four models of network-level behavior. The most faithful is the ``trace'' model, which assigns each flow 
+
+For each level of behavior we define a spectrum of models. The gold standard of realism at each level is provided by the ``trace'' model for that level, which replicates the node, flow or packet behavior of the original trace exactly. The most rudimentary model at each level is the ``uniform'' model, which treats all entities identically---be they nodes, flows or packets. Despite being so simplistic (or perhaps because of it), the uniform behavior models are by far the most commonly for workload generation in experiments. Between these extremes on the spectrum of realism, we consider one or two models with intermediate degrees of complexity and fidelity. At the packet level, we define the ``sample'' model, which is in essence a per-flow variable bit-rate (\caps{VBR}) model: each packet's size is determined by randomly sampling a value from the packet size distribution given by the flow model; the interval until the next packet is then sampled from the given interval distribution.\footnote{Note that the uniform packet model (\textit{i.e.} {\scriptsize{CBR}}), can be considered to be a special case of the sample model where the size and time distributions are both constant.} The intermediate model at the flow level is designated as ``proportional'': the distributions of packet sizes and inter-packet intervals are taken from the trace and passed down to the packet model (which may use the actual distribution, via sampling, or simply use the mean size and intervals, to generate \caps{CBR} traffic).
 
 %\begin{enumerate}
 %\item \textbf{Network Behavior}: which nodes communicate with each other, and how frequently; \textit{i.e.} how flow end-points are mapped onto nodes in the network.
