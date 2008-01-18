@@ -23,7 +23,7 @@
     - start time relative to previous session flow sampled from inherited distribution
     - inherits distributions of size/interval packet behaviors from destination node
   - Parametric:
-    - flow size is samples from BiPareto model fitted to inherited distribution
+    - flow size is sampled from BiPareto model fitted to inherited distribution
     - start time relative to previous session flow sampled Lognormal fitted to inherited
     - inherits distributions of size/interval packet behaviors from destination node
   - Uniform:
