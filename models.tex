@@ -1,7 +1,7 @@
 \begin{tabular}{|c|c|p{4.3in}|}
 \multicolumn{1}{c}{\textbf{Level}} &
 \multicolumn{1}{c}{\textbf{Model}} &
-\multicolumn{1}{c}{\textbf{Description}} \\[2pt]
+\multicolumn{1}{c}{\textbf{Overridden and inherited properties}} \\[2pt]
 \hline
 \multirow{8}{*}[2.5pt]{Node}
 & \multirow{1}{*}[-0.05em]{Individual} &
@@ -25,7 +25,7 @@
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
 \raisebox{1.5pt}{$\centerdot$} generic flows assigned to nodes according to BiPareto model \\
-\raisebox{1.5pt}{$\centerdot$} session start time randomly chosen from viable range
+\raisebox{1.5pt}{$\centerdot$} session start time assigned according to Poisson arrival model
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
@@ -92,7 +92,7 @@
 & \multirow{1}{*}[-0.05em]{Parametric} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-\raisebox{1.5pt}{$\centerdot$} packet sizes and intervals are drawn from inherited parametric distributions
+\raisebox{1.5pt}{$\centerdot$} packet sizes and intervals are drawn from fitted Exponential distributions
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}

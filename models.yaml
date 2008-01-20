@@ -8,7 +8,7 @@
     - session start time assigned from pool of start times
   - Parametric:
     - generic flows assigned to nodes according to BiPareto model
-    - session start time randomly chosen from viable range
+    - session start time assigned according to Poisson arrival model
   - Uniform:
     - all nodes have average number of generic flows
     - session start times uniformly cover viable range
@@ -34,5 +34,5 @@
 - Packet:
   - Individual:    each packet corresponds to a specific trace packet
   - Nonparametric: packet sizes and intervals are sampled from inherited distributions
-  - Parametric:    packet sizes and intervals are drawn from inherited parametric distributions
+  - Parametric:    packet sizes and intervals are drawn from fitted Exponential distributions
   - Uniform:       all packet sizes and inter-packet intervals are equal to inherited mean

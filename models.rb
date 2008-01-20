@@ -25,7 +25,7 @@ puts <<'HEADER'
 \begin{tabular}{|c|c|p{4.3in}|}
 \multicolumn{1}{c}{\textbf{Level}} &
 \multicolumn{1}{c}{\textbf{Model}} &
-\multicolumn{1}{c}{\textbf{Description}} \\[2pt]
+\multicolumn{1}{c}{\textbf{Overridden and inherited properties}} \\[2pt]
 HEADER
 models.each do |l|
   level = l.keys.first

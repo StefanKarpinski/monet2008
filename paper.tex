@@ -92,7 +92,9 @@ One of the hardest problems in modeling phenomena as complex as network traffic 
 \small
 \input{models.tex}
 \end{center}
+\vspace{-0.5em}
 \caption{Summary of how the models at each behavioral level override or inherit properties in the traffic object model ({\footnotesize{TOM}}).}
+\vspace{-1.75em}
 \end{table*}
 
 Our analysis shows that the standard constant bit-rate (\caps{CBR}) traffic model, with uniformly chosen nodes and uniform flows of traffic, significantly misrepresents important performance metrics at every level of the network. To qualify these results in more depth, we also investigate partially synthetic variants of this standard model, allowing us to reason about which aspects of workload models have the most impact. For the most commonly used model, the delay of application data traversing the network from sender to receiver is underestimated by more than a factor of 5, \textit{on average}, and by more than a factor of 11 in a quarter of usage scenarios. Network control overhead is overestimated, on average, by a factor of about 2.5, while link control overhead is underestimated by almost a factor of 2. Even for metrics where the average and median misrepresentations are not so extreme, the statistical characteristics of error values often indicate that something is fundamentally unrealistic. None of the partially synthetic models manage to accurately represent more than one or two performance characteristics. We further use the \caps{AODV}~\cite{rfc:aodv} and \caps{OLSR}~\cite{rfc:olsr} ad~hoc routing protocols to show that the relative performance of protocols can be inverted when changing from using a simplistic traffic model to using real traffic: using random end-point, uniform \caps{CBR} traffic, \caps{AODV} appears to induce less link-layer overhead than \caps{OLSR}, whereas using real traffic, it in fact induces more.
