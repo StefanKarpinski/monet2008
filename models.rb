@@ -14,8 +14,9 @@ class Hash
   def leaves; values.collect{|x| x.leaves}.flatten; end
 end
 
+bullet = '\\raisebox{1.5pt}{$\\centerdot$}'
 fixups = {
-  :Node   => [ 8,'3.0pt'],
+  :Node   => [ 8,'2.5pt'],
   :Flow   => [11,'2.5pt'],
   :Packet => [ 5,'2.5pt']
 }
@@ -41,8 +42,8 @@ models.each do |l|
     puts '\vspace{2pt}'
     items.each_with_index do |item,k|
       item.gsub!(/&/,'\\\&')
-      # puts "& & " if k > 0
-      puts "#{item}" + ((k < items.size-1) ? ' \\\\' : '')
+      line_end = (k < items.size-1) ? ' \\\\' : ''
+      puts "#{bullet} #{item}" + line_end
     end
     puts '\vspace{2pt}'
     puts '\end{minipage} \\\\'

@@ -3,37 +3,37 @@
 \multicolumn{1}{c}{\textbf{Model}} &
 \multicolumn{1}{c}{\textbf{Description}} \\[2pt]
 \hline
-\multirow{8}{*}[3.0pt]{Node}
+\multirow{8}{*}[2.5pt]{Node}
 & \multirow{1}{*}[-0.05em]{Individual} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-each node corresponds to a specific trace node with associated trace flows \\
-session start time assigned from trace \\
-overrides all distributions with per-node versions
+\raisebox{1.5pt}{$\centerdot$} each node corresponds to a specific trace node with associated trace flows \\
+\raisebox{1.5pt}{$\centerdot$} session start time assigned from trace \\
+\raisebox{1.5pt}{$\centerdot$} overrides all distributions with per-node versions
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
 & \multirow{1}{*}[-0.05em]{Nonparametric} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-generic flows assigned to nodes by sampling \\
-session start time assigned from pool of start times
+\raisebox{1.5pt}{$\centerdot$} generic flows assigned to nodes by sampling \\
+\raisebox{1.5pt}{$\centerdot$} session start time assigned from pool of start times
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
 & \multirow{1}{*}[-0.05em]{Parametric} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-generic flows assigned to nodes according to BiPareto model \\
-session start time randomly chosen from viable range
+\raisebox{1.5pt}{$\centerdot$} generic flows assigned to nodes according to BiPareto model \\
+\raisebox{1.5pt}{$\centerdot$} session start time randomly chosen from viable range
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
 & \multirow{1}{*}[-0.05em]{Uniform} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-all nodes have average number of generic flows \\
-session start times uniformly cover viable range
+\raisebox{1.5pt}{$\centerdot$} all nodes have average number of generic flows \\
+\raisebox{1.5pt}{$\centerdot$} session start times uniformly cover viable range
 \vspace{2pt}
 \end{minipage} \\
 \hline
@@ -41,36 +41,36 @@ session start times uniformly cover viable range
 & \multirow{1}{*}[-0.05em]{Individual} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-each flow corresponds to a specific trace flow with an associated packet trace \\
-flow size \& start time taken from trace \\
-overrides distributions of size/interval packet behaviors with flow-specific versions
+\raisebox{1.5pt}{$\centerdot$} each flow corresponds to a specific trace flow with an associated packet trace \\
+\raisebox{1.5pt}{$\centerdot$} flow size \& start time taken from trace \\
+\raisebox{1.5pt}{$\centerdot$} overrides distributions of size/interval packet behaviors with flow-specific versions
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
 & \multirow{1}{*}[-0.05em]{Nonparametric} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-flow size is sampled from inherited distribution of flow sizes \\
-start time relative to previous session flow sampled from inherited distribution \\
-inherits distributions of size/interval packet behaviors from destination node
+\raisebox{1.5pt}{$\centerdot$} flow size is sampled from inherited distribution of flow sizes \\
+\raisebox{1.5pt}{$\centerdot$} start time relative to previous session flow sampled from inherited distribution \\
+\raisebox{1.5pt}{$\centerdot$} inherits distributions of size/interval packet behaviors from destination node
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
 & \multirow{1}{*}[-0.05em]{Parametric} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-flow size is sampled from BiPareto model fitted to inherited distribution \\
-start time relative to previous session flow sampled Lognormal fitted to inherited \\
-inherits distributions of size/interval packet behaviors from destination node
+\raisebox{1.5pt}{$\centerdot$} flow size is sampled from BiPareto model fitted to inherited distribution \\
+\raisebox{1.5pt}{$\centerdot$} start time relative to previous session flow sampled Lognormal fitted to inherited \\
+\raisebox{1.5pt}{$\centerdot$} inherits distributions of size/interval packet behaviors from destination node
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
 & \multirow{1}{*}[-0.05em]{Uniform} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-all flows have size equal to inherited mean \\
-average inter-flow interval used between all flows \\
-inherits distributions of size/interval packet behaviors from destination node
+\raisebox{1.5pt}{$\centerdot$} all flows have size equal to inherited mean \\
+\raisebox{1.5pt}{$\centerdot$} average inter-flow interval used between all flows \\
+\raisebox{1.5pt}{$\centerdot$} inherits distributions of size/interval packet behaviors from destination node
 \vspace{2pt}
 \end{minipage} \\
 \hline
@@ -78,28 +78,28 @@ inherits distributions of size/interval packet behaviors from destination node
 & \multirow{1}{*}[-0.05em]{Individual} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-each packet corresponds to a specific trace packet
+\raisebox{1.5pt}{$\centerdot$} each packet corresponds to a specific trace packet
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
 & \multirow{1}{*}[-0.05em]{Nonparametric} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-packet sizes and intervals are sampled from inherited distributions
+\raisebox{1.5pt}{$\centerdot$} packet sizes and intervals are sampled from inherited distributions
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
 & \multirow{1}{*}[-0.05em]{Parametric} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-packet sizes and intervals are drawn from inherited parametric distributions
+\raisebox{1.5pt}{$\centerdot$} packet sizes and intervals are drawn from inherited parametric distributions
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
 & \multirow{1}{*}[-0.05em]{Uniform} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-all packet sizes and inter-packet intervals are equal to inherited mean
+\raisebox{1.5pt}{$\centerdot$} all packet sizes and inter-packet intervals are equal to inherited mean
 \vspace{2pt}
 \end{minipage} \\
 \hline
