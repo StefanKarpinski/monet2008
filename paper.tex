@@ -69,7 +69,38 @@ The experimental evaluation of new wireless technologies inevitably requires net
 
 One of the hardest problems in modeling phenomena as complex as network traffic patterns lies in determining which characteristics of any given exemplar of behavior are essential and which can safely be abstracted away. In \caps{WLAN} traffic modeling, important characteristics have largely been determined based on intuition. In previous work~\cite{Karpinski07:realism}, we introduced a fundamentally different approach to evaluating the realism of workload models. Rather than subjectively choosing statistical measures that may or may not actually influence network performance, the realism of a model is measured directly in terms of its ability to accurately reproduce critical performance metrics. We define a traffic model to be \textit{sufficiently realistic} with respect to a given performance metric, if the model produces metric values that are similar to those observed using the original trace to generate traffic. Using this new approach, we explore the space of traffic models, establishing rigorously for the first time that common but simplistic models of \caps{WLAN} traffic drastically misrepresent important performance metrics at all levels of the protocol stack.
 
+\begin{table}[t]
+\noindent
+\begin{tabular}[t]{|l|}
+\hline
+\begin{minipage}[l]{3.315in}
+\begin{small}
+\vspace{0.8em}
 \input{properties.tex}
+\vspace{0.7em}
+\end{small}
+\end{minipage}
+\\\hline
+\end{tabular}
+\caption{Summary of properties defined for the hierarchy of object types in the traffic object model ({\footnotesize{TOM}}).}
+\end{table}
+
+
+\begin{table}[t]
+\noindent
+\begin{tabular}[t]{|l|}
+\hline
+\begin{minipage}[l]{3.315in}
+\begin{small}
+\vspace{0.8em}
+\input{models.tex}
+\vspace{0.7em}
+\end{small}
+\end{minipage}
+\\\hline
+\end{tabular}
+\caption{Summary of how the models at each behavioral level override or inherit properties in the traffic object model ({\footnotesize{TOM}}).}
+\end{table}
 
 Our analysis shows that the standard constant bit-rate (\caps{CBR}) traffic model, with uniformly chosen nodes and uniform flows of traffic, significantly misrepresents important performance metrics at every level of the network. To qualify these results in more depth, we also investigate partially synthetic variants of this standard model, allowing us to reason about which aspects of workload models have the most impact. For the most commonly used model, the delay of application data traversing the network from sender to receiver is underestimated by more than a factor of 5, \textit{on average}, and by more than a factor of 11 in a quarter of usage scenarios. Network control overhead is overestimated, on average, by a factor of about 2.5, while link control overhead is underestimated by almost a factor of 2. Even for metrics where the average and median misrepresentations are not so extreme, the statistical characteristics of error values often indicate that something is fundamentally unrealistic. None of the partially synthetic models manage to accurately represent more than one or two performance characteristics. We further use the \caps{AODV}~\cite{rfc:aodv} and \caps{OLSR}~\cite{rfc:olsr} ad~hoc routing protocols to show that the relative performance of protocols can be inverted when changing from using a simplistic traffic model to using real traffic: using random end-point, uniform \caps{CBR} traffic, \caps{AODV} appears to induce less link-layer overhead than \caps{OLSR}, whereas using real traffic, it in fact induces more.
 
@@ -136,13 +167,13 @@ Our general methodology is to compare performance metrics in simulations using r
 
 We do not assume or claim that the traffic found at \caps{IETF60} is representative of conference settings in general. The observed behaviors are also unlikely to resemble those found in a typical commercial or residential setting. We have chosen this trace, however, because within it can be found behaviors resembling many different types of wireless usage cases. Figure~\ref{fig:nodes-flows} shows the wide variations in the number of active flows and nodes over the course of the trace. In the night and morning hours, the traffic patterns are similar to those one might find in a moderately trafficked business or residential area. During working group sessions, we see highly concentrated, heavy usage patterns. At the zenith of activity, over 800 users, 33 thousand flows, and 1 million packets are seen in a single 10-minute trace segment. At the nadir, a lone node sent only a single 61-byte packet over the course of 10 minutes. All levels of activity between these extremes are represented. Moreover, the mix of traffic types observed changes dramatically over the course of the day, providing a wide representation of possible blends of behavior. This heterogeneity and extreme range of behaviors makes the \caps{IETF} data set ideal for this evaluation. The variety of activity gives us greater confidence that success or failure of traffic models is not tied to any specific network condition, but is broadly and generally applicable. %For a traffic model to be truly realistic, it must be realistic across many different usage cases.
 
-\begin{table*}
-\begin{center}\small
-\input{models.tex}
-\caption{The three levels of traffic behavior and the traffic models defined for each level.}\label{tab:traffic-models}
-\end{center}
-\vspace{-1.75em}
-\end{table*}
+%\begin{table*}
+%\begin{center}\small
+%\input{models.tex}
+%\caption{The three levels of traffic behavior and the traffic models defined for each level.}\label{tab:traffic-models}
+%\end{center}
+%\vspace{-1.75em}
+%\end{table*}
 
 Before using the traces, it is necessary to extract application-level behavior from the trace header data. First, we split the trace into individual packet flows. A flow is a series of packets sharing the following five attributes: \caps{IP} and transport protocols (raw \caps{IP}, \caps{ICMP}, \caps{TCP}, \caps{UDP}); source and destination \caps{IP} addresses and \caps{TCP}/\caps{UDP} port numbers. Next, the quantity of application-initiated data contained in each packet is calculated. For non-\caps{TCP} packets, this quantity is simply the size of the transport-layer payload, but for \caps{TCP} the calculation is more complicated: only new data transfers, explicitly initiated by the application are counted. Data retransmitted by \caps{TCP} is disregarded, and empty \caps{ACK}s are ignored. \caps{SYN} and \caps{FIN} flags in packets (even empty ones) are counted as a single byte each, since they are explicitly signaled by the application. %After processing, we have a collection of flows, each with a sequence of timestamps and the amount of application-initiated data sent at that time.
 

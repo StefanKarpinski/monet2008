@@ -1,39 +1,73 @@
-\begin{tabular}{|c|l|p{5in}|}
-\multicolumn{1}{c}{\textbf{Behavior}} &
-\multicolumn{1}{c}{\textbf{Model}} &
-\multicolumn{1}{c}{\textbf{Description}} \\
-\hline
-\multirow{3}[13]{*}{Network}
-\bigstrut & \multirow{1}{*}[-0.05em]{\textbf{T}race} &
-Mapping of flow end-points to wireless nodes taken directly from trace data. \\
-\cline{2-3}
-\bigstrut & \multirow{1}{*}[-0.05em]{\textbf{M}arginal} &
-Use marginal empirical distributions from trace. \\
-\cline{2-3}
-\bigstrut & \multirow{1}{*}[-0.05em]{\textbf{S}ynthetic} &
-Use synthetic distributions \textit{\`a la} Hern\'andez-Campos~\textit{et~al.}~\cite{Hernandez06:wlan-traffic}. \\
-\cline{2-3}
-\bigstrut & \multirow{1}{*}[-0.05em]{\textbf{U}niform} &
-Both end-points are uniformly randomly chosen from all of the wireless nodes. \\
-\hline
-\multirow{2}[11]{*}{Flow}
-\bigstrut & \multirow{1}{*}[-0.05em]{\textbf{T}race} &
-Each flow has the actual start time, end time, total data sent, and number of packets from the trace. \\
-\cline{2-3}
-\bigstrut & \multirow{1}{*}{\textbf{P}roportional} &
-Byte count taken from trace; sizes and intervals are CBR or VBR, on a per-flow basis. \\
-\cline{2-3}
-\bigstrut & \multirow{1}{*}{\textbf{U}niform} &
-All flows have the same duration, volume, packet rate, and data rate as the trace average. \\
-\hline
-\multirow{2}[11]{*}{Packet}
-\bigstrut & \multirow{1}{*}[-0.05em]{\textbf{T}race} &
-The sequence of packet sizes and inter-transmission intervals is taken directly from the trace. \\
-\cline{2-3}
-\bigstrut & \multirow{1}{*}[-0.05em]{\textbf{S}ample} &
-Packets sizes and intervals are randomly drawn from per-flow empirical distributions (VBR). \\
-\cline{2-3}
-\bigstrut & \multirow{1}{*}[-0.05em]{\textbf{U}niform} &
-Packets sizes are uniform and the inter-packet interval is constant (CBR). \\
-\hline
-\end{tabular}
+\noindent
+\textbf{Node:}
+\begin{itemize}
+  \item \textit{Individual}
+  \begin{itemize}
+    \item each node corresponds to a specific trace node with associated trace flows
+    \item session start time assigned from trace
+    \item overrides all distributions with per-node versions
+  \end{itemize}
+  \item \textit{Nonparametric}
+  \begin{itemize}
+    \item generic flows assigned to nodes by sampling
+    \item session start time assigned from pool of start times
+  \end{itemize}
+  \item \textit{Parametric}
+  \begin{itemize}
+    \item generic flows assigned to nodes according to BiPareto model
+    \item session start time randomly chosen from viable range
+  \end{itemize}
+  \item \textit{Uniform}
+  \begin{itemize}
+    \item all nodes have average number of generic flows
+    \item session start times uniformly cover viable range
+  \end{itemize}
+\end{itemize}
+\noindent
+\textbf{Flow:}
+\begin{itemize}
+  \item \textit{Individual}
+  \begin{itemize}
+    \item each flow corresponds to a specific trace flow with an associated packet trace
+    \item flow size \& start time taken from trace
+    \item overrides distributions of size/interval packet behaviors with flow-specific versions
+  \end{itemize}
+  \item \textit{Nonparametric}
+  \begin{itemize}
+    \item flow size is sampled from inherited distribution of flow sizes
+    \item start time relative to previous session flow sampled from inherited distribution
+    \item inherits distributions of size/interval packet behaviors from destination node
+  \end{itemize}
+  \item \textit{Parametric}
+  \begin{itemize}
+    \item flow size is sampled from BiPareto model fitted to inherited distribution
+    \item start time relative to previous session flow sampled Lognormal fitted to inherited
+    \item inherits distributions of size/interval packet behaviors from destination node
+  \end{itemize}
+  \item \textit{Uniform}
+  \begin{itemize}
+    \item all flows have size equal to inherited mean
+    \item average inter-flow interval used between all flows
+    \item inherits distributions of size/interval packet behaviors from destination node
+  \end{itemize}
+\end{itemize}
+\noindent
+\textbf{Packet:}
+\begin{itemize}
+  \item \textit{Individual}
+  \begin{itemize}
+    \item each packet corresponds to a specific trace packet
+  \end{itemize}
+  \item \textit{Nonparametric}
+  \begin{itemize}
+    \item packet sizes and intervals are sampled from inherited distributions
+  \end{itemize}
+  \item \textit{Parametric}
+  \begin{itemize}
+    \item packet sizes and intervals are drawn from inherited parametric distributions
+  \end{itemize}
+  \item \textit{Uniform}
+  \begin{itemize}
+    \item all packet sizes and inter-packet intervals are equal to inherited mean
+  \end{itemize}
+\end{itemize}
