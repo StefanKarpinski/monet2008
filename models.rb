@@ -13,8 +13,8 @@ fixups = {
 
 puts <<'HEADER'
 \begin{tabular}{|c|c|p{4.3in}|}
-\multicolumn{1}{c}{\textbf{Level}} &
-\multicolumn{1}{c}{\textbf{Sub-model}} &
+\multicolumn{1}{c}{\textbf{Class}} &
+\multicolumn{1}{c}{\textbf{Subclass}} &
 \multicolumn{1}{c}{\textbf{Overridden and inherited properties}} \\[2pt]
 HEADER
 models.each do |l|
@@ -27,7 +27,7 @@ models.each do |l|
     model = m.keys.first
     items = m[model]
     items = [items] unless items.is_a?(Array)
-    puts "& \\multirow{1}{*}[-0.05em]{\\submodel{#{model}}} &"
+    puts "& \\multirow{1}{*}[-0.05em]{\\class{#{model}}} &"
     puts '\begin{minipage}[l]{4.3in}'
     puts '\vspace{2pt}'
     items.each_with_index do |item,k|

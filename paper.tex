@@ -1,6 +1,6 @@
 \documentclass[conference]{IEEEtran}
 
-\newcommand{\thetitle}{On the Inadequacy of Uniform Modeling for WLAN Workload Generation}
+\newcommand{\thetitle}{On the Inadequacy of Uniform Modeling for Wireless LAN Workload Generation}
 
 \usepackage[pdftex]{graphicx}
 \usepackage[labelfont=bf,small]{caption}
@@ -26,8 +26,7 @@ University of California, Santa Barbara
 
 \newcommand{\Section}[1]{\hyperref[sec:#1]{Section~\ref*{sec:#1}}}
 \newcommand{\FHC}{Hern\'andez-Campos~\textit{et~al.}}
-\newcommand{\class}[1]{\textsf{\footnotesize{#1}}}
-\newcommand{\submodel}[1]{\textsf{\footnotesize{#1}}}
+\newcommand{\class}[1]{\textsc{\small{#1}}}
 \newcommand{\model}[1]{#1}
 \newcommand{\RFC}[1]{\caps{RFC}~{#1}}
 
@@ -79,7 +78,7 @@ Our point is not to denigrate the models proposed in~\cite{Hernandez06:wlan-traf
 
 To clarify, disambiguate and standardize the specification of generative local area traffic models, we propose the \textit{Traffic Object Model} (\textit{\caps{TOM}}). The \caps{TOM} entails a hierarchy of abstract classes: \class{Node}, \class{Flow}, and \class{Packet} are the primary classes; the \class{Network} class collects everything. Each abstract class defines an interface of properties. A traffic model defines concrete classes at each level that provide the required interfaces; each class defines its own properties by delegation, inheritance, or overriding properties of other classes. Because of the separation of the \caps{TOM} into well-defined levels, each concrete class naturally defines a sub-model, specific to that level's behavior; sub-models can be mixed and matched combinatorially.
 
-We define a range of sub-models at each level of the \caps{TOM}, with decreasing similarity to the original trace behavior: \submodel{Trace} (reproduce original behavior), \submodel{Nonparametric}, \submodel{Parametric}, and \submodel{Uniform}. The control model uses the Trace sub-model at every level, exactly reproducing the behavior recorded from the original network. The standard na\"ive model uses the \submodel{Uniform} sub-model at all levels. The models proposed by {\FHC} are implemented using the \submodel{Parametric} sub-model at every level. The \submodel{Nonparametric} sub-models provide a measure of how much error is introduced by parametric approximation and parameter estimation.
+We define a range of sub-models at each level of the \caps{TOM}, with decreasing similarity to the original trace behavior: \class{Trace} (reproduce original behavior), \class{Nonparametric}, \class{Parametric}, and \class{Uniform}. The control model uses the Trace sub-model at every level, exactly reproducing the behavior recorded from the original network. The standard na\"ive model uses the \class{Uniform} sub-model at all levels. The models proposed by {\FHC} are implemented using the \class{Parametric} sub-model at every level. The \class{Nonparametric} sub-models provide a measure of how much error is introduced by parametric approximation and parameter estimation.
 
 %: objects and their properties together with rules for delegating, inheriting, and overriding the properties across the objects in the \caps{TOM} hierarchy. The \caps{TOM} allows 
 
@@ -125,7 +124,7 @@ The two most prominent traffic generation frameworks are Harpoon and \caps{D-ITG
 
 \caps{D-ITG}~\cite{Avallone04} generates flows using an independent sampling model for packet sizes and inter-packet intervals. The framework contains pre-made models for several common types of Internet traffic. The focus of this project, however, is on providing the infrastructure to generate very large volumes of synthetic Internet-like backbone traffic. No analysis is provided for determining the realism of traffic mixes, or for choosing flow end-points realistically. In wireless networks, these factors are of crucial importance to performance, and cannot be overlooked. Both Harpoon and \caps{D-ITG} provide excellent traffic generation platforms, but do not provide a systematic framework for understanding or reproducing realistic whole-network workload in the wireless setting.
 
-This work extends that published in~\cite{Karpinski07:realism}~and~\cite{Karpinski07:cbr-failure}, using the same methodology for defining and quantifying the realism of synthetic traffic models. The Traffic Object Model builds on the combinatorial approach taken in~\cite{Karpinski07:cbr-failure}, while providing an flexible and general object-oriented framework for constructing generative traffic models. The traffic models evaluated here overlap and augment those evaluated in both prior works; comparison with the models proposed in {\FHC} is entirely new. The Qualnet simulation methodology has been enhanced by the implementation of full-duplex, trace-driven raw \caps{IP}, \caps{TCP}, and \caps{UDP} flows, and performance metric collection based on the \caps{IETF} recommendations for \caps{IP} performance metrics framework~\cite{rfc:ip-metrics,rfc:jitter}.
+This work extends that published in~\cite{Karpinski07:realism}~and~\cite{Karpinski07:cbr-failure}, using the same methodology for defining and quantifying the realism of synthetic traffic models. The Traffic Object Model builds on the combinatorial approach taken in~\cite{Karpinski07:cbr-failure}, while providing an flexible and general object-oriented framework for constructing generative traffic models. The traffic models evaluated here overlap and augment those evaluated in both prior works; comparison with the models proposed in {\FHC} is entirely new. The Qualnet simulation methodology has been enhanced by the implementation of full-duplex, client-server, trace-driven raw \caps{IP}, \caps{TCP}, and \caps{UDP} flows. We have also implemented performance metric aggregation based on the \caps{IETF} framework for \caps{IP} performance metrics~\cite{rfc:ip-metrics,rfc:jitter}.
 
 % TODO: add in the Hernandez-Cortes' dissertation.
 % TODO: concluding remarks about what's missing from traffic work in general.
@@ -174,7 +173,7 @@ Before using the traces, it is necessary to extract application-level behavior f
 \hline
 \begin{minipage}[l]{2.7in}
 \begin{small}
-\vspace{0.6em}
+\vspace{0.7em}
 \input{properties.tex}
 %\vspace{0.6em}
 \end{small}
@@ -183,7 +182,8 @@ Before using the traces, it is necessary to extract application-level behavior f
 \end{tabular}
 \end{center}
 \vspace{-0.5em}
-\caption{Classes and their attributes in the Traffic Object Model.}
+\caption{{\footnotesize{TOM}} base classes and their attributes.}
+\label{tab:properties}
 \vspace{-2em}
 \end{table}
 
@@ -194,27 +194,28 @@ Before using the traces, it is necessary to extract application-level behavior f
 \small
 \input{models.tex}
 \footnotesize\\[0.5em]
-\raisebox{1pt}{*}Parametric models fitted to inherited empirical distributions using maximum likelihood estimation ({\scriptsize{MLE}}).
+%\raisebox{1pt}{*}Parametric models fitted to inherited empirical distributions using maximum likelihood estimation ({\scriptsize{MLE}}).
 \end{center}
 \vspace{-0.75em}
-\label{fig:properties}
-\caption{Summary of how the sub-models at each behavioral level of the {\footnotesize{TOM}} delegate, override or inherit properties.}
+\caption{Details of how the sub-models at each behavioral level of the {\footnotesize{TOM}} inherit, override and delegate properties.}
+\label{tab:models}
 \vspace{-1.75em}
 \end{table*}
 
-In this section, we present a generic object-oriented framework for implementing traffic generation models. This framework is called the Traffic Object Model (\caps{TOM}). It defines four levels of responsibility: network, node, flow and packet. The framework is designed so that different behaviors at each level can be naturally implemented  as classes in object-oriented programming languages. The framework automatically gains the advantages of object orientation, in particular modularity and encapsulation. Every traffic model is naturally split into separate spheres of responsibility, which constitute sub-models for the aspects of the model's behavior at each layer. Thanks to encapsulation and polymorphism of objects, the sub-models from different models can immediately be recombined to create new hybrid behaviors. It is trivial, for example, to produce trace-based node behavior, coupled with parametric flow behavior, and uniform packet behavior. Not all combinations of sub-models are valid, however; which classes may be combined depends on the details of each class. The ability to mix-and-match aspects of behavior at different levels greatly enhances our ability to explore the space of possible traffic models.
+In this section, we present a generic object-oriented framework for implementing traffic generation models. This framework is called the Traffic Object Model (\caps{TOM}). It defines four levels of responsibility: network, node, flow and packet. The framework is designed so that different behaviors at each level can be naturally implemented  as classes in object-oriented programming languages. The framework automatically gains the advantages of object orientation, in particular modularity and encapsulation. Every traffic model is naturally split into separate spheres of responsibility, which constitute sub-models for the aspects of the model's behavior at each layer. Encapsulation and polymorphism of objects, allows us to mix-and-match the sub-models from different models to create new hybrid behaviors. It is trivial, for example, to produce trace-based node behavior, coupled with parametric flow behavior, and uniform packet behavior. Not all combinations of sub-models are valid, however; which classes may be combined depends on the details of each class.
 
-%For example, to use uniform flow behavior but non-uniform, trace-based node behavior, simply mix the the uniform implementation of the 
-
-Abstract base classes define the properties at each level that traffic models must implement.\footnote{In Java or C\#, this role may be played either by an actual abstract class or by an interface. In duck-typed languages such as Ruby or Python, no actual abstract class need exist, since type is implicitly defined by usage; if inheritance is desired, the base class can be made abstract by defining stub methods that throw informative exceptions if called.} Figure~\ref{fig:properties} enumerates all the properties exposed by traffic models used in this work. Other traffic models may necessitate exposing additional properties, but this list suffices to implement the models used in this paper. Concrete classes implement the behavior of specific traffic models at each level. A complete synthetic workload is created as follows:
+Abstract base classes define the properties at each level that traffic models must implement.\footnote{In Java or C\#, this role may be played either by an actual abstract class or by an interface. In duck-typed languages such as Ruby or Python, no actual abstract class need exist, since type is implicitly defined by usage; if inheritance is desired, the base class can be made abstract by defining stub methods that throw informative exceptions if called.} 
+Table~\ref{tab:properties} enumerates all the properties exposed by traffic models used in this work. Other traffic models may necessitate exposing additional properties, but this list suffices to implement the models used in this paper. Concrete classes implement the behavior of specific traffic models at each level. A complete synthetic workload is instantiated as follows:
 \begin{enumerate}
-\item instantiate a \class{Network} object of the appropriate class;
+\item create a \class{Network} object of the appropriate class;
 \item the top-level \class{Network} object in turn instantiates a collection of \class{Node} objects and associated \class{Flow} objects;
 \item each \class{Flow} object generates a stream of \class{Packet} objects.
 \end{enumerate}
 The hierarchy of objects may be used to directly drive a simulation, or may generate configuration files that in turn drive a simulation. Our implementation does the latter, generating a collection of Qualnet configuration files and trace files specific to each workload instantiation (see \Section{simulations}).
 
 \subsection{Traffic Models}\label{sec:models}
+
+For each of the \class{Node}, \class{Flow} and \class{Packet} abstract classes, we create define four concrete subclasses: \class{Trace}, \class{Nonparametric}, \class{Parametric} and \class{Uniform}. The \class{Trace} class at each level takes its properties directly from the behavior of the original traffic. The \class{Nonparametric} and \class{Parametric} classes use nonparametric models of marginal behavior at each level to 
 
 We separate traffic generation into three levels of behavior: network, flow and packet. The {network} level determines properties pertaining to nodes and their interaction. For example, it determines which nodes communicate with each other, and how frequently. This level can be viewed as assigning network nodes to the source and destination roles of flows, as well as determining per-node properties which affect lower level models. The next level of behavior determines overall properties of flows. This includes each flow's start time, duration, packet count and total data volume. Finally, the packet level of behavior determines the individual sizes of packets and the durations of intervals between their transmission. Despite the concreteness of the examples mentioned here, there are also less obvious, abstract properties that models at the network and flow levels determine. Flow models, for example, dictate the distribution of each flow's packet sizes, a property which can be used to determine individual packet sizes, but which is not itself specific to any particular packet.
 
