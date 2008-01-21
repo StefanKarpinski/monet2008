@@ -7,8 +7,8 @@
 & \multirow{1}{*}[-0.05em]{\submodel{Trace}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-\raisebox{1.5pt}{$\centerdot$} each node corresponds to a specific trace node with associated trace flows \\
 \raisebox{1.5pt}{$\centerdot$} session start time assigned from trace \\
+\raisebox{1.5pt}{$\centerdot$} each node corresponds to a specific trace node with associated trace flows \\
 \raisebox{1.5pt}{$\centerdot$} overrides all distributions with node-specific versions
 \vspace{2pt}
 \end{minipage} \\
@@ -16,61 +16,65 @@
 & \multirow{1}{*}[-0.05em]{\submodel{Nonparametric}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-\raisebox{1.5pt}{$\centerdot$} generic flows assigned to nodes by sampling [TODO---more detail] \\
-\raisebox{1.5pt}{$\centerdot$} session start time randomly assigned from pool of trace session start times
+\raisebox{1.5pt}{$\centerdot$} session start time randomly assigned from pool of trace session start times \\
+\raisebox{1.5pt}{$\centerdot$} nodes assigned as flow end-points by sampling from inherited src/dst distributions
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
 & \multirow{1}{*}[-0.05em]{\submodel{Parametric}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-\raisebox{1.5pt}{$\centerdot$} generic flows assigned to nodes according to fitted BiPareto model\raisebox{1.5pt}{\scriptsize*} \\
-\raisebox{1.5pt}{$\centerdot$} session start time assigned according to Poisson arrival model\raisebox{1.5pt}{\scriptsize*}
+\raisebox{1.5pt}{$\centerdot$} session start time assigned according to Poisson arrival model\raisebox{1.5pt}{\scriptsize*} \\
+\raisebox{1.5pt}{$\centerdot$} nodes assigned as flow end-points by sampling from fitted BiPareto model\raisebox{1.5pt}{\scriptsize*}
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
 & \multirow{1}{*}[-0.05em]{\submodel{Uniform}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-\raisebox{1.5pt}{$\centerdot$} all nodes have average number of generic flows \\
-\raisebox{1.5pt}{$\centerdot$} session start times uniformly cover viable range
+\raisebox{1.5pt}{$\centerdot$} session start times selected uniformly from viable range \\
+\raisebox{1.5pt}{$\centerdot$} nodes have the mean number of generic flows
 \vspace{2pt}
 \end{minipage} \\
 \hline
-\multirow{11}{*}[2.5pt]{\class{Flow}}
+\multirow{14}{*}[2.5pt]{\class{Flow}}
 & \multirow{1}{*}[-0.05em]{\submodel{Trace}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
+\raisebox{1.5pt}{$\centerdot$} flow start time and size taken from trace \\
 \raisebox{1.5pt}{$\centerdot$} each flow corresponds to a specific trace flow with an associated packet trace \\
-\raisebox{1.5pt}{$\centerdot$} flow size and start time taken from trace \\
-\raisebox{1.5pt}{$\centerdot$} overrides distributions of size/interval packet behaviors with flow-specific versions
+\raisebox{1.5pt}{$\centerdot$} overrides distributions of size/interval packet behaviors with flow-specific versions \\
+\raisebox{1.5pt}{$\centerdot$} packet stream from trace file
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
 & \multirow{1}{*}[-0.05em]{\submodel{Nonparametric}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-\raisebox{1.5pt}{$\centerdot$} flow size is sampled from inherited distribution of flow sizes \\
-\raisebox{1.5pt}{$\centerdot$} start time relative to previous session flow sampled from inherited distribution \\
-\raisebox{1.5pt}{$\centerdot$} inherits distributions of size/interval packet behaviors from destination node
+\raisebox{1.5pt}{$\centerdot$} start time relative to previous flow sampled from inherited distribution \\
+\raisebox{1.5pt}{$\centerdot$} flow size sampled from inherited distribution of flow sizes \\
+\raisebox{1.5pt}{$\centerdot$} inherits distributions of size/interval packet behaviors from destination node \\
+\raisebox{1.5pt}{$\centerdot$} generic packets generated until flow size exhausted
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
 & \multirow{1}{*}[-0.05em]{\submodel{Parametric}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-\raisebox{1.5pt}{$\centerdot$} flow size is sampled from fitted BiPareto model\raisebox{1.5pt}{\scriptsize*} \\
-\raisebox{1.5pt}{$\centerdot$} start time relative to previous flow in session sampled from fitted Lognormal model\raisebox{1.5pt}{\scriptsize*} \\
-\raisebox{1.5pt}{$\centerdot$} inherits distributions of size/interval packet behaviors from destination node
+\raisebox{1.5pt}{$\centerdot$} start time relative to previous flow sampled from fitted Lognormal model\raisebox{1.5pt}{\scriptsize*} \\
+\raisebox{1.5pt}{$\centerdot$} flow size sampled from fitted BiPareto model\raisebox{1.5pt}{\scriptsize*} \\
+\raisebox{1.5pt}{$\centerdot$} inherits distributions of size/interval packet behaviors from destination node \\
+\raisebox{1.5pt}{$\centerdot$} generic packets generated until flow size exhausted
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
 & \multirow{1}{*}[-0.05em]{\submodel{Uniform}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-\raisebox{1.5pt}{$\centerdot$} all flows have size equal to inherited mean \\
-\raisebox{1.5pt}{$\centerdot$} average inter-flow interval used between all flows \\
-\raisebox{1.5pt}{$\centerdot$} inherits distributions of size/interval packet behaviors from destination node
+\raisebox{1.5pt}{$\centerdot$} start time relative to previous flow equals mean inherited inter-flow interval \\
+\raisebox{1.5pt}{$\centerdot$} all flows have size equal to inherited mean flow size \\
+\raisebox{1.5pt}{$\centerdot$} inherits distributions of size/interval packet behaviors from destination node \\
+\raisebox{1.5pt}{$\centerdot$} generic packets generated until flow size exhausted
 \vspace{2pt}
 \end{minipage} \\
 \hline

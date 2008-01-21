@@ -7,7 +7,7 @@ models = YAML.load_file("models.yaml")
 bullet = '\\raisebox{1.5pt}{$\\centerdot$}'
 fixups = {
   :Node   => [ 8,'2.5pt'],
-  :Flow   => [11,'2.5pt'],
+  :Flow   => [14,'2.5pt'],
   :Packet => [ 5,'2.5pt']
 }
 

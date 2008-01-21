@@ -2,24 +2,26 @@
   - collection of nodes
   - collection of flows
   - distribution of flow sizes
+  - distribution of flow-source counts
+  - distribution of flow-destination counts
   - distribution of intervals between flow start times
   - distribution of packet sizes
   - distribution of inter-packet intervals
 
 - Node:
+  - session start time
   - collection of source flows
   - collection of destination flows
-  - session start time
   - distribution of flow sizes
   - distribution of intervals between flow start times
   - distribution of packet sizes
   - distribution of inter-packet intervals
 
 - Flow:
-  - source
-  - destination
   - start time
-  - size (byte count)
+  - source node
+  - destination node
+  - stream of packets
   - distribution of packet sizes
   - distribution of inter-packet intervals
 

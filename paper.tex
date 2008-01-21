@@ -26,8 +26,8 @@ University of California, Santa Barbara
 
 \newcommand{\Section}[1]{\hyperref[sec:#1]{Section~\ref*{sec:#1}}}
 \newcommand{\FHC}{Hern\'andez-Campos~\textit{et~al.}}
-\newcommand{\class}[1]{\textsf{\small{#1}}}
-\newcommand{\submodel}[1]{\textsf{\small{#1}}}
+\newcommand{\class}[1]{\textsf{\footnotesize{#1}}}
+\newcommand{\submodel}[1]{\textsf{\footnotesize{#1}}}
 \newcommand{\model}[1]{#1}
 \newcommand{\RFC}[1]{\caps{RFC}~{#1}}
 
@@ -149,6 +149,11 @@ This definition depends on many factors: the type of wireless scenario, the perf
 \subsection{Trace Data}\label{sec:trace-data}
 %\subsection{Trace Data \& Simulations}\label{sec:trace-data}\label{sec:simulations}
 
+Our general methodology is to compare performance metrics in simulations using real traffic patterns from traces to the same metrics in simulations using a variety of synthetic traffic models defined using the Traffic Object Model (\caps{TOM}) framework. We use a 24-hour trace recorded in an infrastructured 802.11g wireless \caps{LAN} with 18 access points, deployed at the 60th Internet Engineering Task Force meeting (\caps{IETF}60), held in San Diego during August of 2004. The traffic trace was captured using \texttt{\small{tcpdump}} at a single router, through which all wireless traffic for the meeting was routed, including traffic between wireless nodes. The snap length of the capture was 100 bytes, allowing \caps{IP}, \caps{ICMP}, \caps{UDP} and \caps{TCP} headers to be analyzed. We limit our work to the 24-hour sub-trace recorded on Wednesday, August 4th. This trace contains a broad variety of behaviors and entails a very large volume of traffic: 2.1 million flows, 58 million packets, and 52 billion bytes.
+% 2,085,563 flows, 58,377,994 packets of application data, and 51,988,245,537 bytes of application data.
+
+We do not assume or claim that the traffic found at \caps{IETF}60 is representative of conference settings in general. The observed behaviors are also unlikely to resemble those found in a typical commercial or residential setting. We have chosen this trace, however, because within it can be found behaviors resembling many different types of wireless usage cases. Figure~\ref{fig:nodes-flows} shows the wide variations in the number of active flows and nodes over the course of the trace. In the night and morning hours, the traffic patterns are similar to those one might find in a moderately trafficked business or residential area. During working group sessions, we see highly concentrated, heavy usage patterns. At the zenith of activity, over 800 users, 33 thousand flows, and 1 million packets are seen in a single 10-minute trace segment. At the nadir, a lone node sent only a single 61-byte packet over the course of 10 minutes. All levels of activity between these extremes are represented. Moreover, the mix of traffic types observed changes dramatically over the course of the day, providing a wide representation of possible blends of behavior. This heterogeneity and extreme range of behaviors makes the \caps{IETF} data set ideal for this evaluation. The variety of activity gives us greater confidence that success or failure of traffic models is not tied to any specific network condition, but is broadly and generally applicable. %For a traffic model to be truly realistic, it must be realistic across many different usage cases.
+
 \begin{figure}
 \vspace{0.45em}
 \begin{center}
@@ -160,19 +165,6 @@ This definition depends on many factors: the type of wireless scenario, the perf
 \vspace{-2em}
 \end{figure}
 
-Our general methodology is to compare performance metrics in simulations using real traffic patterns from traces to the same metrics in simulations using a variety of synthetic traffic models defined using the Traffic Object Model (\caps{TOM}) framework. We use a 24-hour trace recorded in an infrastructured 802.11g wireless \caps{LAN} with 18 access points, deployed at the 60th Internet Engineering Task Force meeting (\caps{IETF}60), held in San Diego during August of 2004. The traffic trace was captured using \texttt{\small{tcpdump}} at a single router, through which all wireless traffic for the meeting was routed, including traffic between wireless nodes. The snap length of the capture was 100 bytes, allowing \caps{IP}, \caps{ICMP}, \caps{UDP} and \caps{TCP} headers to be analyzed. We limit our work to the 24-hour sub-trace recorded on Wednesday, August 4th. This trace contains a broad variety of behaviors and entails a very large volume of traffic: 2.1 million flows, 58 million packets, and 52 billion bytes.
-% 2,085,563 flows, 58,377,994 packets of application data, and 51,988,245,537 bytes of application data.
-
-We do not assume or claim that the traffic found at \caps{IETF}60 is representative of conference settings in general. The observed behaviors are also unlikely to resemble those found in a typical commercial or residential setting. We have chosen this trace, however, because within it can be found behaviors resembling many different types of wireless usage cases. Figure~\ref{fig:nodes-flows} shows the wide variations in the number of active flows and nodes over the course of the trace. In the night and morning hours, the traffic patterns are similar to those one might find in a moderately trafficked business or residential area. During working group sessions, we see highly concentrated, heavy usage patterns. At the zenith of activity, over 800 users, 33 thousand flows, and 1 million packets are seen in a single 10-minute trace segment. At the nadir, a lone node sent only a single 61-byte packet over the course of 10 minutes. All levels of activity between these extremes are represented. Moreover, the mix of traffic types observed changes dramatically over the course of the day, providing a wide representation of possible blends of behavior. This heterogeneity and extreme range of behaviors makes the \caps{IETF} data set ideal for this evaluation. The variety of activity gives us greater confidence that success or failure of traffic models is not tied to any specific network condition, but is broadly and generally applicable. %For a traffic model to be truly realistic, it must be realistic across many different usage cases.
-
-%\begin{table*}
-%\begin{center}\small
-%\input{models.tex}
-%\caption{The three levels of traffic behavior and the traffic models defined for each level.}\label{tab:traffic-models}
-%\end{center}
-%\vspace{-1.75em}
-%\end{table*}
-
 Before using the traces, it is necessary to extract application-level behavior from the trace header data. First, we split the trace into individual packet flows. A flow is a series of packets sharing the following five attributes: \caps{IP} and transport protocols (raw \caps{IP}, \caps{ICMP}, \caps{TCP}, \caps{UDP}); source and destination \caps{IP} addresses and \caps{TCP}/\caps{UDP} port numbers. Next, the quantity of application-initiated data contained in each packet is calculated. For non-\caps{TCP} packets, this quantity is simply the size of the transport-layer payload, but for \caps{TCP} the calculation is more complicated: only new data transfers, explicitly initiated by the application are counted. Data retransmitted by \caps{TCP} is disregarded, and empty \caps{ACK}s are ignored. \caps{SYN} and \caps{FIN} flags in packets (even empty ones) are counted as a single byte each, since they are explicitly signaled by the application. %After processing, we have a collection of flows, each with a sequence of timestamps and the amount of application-initiated data sent at that time.
 
 \begin{table}[t]
@@ -180,22 +172,22 @@ Before using the traces, it is necessary to extract application-level behavior f
 \begin{center}
 \begin{tabular}[t]{|l|}
 \hline
-\begin{minipage}[l]{2.8in}
+\begin{minipage}[l]{2.7in}
 \begin{small}
 \vspace{0.6em}
 \input{properties.tex}
-\vspace{0.6em}
+%\vspace{0.6em}
 \end{small}
 \end{minipage}
 \\\hline
 \end{tabular}
 \end{center}
 \vspace{-0.5em}
-\caption{Classes and their properties in the Traffic Object Model.}
+\caption{Classes and their attributes in the Traffic Object Model.}
 \vspace{-2em}
 \end{table}
 
-\subsection{The Traffic Object Model~(\caps{TOM})}\label{sec:models}
+\subsection{The Traffic Object Model~(\caps{TOM})}\label{sec:tom}
 
 \begin{table*}[t]
 \begin{center}
@@ -205,9 +197,24 @@ Before using the traces, it is necessary to extract application-level behavior f
 \raisebox{1pt}{*}Parametric models fitted to inherited empirical distributions using maximum likelihood estimation ({\scriptsize{MLE}}).
 \end{center}
 \vspace{-0.75em}
+\label{fig:properties}
 \caption{Summary of how the sub-models at each behavioral level of the {\footnotesize{TOM}} delegate, override or inherit properties.}
 \vspace{-1.75em}
 \end{table*}
+
+In this section, we present a generic object-oriented framework for implementing traffic generation models. This framework is called the Traffic Object Model (\caps{TOM}). It defines four levels of responsibility: network, node, flow and packet. The framework is designed so that different behaviors at each level can be naturally implemented  as classes in object-oriented programming languages. The framework automatically gains the advantages of object orientation, in particular modularity and encapsulation. Every traffic model is naturally split into separate spheres of responsibility, which constitute sub-models for the aspects of the model's behavior at each layer. Thanks to encapsulation and polymorphism of objects, the sub-models from different models can immediately be recombined to create new hybrid behaviors. It is trivial, for example, to produce trace-based node behavior, coupled with parametric flow behavior, and uniform packet behavior. Not all combinations of sub-models are valid, however; which classes may be combined depends on the details of each class. The ability to mix-and-match aspects of behavior at different levels greatly enhances our ability to explore the space of possible traffic models.
+
+%For example, to use uniform flow behavior but non-uniform, trace-based node behavior, simply mix the the uniform implementation of the 
+
+Abstract base classes define the properties at each level that traffic models must implement.\footnote{In Java or C\#, this role may be played either by an actual abstract class or by an interface. In duck-typed languages such as Ruby or Python, no actual abstract class need exist, since type is implicitly defined by usage; if inheritance is desired, the base class can be made abstract by defining stub methods that throw informative exceptions if called.} Figure~\ref{fig:properties} enumerates all the properties exposed by traffic models used in this work. Other traffic models may necessitate exposing additional properties, but this list suffices to implement the models used in this paper. Concrete classes implement the behavior of specific traffic models at each level. A complete synthetic workload is created as follows:
+\begin{enumerate}
+\item instantiate a \class{Network} object of the appropriate class;
+\item the top-level \class{Network} object in turn instantiates a collection of \class{Node} objects and associated \class{Flow} objects;
+\item each \class{Flow} object generates a stream of \class{Packet} objects.
+\end{enumerate}
+The hierarchy of objects may be used to directly drive a simulation, or may generate configuration files that in turn drive a simulation. Our implementation does the latter, generating a collection of Qualnet configuration files and trace files specific to each workload instantiation (see \Section{simulations}).
+
+\subsection{Traffic Models}\label{sec:models}
 
 We separate traffic generation into three levels of behavior: network, flow and packet. The {network} level determines properties pertaining to nodes and their interaction. For example, it determines which nodes communicate with each other, and how frequently. This level can be viewed as assigning network nodes to the source and destination roles of flows, as well as determining per-node properties which affect lower level models. The next level of behavior determines overall properties of flows. This includes each flow's start time, duration, packet count and total data volume. Finally, the packet level of behavior determines the individual sizes of packets and the durations of intervals between their transmission. Despite the concreteness of the examples mentioned here, there are also less obvious, abstract properties that models at the network and flow levels determine. Flow models, for example, dictate the distribution of each flow's packet sizes, a property which can be used to determine individual packet sizes, but which is not itself specific to any particular packet.
 
