@@ -1,5 +1,5 @@
 - Node:
-  - Individual:
+  - Trace:
     - each node corresponds to a specific trace node with associated trace flows
     - session start time assigned from trace
     - overrides all distributions with node-specific versions
@@ -14,7 +14,7 @@
     - session start times uniformly cover viable range
 
 - Flow:
-  - Individual:
+  - Trace:
     - each flow corresponds to a specific trace flow with an associated packet trace
     - flow size and start time taken from trace
     - overrides distributions of size/interval packet behaviors with flow-specific versions
@@ -32,7 +32,7 @@
     - inherits distributions of size/interval packet behaviors from destination node
 
 - Packet:
-  - Individual:    each packet corresponds to a specific trace packet
+  - Trace:         each packet corresponds to a specific trace packet
   - Nonparametric: packet sizes and intervals sampled from inherited distributions
   - Parametric:    packet sizes and intervals drawn from fitted Exponential distributions*
   - Uniform:       all packet sizes and inter-packet intervals are equal to inherited mean
