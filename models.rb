@@ -4,16 +4,6 @@ require 'yaml'
 
 models = YAML.load_file("models.yaml")
 
-class Object
-  def leaves; self; end
-end
-class Array
-  def leaves; collect{|x| x.leaves}.flatten; end
-end
-class Hash
-  def leaves; values.collect{|x| x.leaves}.flatten; end
-end
-
 bullet = '\\raisebox{1.5pt}{$\\centerdot$}'
 fixups = {
   :Node   => [ 8,'2.5pt'],
@@ -42,6 +32,7 @@ models.each do |l|
     puts '\vspace{2pt}'
     items.each_with_index do |item,k|
       item.gsub!(/&/,'\\\&')
+      item.gsub!(/\*\s*$/,'\raisebox{1pt}{\footnotesize*}')
       line_end = (k < items.size-1) ? ' \\\\' : ''
       puts "#{bullet} #{item}" + line_end
     end
