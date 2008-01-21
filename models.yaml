@@ -3,6 +3,11 @@
     - each node corresponds to a specific trace node with associated trace flows
     - session start time assigned from trace
     - overrides all distributions with node-specific versions
+  # - Dependent:
+  #   - each node corresponds to a specific trace node
+  #   - specific flows assigned to nodes by sampling
+  #   - session start time assigned from trace
+  #   - overrides all distributions with node-specific versions
   - Nonparametric:
     - generic flows assigned to nodes by sampling [TODO---more detail]
     - session start time randomly assigned from pool of trace session start times

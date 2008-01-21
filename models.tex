@@ -1,10 +1,10 @@
 \begin{tabular}{|c|c|p{4.3in}|}
 \multicolumn{1}{c}{\textbf{Level}} &
-\multicolumn{1}{c}{\textbf{Model}} &
+\multicolumn{1}{c}{\textbf{Sub-model}} &
 \multicolumn{1}{c}{\textbf{Overridden and inherited properties}} \\[2pt]
 \hline
-\multirow{8}{*}[2.5pt]{Node}
-& \multirow{1}{*}[-0.05em]{Trace} &
+\multirow{8}{*}[2.5pt]{\class{Node}}
+& \multirow{1}{*}[-0.05em]{\submodel{Trace}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
 \raisebox{1.5pt}{$\centerdot$} each node corresponds to a specific trace node with associated trace flows \\
@@ -13,7 +13,7 @@
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
-& \multirow{1}{*}[-0.05em]{Nonparametric} &
+& \multirow{1}{*}[-0.05em]{\submodel{Nonparametric}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
 \raisebox{1.5pt}{$\centerdot$} generic flows assigned to nodes by sampling [TODO---more detail] \\
@@ -21,15 +21,15 @@
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
-& \multirow{1}{*}[-0.05em]{Parametric} &
+& \multirow{1}{*}[-0.05em]{\submodel{Parametric}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-\raisebox{1.5pt}{$\centerdot$} generic flows assigned to nodes according to fitted BiPareto model\raisebox{1pt}{\footnotesize*} \\
-\raisebox{1.5pt}{$\centerdot$} session start time assigned according to Poisson arrival model\raisebox{1pt}{\footnotesize*}
+\raisebox{1.5pt}{$\centerdot$} generic flows assigned to nodes according to fitted BiPareto model\raisebox{1.5pt}{\scriptsize*} \\
+\raisebox{1.5pt}{$\centerdot$} session start time assigned according to Poisson arrival model\raisebox{1.5pt}{\scriptsize*}
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
-& \multirow{1}{*}[-0.05em]{Uniform} &
+& \multirow{1}{*}[-0.05em]{\submodel{Uniform}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
 \raisebox{1.5pt}{$\centerdot$} all nodes have average number of generic flows \\
@@ -37,8 +37,8 @@
 \vspace{2pt}
 \end{minipage} \\
 \hline
-\multirow{11}{*}[2.5pt]{Flow}
-& \multirow{1}{*}[-0.05em]{Trace} &
+\multirow{11}{*}[2.5pt]{\class{Flow}}
+& \multirow{1}{*}[-0.05em]{\submodel{Trace}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
 \raisebox{1.5pt}{$\centerdot$} each flow corresponds to a specific trace flow with an associated packet trace \\
@@ -47,7 +47,7 @@
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
-& \multirow{1}{*}[-0.05em]{Nonparametric} &
+& \multirow{1}{*}[-0.05em]{\submodel{Nonparametric}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
 \raisebox{1.5pt}{$\centerdot$} flow size is sampled from inherited distribution of flow sizes \\
@@ -56,16 +56,16 @@
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
-& \multirow{1}{*}[-0.05em]{Parametric} &
+& \multirow{1}{*}[-0.05em]{\submodel{Parametric}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-\raisebox{1.5pt}{$\centerdot$} flow size is sampled from fitted BiPareto model\raisebox{1pt}{\footnotesize*} \\
-\raisebox{1.5pt}{$\centerdot$} start time relative to previous flow in session sampled from fitted Lognormal model\raisebox{1pt}{\footnotesize*} \\
+\raisebox{1.5pt}{$\centerdot$} flow size is sampled from fitted BiPareto model\raisebox{1.5pt}{\scriptsize*} \\
+\raisebox{1.5pt}{$\centerdot$} start time relative to previous flow in session sampled from fitted Lognormal model\raisebox{1.5pt}{\scriptsize*} \\
 \raisebox{1.5pt}{$\centerdot$} inherits distributions of size/interval packet behaviors from destination node
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
-& \multirow{1}{*}[-0.05em]{Uniform} &
+& \multirow{1}{*}[-0.05em]{\submodel{Uniform}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
 \raisebox{1.5pt}{$\centerdot$} all flows have size equal to inherited mean \\
@@ -74,29 +74,29 @@
 \vspace{2pt}
 \end{minipage} \\
 \hline
-\multirow{5}{*}[2.5pt]{Packet}
-& \multirow{1}{*}[-0.05em]{Trace} &
+\multirow{5}{*}[2.5pt]{\class{Packet}}
+& \multirow{1}{*}[-0.05em]{\submodel{Trace}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
 \raisebox{1.5pt}{$\centerdot$} each packet corresponds to a specific trace packet
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
-& \multirow{1}{*}[-0.05em]{Nonparametric} &
+& \multirow{1}{*}[-0.05em]{\submodel{Nonparametric}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
 \raisebox{1.5pt}{$\centerdot$} packet sizes and intervals sampled from inherited distributions
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
-& \multirow{1}{*}[-0.05em]{Parametric} &
+& \multirow{1}{*}[-0.05em]{\submodel{Parametric}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-\raisebox{1.5pt}{$\centerdot$} packet sizes and intervals drawn from fitted Exponential distributions\raisebox{1pt}{\footnotesize*}
+\raisebox{1.5pt}{$\centerdot$} packet sizes and intervals drawn from fitted Exponential distributions\raisebox{1.5pt}{\scriptsize*}
 \vspace{2pt}
 \end{minipage} \\
 \cline{2-3}
-& \multirow{1}{*}[-0.05em]{Uniform} &
+& \multirow{1}{*}[-0.05em]{\submodel{Uniform}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
 \raisebox{1.5pt}{$\centerdot$} all packet sizes and inter-packet intervals are equal to inherited mean
