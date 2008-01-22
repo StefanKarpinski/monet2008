@@ -40,8 +40,8 @@ models.each do |l|
     puts '\end{minipage} \\\\'
     puts '\cline{2-3}' if j < models.size
   end
+  puts '\hline'
 end
 puts <<'FOOTER'
-\hline
 \end{tabular}
 FOOTER

@@ -5,7 +5,7 @@
     - overrides all distributions with node-specific versions
   - Nonparametric:
     - session start time randomly assigned from pool of trace session start times
-    - nodes assigned as flow end-points by sampling from inherited src/dst distributions
+    - nodes assigned as flow end-points by sampling from inherited distributions
   - Parametric:
     - session start time assigned according to Poisson arrival model
     - nodes assigned as flow end-points by sampling from fitted BiPareto model
@@ -38,5 +38,5 @@
 - Packet:
   - Trace:         each packet corresponds to a specific trace packet
   - Nonparametric: packet sizes and intervals sampled from inherited distributions
-  - Parametric:    packet sizes and intervals drawn from fitted Exponential distributions
+  - Parametric:    packet sizes and intervals sampled from fitted Exponential distributions
   - Uniform:       all packet sizes and inter-packet intervals are equal to inherited mean
