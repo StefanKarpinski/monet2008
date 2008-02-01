@@ -3,12 +3,12 @@
 \multicolumn{1}{c}{\textbf{Subclass}} &
 \multicolumn{1}{c}{\textbf{Overridden and inherited properties}} \\[2pt]
 \hline
-\multirow{8}{*}[2.5pt]{\class{Node}}
+\multirow{8}{*}[2.5pt]{\class{Session}}
 & \multirow{1}{*}[-0.05em]{\class{Trace}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-\raisebox{1.5pt}{$\centerdot$} session start time assigned from trace \\
-\raisebox{1.5pt}{$\centerdot$} each node corresponds to a specific trace node with associated trace flows \\
+\raisebox{1.5pt}{$\centerdot$} start time assigned from trace \\
+\raisebox{1.5pt}{$\centerdot$} session corresponds to a specific trace node with associated trace flows \\
 \raisebox{1.5pt}{$\centerdot$} overrides all distributions with node-specific versions
 \vspace{2pt}
 \end{minipage} \\
@@ -16,7 +16,7 @@
 & \multirow{1}{*}[-0.05em]{\class{Nonparametric}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-\raisebox{1.5pt}{$\centerdot$} session start time randomly assigned from pool of trace session start times \\
+\raisebox{1.5pt}{$\centerdot$} start time randomly assigned from pool of trace session start times \\
 \raisebox{1.5pt}{$\centerdot$} nodes assigned as flow end-points by sampling from inherited distributions
 \vspace{2pt}
 \end{minipage} \\
@@ -24,7 +24,7 @@
 & \multirow{1}{*}[-0.05em]{\class{Parametric}} &
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
-\raisebox{1.5pt}{$\centerdot$} session start time assigned according to Poisson arrival model \\
+\raisebox{1.5pt}{$\centerdot$} start time assigned according to Poisson arrival model \\
 \raisebox{1.5pt}{$\centerdot$} nodes assigned as flow end-points by sampling from fitted BiPareto model
 \vspace{2pt}
 \end{minipage} \\
@@ -33,7 +33,7 @@
 \begin{minipage}[l]{4.3in}
 \vspace{2pt}
 \raisebox{1.5pt}{$\centerdot$} session start times selected uniformly from viable range \\
-\raisebox{1.5pt}{$\centerdot$} nodes have the mean number of generic flows
+\raisebox{1.5pt}{$\centerdot$} sessions all have the mean number of generic flows
 \vspace{2pt}
 \end{minipage} \\
 \hline

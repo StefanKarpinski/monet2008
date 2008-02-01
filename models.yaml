@@ -1,17 +1,17 @@
-- Node:
+- Session:
   - Trace:
-    - session start time assigned from trace
-    - each node corresponds to a specific trace node with associated trace flows
+    - start time assigned from trace
+    - session corresponds to a specific trace node with associated trace flows
     - overrides all distributions with node-specific versions
   - Nonparametric:
-    - session start time randomly assigned from pool of trace session start times
+    - start time randomly assigned from pool of trace session start times
     - nodes assigned as flow end-points by sampling from inherited distributions
   - Parametric:
-    - session start time assigned according to Poisson arrival model
+    - start time assigned according to Poisson arrival model
     - nodes assigned as flow end-points by sampling from fitted BiPareto model
   - Uniform:
     - session start times selected uniformly from viable range
-    - nodes have the mean number of generic flows
+    - sessions all have the mean number of generic flows
 
 - Flow:
   - Trace:
