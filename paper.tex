@@ -91,16 +91,16 @@ When mapping flow behaviors into a vector space, it is important that the mappin
 
 %While this may seem trivial, note that the representation must be chosen carefully. Suppose instead, for example, we represented each flow's behavior by its packet count, $p$, average packet size, $b/p$, and average inter-packet interval, $d/(p-1)$. In this representation, the average of two behaviors has the \textit{average} average packet size, and the \textit{average} average inter-packet interval. Therein lies the rub: this is the case no matter how many packets are in each flow; if a flow with thousands of 1500-byte packets is averaged with a single-packet, one-byte flow, the average behavior has... Instead, we should more naturally weight the averages by the number of packets in each constituent. This is precisely what the packets-bytes-duration representation accomplishes.
 
-The {packets-bytes-duration} model representation is clearly overly simplistic and very incomplete. (Yet, it is more detailed than most commonly used experimental traffic models!) It captures nothing about variability of packet sizes, nor about the ``burstiness'' of packet transmissions; it leaves start time unspecified; it says nothing about the source or destination of the flow. At the opposite extreme, it is possible to embed the exact start time of each flow, and the exact size and transmission times of its packets in a vector space, etc. The difficulty comes in doing so in a manner that makes the summation of vectors correspond naturally and meaningfully to the aggregate behavior of flows. We take an intermediate approach, suggested by the results of~\cite{Karpinski07:realism}: to reproduce network performance accurately, it suffices to know, for each flow, the correct source node, destination node, start time, end time, and empirical distributions of packet sizes and inter-packet intervals for each flow. Accordingly, we represent a flow's behavior by these precise characteristics.If there are $f$ flows in the entire workload pattern, then its collective behavior can be described with six matrices; the rows of each matrix are behavior vectors of the $f$ flows in the workload, indexed in some chosen order. We use the following notation for the behavior matrices and their constituent vectors:\vspace{-0.25em}
+The {packets-bytes-duration} model representation is clearly overly simplistic and very incomplete. (Yet, it is more detailed than most commonly used experimental traffic models!) It captures nothing about variability of packet sizes, nor about the ``burstiness'' of packet transmissions; it leaves start time unspecified; it says nothing about the source or destination of the flow. At the opposite extreme, it is possible to embed the exact start time of each flow, and the exact size and transmission times of its packets in a vector space, etc. The difficulty comes in doing so in a manner that makes the summation of vectors correspond naturally and meaningfully to the aggregate behavior of flows. We take an intermediate approach, suggested by the results of~\cite{Karpinski07:realism}: to reproduce network performance accurately, it suffices to know, for each flow, the correct source node, destination node, start time, end time, and empirical distributions of packet sizes and inter-packet intervals for each flow. Accordingly, we represent a flow's behavior by these precise characteristics. If there are $f$ flows in the entire workload pattern, then its collective behavior can be described with six matrices; the rows of each matrix are behavior vectors of all flows, indexed in some chosen order. We use the following notation for the behavior matrices and their constituent vectors:\vspace{-0.25em}
 \begin{tabbing}
-\hspace{3em}\=\bullet\hspace{0.5em}\=\hspace{9.75em}\=
-$D\:$\=$=\setx{\vec{d}_i}\:$\=\kill
-\>\bullet\> sources: \>$S$\>$=\setx{\vec{s}_i}$\>$\in\R^{f \times n}$,\\
-\>\bullet\> destinations: \>$D$\>$=\setx{\vec{d}_i}$\>$\in\R^{f \times n}$,\\
-\>\bullet\> start times: \>$B$\>$=\setx{\vec{b}_i}$\>$\in\R^{f \times d_t}$,\\
-\>\bullet\> end times: \>$E$\>$=\setx{\vec{e}_i}$\>$\in\R^{f \times d_t}$,\\
-\>\bullet\> packet sizes: \>$Z$\>$=\setx{\vec{z}_i}$\>$\in\R^{f \times d_z}$,\\
-\>\bullet\> inter-packet intervals: \>$V$\>$=\setx{\vec{v}_i}$\>$\in\R^{f \times d_v}$.
+\hspace{1.5em}\=\bullet\hspace{0.5em}\=\hspace{9.75em}\=
+$D\:$\=$=\setx{\vec{d}_i}\:$\=$=\setx{d_{ij}}\:$\=\kill
+\>\bullet\> sources: \>$S$\>$=\setx{\vec{s}_i}$\>$=\setx{s_{ij}}$\>$\in\R^{f \times n}$,\\
+\>\bullet\> destinations: \>$D$\>$=\setx{\vec{d}_i}$\>$=\setx{d_{ij}}$\>$\in\R^{f \times n}$,\\
+\>\bullet\> start times: \>$B$\>$=\setx{\vec{b}_i}$\>$=\setx{b_{ij}}$\>$\in\R^{f \times d_t}$,\\
+\>\bullet\> end times: \>$E$\>$=\setx{\vec{e}_i}$\>$=\setx{e_{ij}}$\>$\in\R^{f \times d_t}$,\\
+\>\bullet\> packet sizes: \>$Z$\>$=\setx{\vec{z}_i}$\>$=\setx{z_{ij}}$\>$\in\R^{f \times d_z}$,\\
+\>\bullet\> inter-packet intervals: \>$V$\>$=\setx{\vec{v}_i}$\>$=\setx{v_{ij}}$\>$\in\R^{f \times d_v}$.
 \end{tabbing}
 
 \subsection{Source \& Destination Nodes}
@@ -124,6 +124,18 @@ The packets size behavior of a flow is represented by a histogram vector, $\vec{
 This specific function was chosen because, given the values of $d_v$, $v_{\min}$, and $v_{\max}$ in our experiments, it provides millisecond-scale to second-scale resolution for intervals on the orders of $v_{\min}$ to $v_{\max}$, respectively, adapting resolution smoothly between these extremes.
 %The values we use are $v_{\min}=10^{-6}$, which is the minimal interval our trace data, and $v_{\max}=600$, which is the total duration of each simulated situation, and using $d_v=1500$ to match the dimensionally of the packet size representation.
 The summation of behavior vectors over multiple flows yields a joint histogram giving the pooled frequencies of all packet sizes and inter-packet intervals.
+
+\section{Derivative Representations of Network Behavior}
+
+Now that we have defined our representation of network behavior, we derive useful expressions for commonly used network properties in terms of these basic representations.
+
+\subsection{Communication Topology}
+
+The number of flows between each pair of nodes in the network is immediately given by the matrix product $SD^t\in\R^{n \times n}$. The entry at row $i$ and column $j$ in this matrix gives the number of flows from 
+
+\section{Expression of Common Models in Algebraic Form}
+
+Most traffic models are not explicit means of generating complete synthetic traces of network traffic, but rather descriptions of some aspect of of the behavior of idealized traffic.
 
 \section{Introduction}\label{sec:intro}
 
