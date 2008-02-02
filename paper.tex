@@ -92,6 +92,14 @@ $D\:$\=$=\setx{\vec{d}_i}\:$\=\kill
 \>\bullet\> inter-packet intervals: \>$V$\>$=\setx{\vec{v}_i}$\>$\in\R^{f \times d_v}$.
 \end{tabbing}
 
+\subsection{Source \& Destination Nodes}
+
+Let $n$ be the number of nodes in the given traffic collection. We map nodes onto the standard basis vectors of $\R^n$: if the $j$th node is the source of the the $i$th flow, then $\vec{s}_i=\mathbf{e}_j$ (the vector with 1 at index $j$ and zeros elsewhere); if the $k$th node is the destination, then $\vec{d}_i=\mathbf{e}_k$. This may seem like a rather expansive representation, given that start and end nodes can be represented as a unidimensional indices from $\set{1,\dots,n}$. The advantage becomes clear when we consider vector operations. The sum of the source indices over a collection is meaningless; the sum of the the source vectors, however, is an $n$-dimensional histogram indicating how often each source node occurs in the collection.
+
+\subsection{Start \& End Times}
+
+The flow start and end time indicator vectors, $\vec{\alpha}$ and $\vec{\epsilon}$, also require some explanation. Start and end times are simple scalar values. Why not represent them as such? The answer lies in the requirement that behaviors must add meaningfully. If we represent the start time as a scalar, then adding the behavior of two flows produces a meaningless value. It's certainly not a start time itself---it may even exceed the start time of any actual flow. Instead, we again quantize the continuum of time: we map the range of possible start times onto the indices $\left\{1,\dots,d_t\right\}$, where $d_t$ is some chosen dimensionality. If the start time is mapped to index, $i$, then $\vec{\alpha}=e_i$, the vector with 1 at index $i$ and zeros elsewhere. The benefit of this representation is that we can now appropriately represent aggregate behavior through vector addition: the sum of start vectors over any collection of flows is a histogram of start times for those flows.
+
 \subsection{Packet Sizes \& Inter-Packet Intervals}
 
 The packets size behavior of a flow is represented by a histogram vector, $\vec{z}$, whose $i$th element, $z_i$, is the number of packets in the flow with $i$ bytes of payload data. The dimension, $d_z$, is the largest possible packet size, which in practice is the maximum transfer unit of the wireless medium---typically 1500 bytes. The histogram of inter-packet intervals is similar, except that domain of possible intervals is a continuum, so we much map the range of possible intervals onto the discrete index values $\left\{1,\dots,d_v\right\}$. In our experiments, we use the following logarithmic quantization function:
@@ -99,12 +107,6 @@ The packets size behavior of a flow is represented by a histogram vector, $\vec{
 q(v) &= \left\lfloor(d_v-1)\frac{\ln v - \ln v_{\min}}{\ln v_{\max}-\ln v_{\min}}\right\rfloor+1.
 \end{align}
 with $v_{\min}=10^{-6}$, which is the minimal interval our trace data, and $v_{\max}=600$, which is the total duration of each simulated situation, and hence an upper bound on the inter-packet intervals. We use $d_v=1500$ to match the dimensionally of the packet size representation. The packet size and inter-packet intervals are collected into matrices, $Z\in\R^{f \times d_z}$ and $V\in\R^{f \times d_v}$, whose rows are the behavior vectors $\vec{z}_i$ and $\vec{v}_i$ indexed from $i=1,\dots,f$ where $f$ is the number of flows in the collection.
-
-\subsection{Start \& End Times}
-
-The flow start and end time indicator vectors, $\vec{\alpha}$ and $\vec{\epsilon}$, also require some explanation. Start and end times are simple scalar values. Why not represent them as such? The answer lies in the requirement that behaviors must add meaningfully. If we represent the start time as a scalar, then adding the behavior of two flows produces a meaningless value. It's certainly not a start time itself---it may even exceed the start time of any actual flow. Instead, we again quantize the continuum of time: we map the range of possible start times onto the indices $\left\{1,\dots,d_t\right\}$, where $d_t$ is some chosen dimensionality. If the start time is mapped to index, $i$, then $\vec{\alpha}=e_i$, the vector with 1 at index $i$ and zeros elsewhere. The benefit of this representation is that we can now appropriately represent aggregate behavior through vector addition: the sum of start vectors over any collection of flows is a histogram of start times for those flows.
-
-\subsection{Source \& Destination Nodes}
 
 \section{Introduction}\label{sec:intro}
 
