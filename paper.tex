@@ -82,13 +82,14 @@ When mapping flow behaviors into a vector space, it is important that the mappin
 
 The {packets-bytes-duration} model representation is clearly overly simplistic and very incomplete. (Yet, it is more detailed than most commonly used experimental traffic models!) It captures nothing about variability of packet sizes, nor about the ``burstiness'' of packet transmissions; it leaves start time unspecified; it says nothing about the source or destination of the flow. At the opposite extreme, it is possible to embed the exact start time of each flow, and the exact size and transmission times of its packets in a vector space, etc. The difficulty comes in doing so in a manner that makes the summation of vectors correspond naturally and meaningfully to the aggregate behavior of flows. We take an intermediate approach, suggested by the results of~\cite{Karpinski07:realism}: to reproduce network performance accurately, it suffices to know, for each flow, the correct source node, destination node, start time, end time, and empirical distributions of packet sizes and inter-packet intervals for each flow. Accordingly, we represent a flow's behavior by these precise characteristics.If there are $f$ flows in the entire workload pattern, then its collective behavior can be described with six matrices; the rows of each matrix are behavior vectors of the $f$ flows in the workload, indexed in some chosen order. We use the following notation for the behavior matrices and their constituent vectors:\vspace{-0.25em}
 \begin{tabbing}
-\hspace{3em}\=\bullet\hspace{0.5em}\=\hspace{9.75em}\=\kill
-\>\bullet\> sources: \>$S=\setx{\vec{s}_i}\in\R^{f \times n}$,\\
-\>\bullet\> destinations: \>$D=\setx{\vec{d}_i}\in\R^{f \times n}$,\\
-\>\bullet\> start times: \>$B=\setx{\vec{b}_i}\in\R^{f \times d_t}$,\\
-\>\bullet\> end times: \>$E=\setx{\vec{e}_i}\in\R^{f \times d_t}$,\\
-\>\bullet\> packet sizes: \>$Z=\setx{\vec{z}_i}\in\R^{f \times d_z}$,\\
-\>\bullet\> inter-packet intervals: \>$V=\setx{\vec{v}_i}\in\R^{f \times d_v}$.
+\hspace{3em}\=\bullet\hspace{0.5em}\=\hspace{9.75em}\=
+$D\:$\=$=\setx{\vec{d}_i}\:$\=\kill
+\>\bullet\> sources: \>$S$\>$=\setx{\vec{s}_i}$\>$\in\R^{f \times n}$,\\
+\>\bullet\> destinations: \>$D$\>$=\setx{\vec{d}_i}$\>$\in\R^{f \times n}$,\\
+\>\bullet\> start times: \>$B$\>$=\setx{\vec{b}_i}$\>$\in\R^{f \times d_t}$,\\
+\>\bullet\> end times: \>$E$\>$=\setx{\vec{e}_i}$\>$\in\R^{f \times d_t}$,\\
+\>\bullet\> packet sizes: \>$Z$\>$=\setx{\vec{z}_i}$\>$\in\R^{f \times d_z}$,\\
+\>\bullet\> inter-packet intervals: \>$V$\>$=\setx{\vec{v}_i}$\>$\in\R^{f \times d_v}$.
 \end{tabbing}
 
 \subsection{Packet Sizes \& Inter-Packet Intervals}
