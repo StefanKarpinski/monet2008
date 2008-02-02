@@ -42,11 +42,22 @@ University of California, Santa Barbara
 \newcommand{\E}[1]{\left<#1\right>}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\Q}{\mathcal{Q}}
+\newcommand{\Qt}{Q_{\text{time}}}
+\newcommand{\Qi}{Q_{\text{ival}}}
 
 \newcommand{\abs}[1]{\left|#1\right|}
 \newcommand{\absx}[1]{|#1|}
 \newcommand{\set}[1]{\left\{#1\right\}}
 \newcommand{\setx}[1]{\{#1\}}
+\newcommand{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand{\floorx}[1]{\lfloor#1\rfloor}
+\newcommand{\ceil}[1]{\left\lceil#1\right\rceil}
+\newcommand{\ceilx}[1]{\lceil#1\rceil}
+\newcommand{\round}[1]{\left[#1\right]}
+\newcommand{\roundx}[1]{[#1]}
+\newcommand{\fracx}[2]{#1/#2}
+\newcommand{\fracp}[2]{\left(\frac{#1}{#2}\right)}
+\newcommand{\fracpx}[2]{(#1/#2)}
 
 \newcommand{\TTT}{\text{TTT}}
 \newcommand{\TTU}{\text{TTU}}
@@ -98,15 +109,21 @@ Let $n$ be the number of nodes in the given traffic collection. We map nodes ont
 
 \subsection{Start \& End Times}
 
-The flow start and end time indicator vectors, $\vec{\alpha}$ and $\vec{\epsilon}$, also require some explanation. Start and end times are simple scalar values. Why not represent them as such? The answer lies in the requirement that behaviors must add meaningfully. If we represent the start time as a scalar, then adding the behavior of two flows produces a meaningless value. It's certainly not a start time itself---it may even exceed the start time of any actual flow. Instead, we again quantize the continuum of time: we map the range of possible start times onto the indices $\left\{1,\dots,d_t\right\}$, where $d_t$ is some chosen dimensionality. If the start time is mapped to index, $i$, then $\vec{\alpha}=e_i$, the vector with 1 at index $i$ and zeros elsewhere. The benefit of this representation is that we can now appropriately represent aggregate behavior through vector addition: the sum of start vectors over any collection of flows is a histogram of start times for those flows.
+We also represent start and end times using indicator vectors. Time, however, is continuous, so we must first map times onto a range of time indices $\set{1,\dots,d_t}$. We transform the range $[0,t_{\max}]$ of possible start times using a simple quantization function:
+\begin{align}
+\Qt(t) &= \max\set{1,\ceil{\fracx{d_t t}{t_{\max}}}}.
+\end{align}
+Let $j$ and $k$ be the quantized start and end indices of a flow. Then the start and end vectors for the flow are $\vec{b}=\mathbf{e}_j$ and $\vec{e}=\mathbf{e}_k$. Again, this may seem excessively complex, but the advantage becomes clear when take aggregate flows: the sum of start vectors over a collection of flows is a $d_t$-dimensional histogram indicating the frequency of start times occurring in each quantization bin.
 
 \subsection{Packet Sizes \& Inter-Packet Intervals}
 
-The packets size behavior of a flow is represented by a histogram vector, $\vec{z}$, whose $i$th element, $z_i$, is the number of packets in the flow with $i$ bytes of payload data. The dimension, $d_z$, is the largest possible packet size, which in practice is the maximum transfer unit of the wireless medium---typically 1500 bytes. The histogram of inter-packet intervals is similar, except that domain of possible intervals is a continuum, so we much map the range of possible intervals onto the discrete index values $\left\{1,\dots,d_v\right\}$. In our experiments, we use the following logarithmic quantization function:
+The packets size behavior of a flow is represented by a histogram vector, $\vec{z}$, whose $i$th element, $z_i$, is the number of packets in the flow with $i$ bytes of payload data. The dimension, $d_z$, is the largest possible packet size, which in practice is the maximum transfer unit of the wireless medium---typically 1500 bytes. The histogram of inter-packet intervals is similar, except that the domain of possible intervals is a continuum, so we much map this range onto the discrete index values $\left\{1,\dots,d_v\right\}$. In our experiments, we use the following adaptive quantization function:
 \begin{align}
-q(v) &= \left\lfloor(d_v-1)\frac{\ln v - \ln v_{\min}}{\ln v_{\max}-\ln v_{\min}}\right\rfloor+1.
+\Qi(v) &= \max\set{1,\ceil{d_v\fracp{v-v_{\min}}{v_{\max}-v_{\min}}^{\frac{1}{2}}}}.
 \end{align}
-with $v_{\min}=10^{-6}$, which is the minimal interval our trace data, and $v_{\max}=600$, which is the total duration of each simulated situation, and hence an upper bound on the inter-packet intervals. We use $d_v=1500$ to match the dimensionally of the packet size representation. The packet size and inter-packet intervals are collected into matrices, $Z\in\R^{f \times d_z}$ and $V\in\R^{f \times d_v}$, whose rows are the behavior vectors $\vec{z}_i$ and $\vec{v}_i$ indexed from $i=1,\dots,f$ where $f$ is the number of flows in the collection.
+This specific function was chosen because, given the values of $d_v$, $v_{\min}$, and $v_{\max}$ in our experiments, it provides millisecond-scale to second-scale resolution for intervals on the orders of $v_{\min}$ to $v_{\max}$, respectively, adapting resolution smoothly between these extremes.
+%The values we use are $v_{\min}=10^{-6}$, which is the minimal interval our trace data, and $v_{\max}=600$, which is the total duration of each simulated situation, and using $d_v=1500$ to match the dimensionally of the packet size representation.
+The summation of behavior vectors over multiple flows yields a joint histogram giving the pooled frequencies of all packet sizes and inter-packet intervals.
 
 \section{Introduction}\label{sec:intro}
 
