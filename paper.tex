@@ -1,6 +1,6 @@
 \documentclass[conference]{IEEEtran}
 
-\newcommand{\thetitle}{On the Inadequacy of Uniform Modeling for Wireless LAN Workload Generation}
+\newcommand{\thetitle}{Linear Algebra as a Unifying Theory of Workload Modeling}
 
 \usepackage[pdftex]{graphicx}
 \usepackage[labelfont=bf,small]{caption}
@@ -15,7 +15,7 @@
 \newcommand{\email}[1]{$\left<{\textit{#1}}\right>$}
 \newcommand{\caps}[1]{{\small{#1}}}
 
-\title{\thetitle}
+\title{Linear Algebra as a Unifying Theory\\of Wireless Workload Modeling}
 \author{
 {\large{Stefan~Karpinski, Elizabeth~M.~Belding, Kevin~C.~Almeroth}}\\
 \textit{\{sgk,ebelding,almeroth\}@cs.ucsb.edu}\vspace{0.5em}\\
@@ -63,11 +63,25 @@ University of California, Santa Barbara
 \input{abstract.tex}
 \end{abstract}
 
+\section{Algebraic Representations \\of Network Behavior}
+
+\subsection*{Flow Behavior}
+
+The behavior of a flow may be mapped into a vector space such that the two operations, namely vector addition and scalar multiplication, can be sensibly defined in a way that naturally corresponds with the aggregation of behaviors. This is best clarified with an intentionally simplistic example. Suppose that the behavior of a flow is represented by the number of packets, $p$, the total bytes transmitted, $b$, and the total duration, $d$. This triplet can be naturally embedded in Euclidean space: $\vec{x}=(p,b,d)\in\R^3$. If we have two flows with behavior vectors $\vec{x}_1$ and $\vec{x}_2$, then their ``sum behavior,'' $\vec{x}_1+\vec{x}_2$ has:
+\begin{align*}
+p_1+p_2 &\text{ packets,}\\
+b_1+b_2 &\text{ bytes,}\\
+d_1+d_2 &\text{ duration.}
+\end{align*}
+Their average, i.e. $\frac{1}{2}(\vec{x}_1+\vec{x}_2)$, has the average number of packets, bytes, and duration, which is precisely what the ``average behavior'' of the two flows should intuitively be. 
+
+While this may seem trivial, note that the representation must be chosen carefully. Suppose instead, for example, we represented each flow's behavior by its packet count, $p$, average packet size, $b/p$, and average inter-packet interval, $d/(p-1)$. In this representation, the average of two behaviors has the average average packet size (the two averages are intentional), and the average average inter-packet interval. There lies the rub: this is still the case no matter how many packets are in each flow. Instead, we should more naturally weight the averages by the number of packets in each constituent. This is precisely what the packets-bytes-duration representation accomplishes.
+
 \section{Introduction}\label{sec:intro}
 
 We demonstrate how linear algebra can be effectively used to represent and perform computations with traffic behaviors in local area networks (\caps{LAN}s). Moreover, we map common concepts and techniques from traffic modeling into this new algebraic domain, showing how they can be expressed with mathematic precision and succinctness, while simultaneously being made clearer and more general. 
 
-Most of what are called traffic models are actually only partial descriptions of one or a handful of aspects of a complete model. The ubiquitous constant bit-rate (\caps{CBR}) model, for example, merely describes the nature of the packets in each flow in a workload: in a given flow, the sizes of packets and the intervals between them are are all uniform. Hence, the transmitted bit-rate is constant. 
+Most of what are called traffic models are actually only partial descriptions of one or a handful of aspects of a complete model. The ubiquitous constant bit-rate (\caps{CBR}) model, for example, merely describes the nature of the packets in each flow in a workload: in a given flow, the sizes of packets and the intervals between them are are all uniform. Hence, the transmitted bit-rate is constant.
 
 Two things are require for the direct empirical comparison of traffic models:
 \begin{itemize}
