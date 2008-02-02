@@ -40,9 +40,13 @@ University of California, Santa Barbara
 \newcommand{\X}{\mathsf{X}}
 \newcommand{\M}{\mathsf{M}}
 \newcommand{\E}[1]{\left<#1\right>}
-\newcommand{\abs}[1]{\left|#1\right|}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\Q}{\mathcal{Q}}
+
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\absx}[1]{|#1|}
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\setx}[1]{\{#1\}}
 
 \newcommand{\TTT}{\text{TTT}}
 \newcommand{\TTU}{\text{TTU}}
@@ -53,6 +57,8 @@ University of California, Santa Barbara
 
 \newcommand{\figurename}{Figure}
 \newcommand{\tablename}{Table}
+
+\renewcommand{\labelitemi}{\raisebox{2pt}{$\centerdot$}}
 
 \graphicspath{{graphs/}}
 
@@ -73,25 +79,15 @@ When mapping flow behaviors into a vector space, it is important that the mappin
 
 %While this may seem trivial, note that the representation must be chosen carefully. Suppose instead, for example, we represented each flow's behavior by its packet count, $p$, average packet size, $b/p$, and average inter-packet interval, $d/(p-1)$. In this representation, the average of two behaviors has the \textit{average} average packet size, and the \textit{average} average inter-packet interval. Therein lies the rub: this is the case no matter how many packets are in each flow; if a flow with thousands of 1500-byte packets is averaged with a single-packet, one-byte flow, the average behavior has... Instead, we should more naturally weight the averages by the number of packets in each constituent. This is precisely what the packets-bytes-duration representation accomplishes.
 
-The {packets-bytes-duration} model representation is clearly overly simplistic and very incomplete. (Yet, it is more detailed than most commonly used experimental traffic models!) It captures nothing about variability of packet sizes, nor about the ``burstiness'' of packet transmissions; it leaves start time unspecified; it says nothing about the source or destination of the flow. At the opposite extreme, it is possible to embed the exact start time of each flow, and the exact size and transmission times of its packets in a vector space, etc. The difficulty comes in doing so in a manner that makes the summation of vectors correspond naturally and meaningfully to the aggregate behavior of flows. We take an intermediate approach, suggested by the results of~\cite{Karpinski07:realism}: to reproduce network performance accurately, it suffices to know, for each flow, the correct source node, destination node, start time, end time, and empirical distributions of packet sizes and inter-packet intervals for each flow. Accordingly, we represent a flow's behavior by these precise characteristics. We encode a single flow's behavior with six vectors:
+The {packets-bytes-duration} model representation is clearly overly simplistic and very incomplete. (Yet, it is more detailed than most commonly used experimental traffic models!) It captures nothing about variability of packet sizes, nor about the ``burstiness'' of packet transmissions; it leaves start time unspecified; it says nothing about the source or destination of the flow. At the opposite extreme, it is possible to embed the exact start time of each flow, and the exact size and transmission times of its packets in a vector space, etc. The difficulty comes in doing so in a manner that makes the summation of vectors correspond naturally and meaningfully to the aggregate behavior of flows. We take an intermediate approach, suggested by the results of~\cite{Karpinski07:realism}: to reproduce network performance accurately, it suffices to know, for each flow, the correct source node, destination node, start time, end time, and empirical distributions of packet sizes and inter-packet intervals for each flow. Accordingly, we represent a flow's behavior by these precise characteristics.If there are $f$ flows in the entire workload pattern, then its collective behavior can be described with six matrices; the rows of each matrix are behavior vectors of the $f$ flows in the workload, indexed in some chosen order. We use the following notation for the behavior matrices and their constituent vectors:
 \begin{itemize}
-\item $\vec{s}\in\R^n$ indicates the source of the flow;
-\item $\vec{d}\in\R^n$ indicates the destination of the flow.;
-\item $\vec{b} \in \R^{d_t}$ indicates when the flow begins;
-\item $\vec{e} \in \R^{d_t}$ indicates when the flow ends;
-\item $\vec{z} \in \R^{d_z}$ is a histogram of packet sizes;
-\item $\vec{v} \in \R^{d_v}$ is a histogram of inter-packet intervals.
+\item $S=\setx{\vec{s}_i}\in\R^{f \times n}$ --- the source matrix;
+\item $D=\setx{\vec{d}_i}\in\R^{f \times n}$ --- the destination matrix;
+\item $B=\setx{\vec{b}_i}\in\R^{f \times d_t}$ --- the start time matrix;
+\item $E=\setx{\vec{e}_i}\in\R^{f \times d_t}$ --- the end time matrix;
+\item $Z=\setx{\vec{z}_i}\in\R^{f \times d_z}$ --- the size matrix;
+\item $V=\setx{\vec{v}_i}\in\R^{f \times d_v}$ --- the interval matrix.
 \end{itemize}
-If there are $f$ flows in the entire workload pattern, then its collective behavior can be described with six matrices:
-\begin{itemize}
-\item $S\in\R^{f \times n}$ the source matrix;
-\item $D\in\R^{f \times n}$ the destination matrix;
-\item $B\in\R^{f \times d_t}$ the start time matrix;
-\item $E\in\R^{f \times d_t}$ the end time matrix;
-\item $Z\in\R^{f \times d_z}$ the size matrix;
-\item $V\in\R^{f \times d_v}$ the interval matrix.
-\end{itemize}
-The rows of each matrix are behavior vectors of the $f$ flows in the workload, indexed in some chosen order.
 
 \subsection{Packet Sizes \& Inter-Packet Intervals}
 
