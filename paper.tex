@@ -25,6 +25,8 @@ University of California, Santa Barbara
 }
 
 \newcommand{\Section}[1]{\hyperref[sec:#1]{Section~\ref*{sec:#1}}}
+\newcommand{\Equation}[1]{\hyperref[eqn:#1]{Equation~\ref*{eqn:#1}}}
+
 \newcommand{\FHC}{Hern\'andez-Campos~\textit{et~al.}}
 \newcommand{\class}[1]{\textsc{\small{#1}}}
 \newcommand{\model}[1]{#1}
@@ -33,6 +35,7 @@ University of California, Santa Barbara
 \DeclareMathOperator{\var}{Var}
 \DeclareMathOperator{\N}{\mathcal{N}}
 \DeclareMathOperator{\Def}{def}
+\DeclareMathOperator{\Val}{val}
 
 \newcommand{\defeq}{\stackrel{\Def}{=}{}}
 \newcommand{\eqnote}[1]{\text{\footnotesize{[#1]}}}
@@ -44,11 +47,14 @@ University of California, Santa Barbara
 \newcommand{\Q}{\mathcal{Q}}
 \newcommand{\Qt}{Q_{\text{time}}}
 \newcommand{\Qi}{Q_{\text{ival}}}
+\newcommand{\ones}[1]{\mathbf{1}_{#1}}
 
 \newcommand{\abs}[1]{\left|#1\right|}
 \newcommand{\absx}[1]{|#1|}
 \newcommand{\set}[1]{\left\{#1\right\}}
 \newcommand{\setx}[1]{\{#1\}}
+\newcommand{\seq}[1]{\left<#1\right>}
+\newcommand{\seqx}[1]{<#1>}
 \newcommand{\floor}[1]{\left\lfloor#1\right\rfloor}
 \newcommand{\floorx}[1]{\lfloor#1\rfloor}
 \newcommand{\ceil}[1]{\left\lceil#1\right\rceil}
@@ -81,11 +87,12 @@ University of California, Santa Barbara
 %\input{abstract.tex}
 %\end{abstract}
 
-\section{Algebraic Representations \\of Network Behavior}
+%\section{Algebraic Representations \\of Network Behavior}\label{sec:representations}
+\section{The General Matrix Model}
 
 %The traffic workload pattern in a network is the collection of actions taken by hosts, on behalf of users and applications, that affect the behavior of the network itself. By design, Internet Protocol (\caps{IP}) networks treat all data in the same manner~\cite{Clark88}. Therefore, the actual information transmitted is irrelevant, only the manner of transmission matters. Although networks are packet-switched, packets are logically organized into sequences of packets sharing the same \caps{IP} protocol, source and destination \caps{IP} address, and source and destination  \caps{TCP} or \caps{UDP} port numbers. Such a sequence of packets is called a \textit{flow}. Although there are a vast multitude different application types which use \caps{IP}, there are two fundamentally different behaviors of flows which we distinguish here: \caps{TCP}, which delivers data reliably through feedback and retransmissions; and \caps{UDP}, which delivers data only on a best-effort basis. While it is possible to implement reliable transmission similar to \caps{TCP} over \caps{UDP}, it is uncommon, so we make the generalization that network events, such as packet drops, do not significantly feedback to the behavior of upper layers. With \caps{TCP}, on the other hand, network events are known to affect the transport layer
 
-The traffic workload pattern in a network is simply a collection of \caps{IP} packets between hosts in the network sent at certain times. It is standard in network analysis, however, to aggregate sequences of packets sharing the same \caps{IP} protocol, source and destination nodes, and source and destination \caps{TCP} or \caps{UDP} port numbers. Such a sequence of packets is called a \textit{flow}. The traffic pattern is characterized completely by the detailed behavior of it's flows. The behavior of a flow is defined by seven properties: its source and destination nodes; its start and end times; the specific sizes of and intervals between its constituent packets; and finally, whether it is paired with another flow in a request-response relationship.\footnote{Flow pairing is typically not addressed in traffic models. However, the most common transport protocol, {\scriptsize{TCP}}, is full-duplex, exhibiting tightly coupled pairs of client-server flows. Therefore, accurate representation of traffic behavior requires knowing which flows are request-response pairs. Moreover, although they are not strictly full-duplex, it is generally appropriate to view {\scriptsize{UDP}} and {\scriptsize{ICMP}} flows as paired, since the client-server paradigm is still used. Each {\scriptsize{DNS}} response, for example, is naturally associated with its corresponding request, and will have symmetrical {\scriptsize{IP}} addresses and port numbers.} We propose to represent the behavior of each flow in terms of seven vectors---one for each aspect of its behavior. The aggregate behavior of all the flows in a workload pattern are then represented as matrices, the rows of which are the behavior vectors of the flows.
+The traffic workload pattern in a network is simply a collection of \caps{IP} packets between hosts in the network sent at certain times. It is standard in network analysis, however, to aggregate sequences of packets sharing the same \caps{IP} protocol, source and destination nodes, and source and destination \caps{TCP} or \caps{UDP} port numbers. Such a sequence of packets is called a \textit{flow}. The traffic pattern is characterized completely by the detailed behavior of it's flows. The behavior of a flow is defined by six properties: its source and destination nodes; its start and end times; and the specific sizes of and intervals between its constituent packets. We propose to represent the behavior of each flow in terms of six vectors---one for each aspect of its behavior. The aggregate behavior of all the flows in a workload pattern are then represented as matrices, the rows of which are the behavior vectors of the flows.
 
 When mapping flow behaviors into a vector space, it is important that the mapping of behaviors into the vector spaces in question respect the vector space operations: addition of vectors and scalar multiplication. This requirement is best clarified with a simplified example. Suppose that the behavior of a flow is represented by the number of packets, $p$, the total bytes transmitted, $b$, and its total duration, $d$. Despite its simplicity, this representation is adequate to reproduce constant bit-rate (\caps{CBR}), time-randomized flow behavior. The triplet of representative values can be naturally embedded into Euclidean space: $\vec{x}=(p,b,d)\in\R^3$. If we have two flows with behavior vectors $\vec{x}_1$ and $\vec{x}_2$, then their sum as vectors, $x_1+x_2=(p_1+p_2,b_1+b_2,d_1+d_2)$, provides an appropriate description of the aggregate behavior of the two flows together. Similarly, their average, i.e. $\frac{1}{2}(\vec{x}_1+\vec{x}_2)$, has the average number of packets, bytes, and duration, which is precisely what the ``average behavior'' of the two flows should intuitively be.
 
@@ -93,39 +100,38 @@ When mapping flow behaviors into a vector space, it is important that the mappin
 
 %While this may seem trivial, note that the representation must be chosen carefully. Suppose instead, for example, we represented each flow's behavior by its packet count, $p$, average packet size, $b/p$, and average inter-packet interval, $d/(p-1)$. In this representation, the average of two behaviors has the \textit{average} average packet size, and the \textit{average} average inter-packet interval. Therein lies the rub: this is the case no matter how many packets are in each flow; if a flow with thousands of 1500-byte packets is averaged with a single-packet, one-byte flow, the average behavior has... Instead, we should more naturally weight the averages by the number of packets in each constituent. This is precisely what the packets-bytes-duration representation accomplishes.
 
-The {packets-bytes-duration} representation is clearly overly simplistic and very incomplete. (Yet, it is more detailed than the most commonly used experimental traffic models!) It captures nothing about variability of packet sizes, nor about the ``burstiness'' of packet transmissions; it leaves start time unspecified; it says nothing about the source or destination of the flow. At the opposite extreme, it is possible to embed the exact start time of each flow, and the exact size and transmission times of its packets in a vector space, etc. The difficulty comes in doing so in a manner that makes the summation of vectors correspond naturally and meaningfully to the aggregate behavior of flows. We take an intermediate approach, suggested by the results of~\cite{Karpinski07:realism}: to reproduce network performance accurately, it suffices to know, for each flow, the correct source node, destination node, start time, end time, empirical distributions of packet sizes and inter-packet intervals for each flow, and which other flow (if any) it is a response to. If there are $f$ flows in the entire workload pattern, then its collective behavior can be described with seven matrices; the rows of each matrix are the behavior vectors of the flows, indexed in some chosen order. We use the following notation for the behavior matrices and their constituent vectors and elements:\vspace{-0.25em}
+The {packets-bytes-duration} representation is clearly overly simplistic and very incomplete. (Yet, it is more detailed than the most commonly used experimental traffic models!) It captures nothing about variability of packet sizes, nor about the ``burstiness'' of packet transmissions; it leaves start time unspecified; it says nothing about the source or destination of the flow. At the opposite extreme, it is possible to embed the exact start time of each flow, and the exact size and transmission times of its packets in a vector space, etc. The difficulty comes in doing so in a manner that makes the summation of vectors correspond naturally and meaningfully to the aggregate behavior of flows. We take an intermediate approach, suggested by the results of~\cite{Karpinski07:realism}: to reproduce network performance accurately, it suffices to know, for each flow, the correct source node, destination node, start time, end time, and empirical distributions of packet sizes and inter-packet intervals for each flow. If there are $f$ flows in the entire workload pattern, then the collective behavior can be described with six matrices; the rows of each matrix are the behavior vectors of the flows, indexed in some chosen order. We use the following notation for the behavior matrices and their constituent vectors and elements:\vspace{-0.25em}
 \begin{tabbing}
 \hspace{1.5em}\=\bullet\hspace{0.5em}\=\hspace{9.75em}\=
 $D\:$\=$=\setx{\vec{d}_i}\:$\=$=\setx{d_{ij}}\:$\=\kill
 \>\bullet\> sources: \>$S$\>$=\setx{\vec{s}_i}$\>$=\setx{s_{ij}}$\>$\in\R^{f \times n}$,\\
 \>\bullet\> destinations: \>$D$\>$=\setx{\vec{d}_i}$\>$=\setx{d_{ij}}$\>$\in\R^{f \times n}$,\\
-\>\bullet\> response: \>$R$\>$=\setx{\vec{r}_i}$\>$=\setx{r_{ij}}$\>$\in\R^{f \times f}$,\\
 \>\bullet\> start times: \>$B$\>$=\setx{\vec{b}_i}$\>$=\setx{b_{ij}}$\>$\in\R^{f \times d_t}$,\\
 \>\bullet\> end times: \>$E$\>$=\setx{\vec{e}_i}$\>$=\setx{e_{ij}}$\>$\in\R^{f \times d_t}$,\\
 \>\bullet\> packet sizes: \>$Z$\>$=\setx{\vec{z}_i}$\>$=\setx{z_{ij}}$\>$\in\R^{f \times d_z}$,\\
 \>\bullet\> inter-packet intervals: \>$V$\>$=\setx{\vec{v}_i}$\>$=\setx{v_{ij}}$\>$\in\R^{f \times d_v}$.
 \end{tabbing}
+The total behavior matrix is the concatenation of these matrices: $F = (S,D,B,E,Z,V) \in \R^{f \times \Sigma}$ where $\Sigma=2(n+d_t)+d_z+d_v$. Many common traffic models can be expressed precisely and succinctly in terms of transformations or conditions on this behavior matrix and its constituents.
 
 \subsection{Source \& Destination Nodes}
 
-Let $n$ be the number of nodes in the given traffic collection. We let $s_{ij}=1$ if the $j$th node is the source of the $i$th flow, and zero otherwise; similarly, $d_{ik}=1$ if the destination of the $i$th flow is the $k$th node. This sparse matrix may seem like an overly expansive representation, given that start and end nodes can be represented as unidimensional indices from $\set{1,\dots,n}$. The advantage becomes clear when we consider vector operations combining collections of behavior vectors. The sum of the source indices over a collection is meaningless; the sum of the the source vectors, however, is an $n$-dimensional histogram indicating how often each source node occurs in the collection.
-
-\subsection{Requests \& Responses: Flow Pairing}
-
-
+Let $n$ be the number of nodes in the given traffic collection. We let $s_{ij}=1$ if the $j$th node is the source of the $i$th flow, and zero otherwise; similarly, $d_{ik}=1$ if the destination of the $i$th flow is the $k$th node. This sparse matrix may seem like an overly expansive representation, given that start and end nodes can be represented as unidimensional indices from $\set{1,\dots,n}$. The advantage becomes clear when we consider vector operations combining collections of behavior vectors. The sum of the source indices over a collection is meaningless; the sum of the the source vectors, $\set{\vec{s}_i}$, however, is an $n$-dimensional histogram indicating how often each source node occurs in the collection.
 
 \subsection{Start \& End Times}
 
 We represent start and end times using indicator vectors. Unlike node indices, however, time is continuous, so we must first map times onto a range of time indices $\set{1,\dots,d_t}$. We transform the range $[0,t_{\max}]$ of possible start times using a simple quantization function:
 \begin{align}
-\Qt(t) &= \max\set{1,\ceil{\fracx{d_t t}{t_{\max}}}}.
+\label{eqn:time-quantization}
+\Qt(t) &= \max\set{1,\ceil{d_t\fracpx{t}{t_{\max}}}}.
 \end{align}
-Let $j$ and $k$ be the quantized start and end indices of a flow. Then the start and end vectors for the flow are $\vec{b}=\mathbf{e}_j$ and $\vec{e}=\mathbf{e}_k$. Again, this may seem excessively complex, but the advantage becomes clear when we aggregate flows: the sum of start vectors over a collection of flows is a $d_t$-dimensional histogram indicating the frequency of start times occurring in each quantization bin.
+%Suppose the $i$th flow has a quantized start index of $j$ and a end index of $k$. Then $b_{ij'}=\delta{jj'}$ and $e_{ik'}=\delta_{kk'}$.
+Let $j$ and $k$ be the quantized start and end indices of a flow. Then the start and end vectors for the flow are $\vec{b}=\mathbf{e}_j$ and $\vec{e}=\mathbf{e}_k$ ($\mathbf{e}_j$ has unity at index $j$ and zeros elsewhere). Again, this may seem excessively complex, but the advantage becomes clear when we aggregate flows: the sum of start vectors over a collection of flows is a $d_t$-dimensional histogram indicating the frequency of start times occurring in each quantization bin.
 
 \subsection{Packet Sizes \& Inter-Packet Intervals}
 
-The packets size behavior of a flow is represented by a histogram vector, $\vec{z}$. Explicitly,  $z_{ij}$ is the number of packets in the $i$th flow with $j$ bytes of payload data. The dimension, $d_z$, is the largest possible packet size, which in practice is the maximum transfer unit of the wireless medium---typically 1500 bytes. The histogram of inter-packet intervals is similar, except that the domain of possible intervals is a continuum, so we much map this range onto the discrete index values $\left\{1,\dots,d_v\right\}$. In our experiments, we use the following adaptive quantization function:
+The packets size behavior of a flow is represented by a histogram vector, $\vec{z}$. Explicitly,  $z_{ij}$ is the number of packets in the $i$th flow with $j$ bytes of payload data. The dimension, $d_z$, is the largest possible packet size, which in practice is the maximum transfer unit of the wireless medium---typically 1500 bytes. The histogram of inter-packet intervals is similar, except that the domain of possible intervals is a continuum, so we must map this range onto the discrete index values $\left\{1,\dots,d_v\right\}$. In our experiments, we use the following adaptive quantization function:
 \begin{align}
+\label{eqn:interval-quantization}
 \Qi(v) &= \max\set{1,\ceil{d_v\fracp{v-v_{\min}}{v_{\max}-v_{\min}}^{\frac{1}{2}}}}.
 \end{align}
 This specific function was chosen because, given the values of $d_v$, $v_{\min}$, and $v_{\max}$ in our experiments, it provides millisecond-scale to second-scale resolution for intervals on the orders of $v_{\min}$ to $v_{\max}$, respectively, adapting resolution smoothly between these extremes.
@@ -138,11 +144,33 @@ Having defined our representation of network behavior, we turn to deriving usefu
 
 \subsection{Communication Topology}
 
-The number of flows between each pair of nodes in the network is immediately given by the matrix product $SD^t$: $(SD^t)_{ij}$ is the number flows from node $i$ to node $j$.
+The number of flows between each pair of nodes in the network is immediately given by the matrix product $SD^t\in\R^{n \times n}$, where $*^t$ denotes the transpose. That is $(SD^t)_{ij}$ is the number of flows from node $i$ to node $j$. The total number of source-flows for each node is given by the vector $S^t\ones{f}\in\R^n$, while the total number of destination-flows is given by $D^t\ones{f}\in\R^n$ ($\ones{f}$ is the $f$-dimensional column vector consisting of all ones).
 
-\section{Expression of Common Models in Algebraic Form}
+\subsection{Average Flow Behaviors}
 
-Most traffic models are not explicit means of generating complete synthetic traces of network traffic, but rather descriptions of some aspect of of the behavior of idealized traffic.
+The average packet sizes and inter-packet intervals for flows are computed by right multiplication by the vector of values corresponding to the column indices. For example, the packet sizes corresponding to the columns of the size matrix are simply the indices themselves: $\vec{\sigma}=(1,2,3,\dots,d_z)$. Since inter-packet intervals were quantized according to \Equation{interval-quantization}, we use the median value of the $k$th interval to represent it:
+\begin{align}
+\vec{\tau}(k) = v_{\min}+(v_{\max}-v_{\min})\fracp{k(k+1)+\frac{1}{2}}{d_v^2}.
+\end{align}
+With these index-value vectors, the average packet sizes and inter-packet intervals for each flow can be computed:
+\begin{align}
+\label{eqn:average-size}%
+\text{average sizes:}&~~~~~Z\vec{\sigma} \in \R^f,\\
+\label{eqn:average-interval}%
+\text{average intervals:}&~~~~~V\vec{\tau} \in \R^f.
+\end{align}
+
+%Computing the aggregate behavior is exceedingly simple. It is generally accomplished through 
+
+\section{Expression of Common Models}
+
+Existing traffic models are typically not explicit methods of generating complete synthetic traces of network traffic, but rather descriptions of some aspect of of the behavior of idealized traffic. In our algebraic modeling framework, such models can be interpreted as stipulations about the form of the behavior matrices, or as transforms that implement those stipulations given a real set of traffic matrices.
+
+%A generic traffic model is a way of generating the six matrices described in \Section{representations}. A trace-derived traffic model transforms the matrices for an actual trace of network behavior into a simplified or regularized form. For experimental comparison, the dimensions of the matrices should all be preserved. If a trace-derived model produces experimental performance metrics that are similar to those produced by the original trace data, then simplifications made by the model are viable; if the performance is distorted, then the simplifications are discarding essential information about the traffic pattern.
+
+\subsection{Uniformity}
+
+It is common in generating traffic behaviors for experiments to treat packets, nodes, and flows uniformly to varying degrees, largely because of the high complexity of doing otherwise and the lack of compelling alternatives. Here we examine how various notions of uniformity are represented in the matrix model. In general, \textit{intra-flow uniformity} is effected by right multiplication, which mixes the elements in each row, whereas \textit{inter-flow uniformity} is effected by left multiplication, which mixes elements across rows. The standard constant bit-rate (\caps{CBR}) flow model, for example, in its strictest sense, is an intra-flow model, which stipulates that all the packets in each flow behave identically, having identical sizes and intervals. Each flow's bit-rate is therefore constant, and hence the name. The strict \caps{CBR} model can be effected by using the expressions for per-flow average packet sizes and inter-packet intervals given in Equations~\ref{eqn:average-size}~and~\ref{eqn:average-interval}. This essentially reduces the size and time representation to the 
 
 \section{Introduction}\label{sec:intro}
 
