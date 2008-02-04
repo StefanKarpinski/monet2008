@@ -49,6 +49,7 @@ University of California, Santa Barbara
 \newcommand{\Qi}{Q_{\text{ival}}}
 \newcommand{\Di}{Q^{-1}_{\text{ival}}}
 \newcommand{\ones}[1]{\mathbf{1}_{#1}}
+\newcommand{\zeros}[1]{\mathbf{0}_{#1}}
 
 \newcommand{\abs}[1]{\left|#1\right|}
 \newcommand{\absx}[1]{|#1|}
@@ -156,19 +157,26 @@ The packet stream ends when a packet would be sent after the chosen end time of 
 
 Having defined our representation of network behavior, we turn to deriving useful expressions for commonly used network properties in terms of these algebraic building blocks.
 
-\subsection{Communication Topology}
+\subsection{Nodes: Communication Topology}
+\label{sec:communication-topology}
 
 The number of flows between each pair of nodes in the network is expressed by the matrix product $SD^t\in\R^{n \times n}$ ($*^t$~denotes transpose). That is $(SD^t)_{ij}$ is the number of flows from node $i$ to node $j$. The total number of source flows for each node is given by the vector $S^t\ones{f}$, and the total number of destination flows is given by $D^t\ones{f}$. ($\ones{f}$ is the $f$-dimensional column vector consisting of all ones.)
 
-\subsection{Flow Packet Count, Size \& Duration}
+\subsection{Flows: Packet Count, Size \& Duration}
 \label{sec:flow-totals}
 
 From the matrices $Z$ and $V$, we can compute the packet count, size (total bytes), and approximate duration for each flow. The computations for size and duration require knowing the values that each matrix column represents. The computed duration is only approximate because information is irrecoverably lost in the quantization process (see \Equation{interval-quantization}). The vectors of representative values for $Z$ and $V$ are:
 \begin{align}
-\vec{\sigma}&=(1,2,3,\dots,d_z),\\
+\vec{\sigma}&=\seq{1,2,3,\dots,d_z},\\
 \vec{\tau}&=\seq{\Di\left(k,\fracx{1}{2}\right)}_{k=1}^{d_v}.
 \end{align}
-Using these vectors of representative values, the vector of packet-counts is $Z\ones{d_z}=V\ones{d_v}$, the vector of flow sizes vector is $Z\vec{\sigma}$, and the vector of durations is $V\vec{\tau}$.
+Using these representative values, the vector of packet-counts is $Z\ones{d_z}=V\ones{d_v}$, the vector of flow sizes vector is $Z\vec{\sigma}$, and the vector of approximate durations is $V\vec{\tau}$.
+
+\subsection{Network: Marginal Behavior}
+\label{sec:marginal-behavior}
+
+\noindent
+...
 
 \section{Expression of Common Models}
 
@@ -178,7 +186,16 @@ Existing traffic models are typically not explicit methods of generating complet
 
 \subsection{Uniformity}
 
-It is common in generating traffic behaviors for experiments to treat packets, nodes, and flows uniformly to varying degrees, largely because of the high complexity of doing otherwise and the lack of compelling alternatives. Here we examine how various notions of uniformity are represented in the matrix model. In general, \textit{intra-flow uniformity} is effected by right multiplication, which mixes the elements in each row, whereas \textit{inter-flow uniformity} is effected by left multiplication, which mixes elements across rows. The standard constant bit-rate (\caps{CBR}) flow model, for example, in its strictest sense, is an intra-flow model, which stipulates that all the packets in each flow behave identically, having identical sizes and intervals. Each flow's bit-rate is therefore constant, and hence the name. The strict \caps{CBR} model can be expressed simply using the packets-bytes-duration model discussed in \Section{representations}. Deriving the packet-bytes-duration model from the general matrix model is accomplished through right multiplication as described in \Section{flow-totals}.
+It is common in generating traffic behaviors for experiments to treat packets, nodes, and flows uniformly to varying degrees, largely because of the high complexity of doing otherwise and the lack of compelling alternatives. Here we examine how various notions of uniformity are expressed in the matrix model. In general, \textit{intra-flow uniformity} is effected by right multiplication, which mixes the elements in each row, whereas \textit{inter-flow uniformity} is effected by left multiplication, which mixes elements across rows. The constant bit-rate (\caps{CBR}) flow model, for example, in its strictest sense, is an intra-flow model, which stipulates that all the packets in each flow behave identically, having identical sizes and intervals; thus each flow's bit-rate is constant, as the name implies. The strict \caps{CBR} model can be expressed simply using the packets-bytes-duration (\caps{PBD}) model used as an example in \Section{representations}. The pair of matrices $\seq{Z,V}$ is transformed to \caps{PBD} form using the vectors defined in \Section{flow-totals}: $\seq{Z,V}\Gamma$, where
+\begin{align}
+\Gamma=\begin{pmatrix}
+\ones{} & \vec{\sigma} & \zeros{} \\
+\zeros{} & \zeros{} & \vec{\tau}
+\end{pmatrix} \in \R^{(d_v+d_z)\times{3}}.
+\end{align}
+
+%Deriving the packet-bytes-duration model from the general matrix model is accomplished through right multiplication as described in \Section{flow-totals}.
+% TODO: this conclusion is pretty weak.
 
 While constant bit-rate in the strict sense implies only that the packet behavior in each flow is uniform, it is extremely rare for it to be applied in this strict sense only; it is typical that \caps{CBR} models make assumptions about uniformity across flows, and not only within each flow. The most drastic simplification is to treat all flows in a synthetic workload identically. This is effected by left multiplication: $F'=\ones{f \times f} F$. In general, we can express uniformity through left-multiplication by some matrix. To make flow behavior uniform at the per-source node level, we left-multiply by $SS^t/f\in\R^{f \times f}$: $F'=(SS^t/f)F$. Per-destination node uniformity can be achieved similarly: $F'=(DD^t/f)F$.
 
