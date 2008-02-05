@@ -26,6 +26,8 @@ University of California, Santa Barbara
 
 \newcommand{\Section}[1]{\hyperref[sec:#1]{Section~\ref*{sec:#1}}}
 \newcommand{\Equation}[1]{\hyperref[eqn:#1]{Equation~\ref*{eqn:#1}}}
+\newcommand{\Figure}[1]{\hyperref[fig:#1]{Figure~\ref*{fig:#1}}}
+\newcommand{\Table}[1]{\hyperref[tab:#1]{Table~\ref*{tab:#1}}}
 
 \newcommand{\FHC}{Hern\'andez-Campos~\textit{et~al.}}
 \newcommand{\class}[1]{\textsc{\small{#1}}}
@@ -317,8 +319,30 @@ The essential idea behind the differential simulation technique is to compare tr
 \subsection{Traffic Models}
 \label{sec:traffic-models}
 
+\begin{table*}
+\begin{center}
+\small
+\begin{tabular}{|c|c|l|}
+\multicolumn{1}{c}{\textbf{model}} &
+\multicolumn{1}{c}{\textbf{transformation}} &
+\multicolumn{1}{c}{\textbf{description}} \\
+\hline
+{\footnotesize{GMM}} & --- & the general matrix model \\\hline\hline
+flow uniform & $F'=(\ones{f \times f}/f)F$ & flows are generated stochastically identically \\\hline
+node uniform & $S'=S(\ones{n \times n}/n)$~~;~~$D'=D(\ones{n \times n}/n)$ & nodes behave stochastically identically with respect to flows \\\hline
+time uniform & $B'=B(\ones{d_t \times d_t}/d_t)$~~;~~$E'=E(\ones{d_t \times d_t}/d_t)$ & all start times and end times are equally likely \\\hline
+full uniform & \textit{all uniform transformations} & applies all the uniformity assumptions of the above three models \\\hline\hline
+node marginal & $S'=(\ones{f \times f}/f)S$~~;~~$D'=(\ones{f \times f}/f)D$ & nodes behave distinctly, but behavior is independent of flows \\\hline
+packet marginal & $Z'=(\ones{f \times f}/f)Z$~~;~~$V'=(\ones{f \times f}/f)V$ & packet behavior is variable bit-rate, aggregated across all flows \\\hline
+\end{tabular}
+\caption{Matrix-based traffic models evaluated.}
+\label{tab:traffic-models}
+\end{center}
+\end{table*}
+
 The original trace traffic constitutes the first model we simulate, although it is not really a model, {per se}. This serves as a control group against which to compare all other models. Before we can evaluate the General Matrix Model (\caps{GMM}) presented in \Section{general-matrix-model}, we must establish that one potentially important aspect of traffic behavior that is \textit{not} represented in the \caps{GMM} can legitimately be discarded. That aspect of behavior is \textit{\caps{TCP} feedback}. The \caps{GMM} does not specify the \caps{IP} protocol type of each flow. Therefore we must establish the extent to which using \caps{UDP} flows, without reliable delivery or congestion control, affects performance metrics.
 %\caps{GMM} also does not indicate which flows are paired with each other in a client-server relationship. While this pairing does not affect non-\caps{TCP} flows, we implement.
+Other synthetic models derived from algebraic transformations of the \caps{GMM} are listed in \Table{traffic-models}.
 
 \subsection{Trace Data}\label{sec:trace-data}
 %\subsection{Trace Data \& Simulations}\label{sec:trace-data}\label{sec:simulations}
@@ -606,38 +630,13 @@ converges to a standard normal distribution for large values of $n$, where $n$ i
 \vspace{-1.25em}
 \end{figure*}
 
-Our simulation results are summarized in Figure~\ref{fig:boxplots}. Each subfigure shows a single performance metric. The distribution of errors for each traffic model is visualized with a box-and-whisker plot. These plots allow immediate assessment of realism: a good traffic model should have log-ratio values that are tightly clustered around the center, with a small, evenly balanced box. Additionally, the mean and median markers should be close to the center. Complementing the visual display of summary statistics, Figure~\ref{fig:boxplots} also lists three $p$-values to the right of each box-and-whisker plot. These are, in order, the $p$-values for the median, mean and 3-mean tests described in \Section{statistical-equivalence}. Each test catches a different type of unrealistic statistical behavior.
+Our simulation results are summarized in Figure~\ref{fig:box-plots}. Each subfigure shows a single performance metric. The distribution of errors for each traffic model is visualized with a box-and-whisker plot. These plots allow immediate assessment of realism: a good traffic model should have log-ratio values that are tightly clustered around the center, with a small, evenly balanced box. Additionally, the mean and median markers should be close to the center. 
 
-The \caps{UTU} model, for example, which uses real flow behavior but synthetic flow topology and packet behavior, does a very good job of accurately reproducing realistic average end-to-end delay (Figure~\ref{fig:Application-Average-Delay}): the median and mean are both close to zero, and the $p$-values are all greater than $0.05$. The standard uniform \caps{CBR} model (\caps{UUU}), on the other hand, underestimates average end-to-end delay by between a factor of $2$ and $11$ half of the time, and by more than a factor of $11$ a quarter of the time. Its $p$-values for delay are all less than $0.005$.
-
-Figure~\ref{fig:Application-Average-Jitter} shows that the \caps{STU} traffic model passes the mean test but not the median or 3-mean tests. This result indicates that this model tends to overestimate jitter, but in some subset of cases it significantly underestimates instead, yielding a mean near zero, but a skewed median. This analysis is verified when we examine a scatterplot of metric values for \caps{STU} versus \caps{TTT} traffic models. In Figure~\ref{fig:application-average-jitter-stu} we can see that for the majority of simulations, the \caps{STU} value for jitter exceeds the \caps{TTT} value. In a significant minority, however, the \caps{STU} model yields very small jitter values, while the \caps{TTT} model gives large values. Even though the average error is near zero, this is not a model that reproduces realistic jitter.
-
-The \caps{UTU} traffic model accurately reproduces packet dropping behavior in routing queues. Figure~\ref{fig:network-packet-drop-rate-utu} shows a scatterplot for such a realistic model: the data points are well clustered symmetrically around the diagonal line. We conclude that the primary influence on the packet drop rate is flow behavior. However, if we use a sink topology model, as in Figure~\ref{fig:network-packet-drop-rate-stu}, the drop rate becomes inflated. The sink topology introduces an unrealistic routing bottleneck in the network, causing excessive queue overflows for all sizes of scenarios. The uniform topology model does not exhibit this bottleneck, and thereby avoids producing this unrealistic performance artifact. This demonstrates that while the uniform topology model is generally less realistic than the sink model, for certain metrics, their relative quality is the opposite.
-
-Figure~\ref{fig:mac-retransmission-failures-suu} illustrates a case where the 3-mean test catches unrealistic behavior that the median and mean tests do not catch. From Figure~\ref{fig:MAC-Retransmission-Failures} we can see that the mean and median error values for the \caps{SUU} model are fairly small. The scatter-plot, however, shows that this model significantly underestimates the failure rate for large scenarios with many flows (squares), while overestimating the rate in smaller scenarios.
-
-There are few, if any, positive conclusions that can be drawn from these results. The primary message is that these synthetic traffic models, especially the standard uniform \caps{CBR} model, consistently misrepresent the most important performance metrics. The traffic model that performs the best overall is the \caps{UTU} model, which uses real flow behavior with uniform flow topology and uniform packet behavior. This model, however, still fails statistical tests of realism for all but two of the metrics considered. Further development of traffic models is needed before it becomes possible to generate traffic in simulations or experimental deployments such that a single set of experiments can realistically evaluate all aspects of network performance.
+The primary result is that the General Matrix Model~(\caps{GMM}) is sufficiently realistic. It accurately reproduces important performance metrics at all levels of the protocol stack in simulation. This only moves us a step closer to being able to generate realistic, completely synthetic workloads, since the \caps{GMM} in these comparisons  derives almost all of its behavior directly from the trace. However, it means that we have effectively reduced the problem of generating realistic workload to the problem of classifying and understanding what sorts of traffic matrices occur in real workloads. Moreover, we can express a vast array of different approaches to traffic modeling simply and uniformly using matrix operations.
 
 \section{Discussion}\label{sec:discussion}
 
 What are the ramifications of these results? The discovery that the most commonly used traffic model for wireless networks drastically misrepresents important performance metrics may shed some light on the lack of trust in results from wireless simulations. It is now well established that network usage behavior---both mobility, and, with this research, traffic patterns---have an impact on network performance that cannot be ignored. Even experimental deployments cannot avoid the need for more realistic traffic workload models. While using a real, physical network successfully sidesteps simulation problems below the application layer, without realistic traffic models, reliable, meaningful performance predictions remain beyond our reach.
-
-\subsection{Relative Performance Comparisons}
-
-Performance evaluations are primarily used to compare new protocols with existing ones. It remains possible that while misrepresenting important metrics, synthetic traffic models preserve the relative performance of protocols. In order to test this hypothesis, we have run further simulations, revisiting a classic comparison of ad~hoc routing protocols: \caps{AODV} \textit{vs.} \caps{OLSR}. % TODO: cite a previous comparison here.
-We focus on the trace segments with 75 or fewer active nodes, since published performance comparisons of ad hoc routing protocols have typically not used more nodes than this. For each scenario, we have run simulations with 10 different seed values using the \caps{AODV} and \caps{OLSR} routing protocols and the \caps{UUU} and \caps{TTT} traffic models, allowing us to compare relative performance results when switching traffic models.
-
-The key result of our comparison is that, for certain performance metrics, \textbf{the relative performance of \caps{AODV} and \caps{OLSR} is inverted, simply  by changing traffic models.} Figure~\ref{fig:mac-control-overhead-cmp} shows some of the results from this experiment. The graph plots \caps{MAC} control overhead against the number of nodes in each simulation scenario. Each data point shows the average overhead for the simulations of that scenario using ten seed values. With the standard \caps{UUU} traffic model, \caps{OLSR} consistently has much higher overhead, across the board, than \caps{AODV}. When real traffic is used, however, \caps{OLSR} performs significantly better than \caps{AODV}. A similar switch occurs for the number of \caps{MAC} retransmissions. This experiment demonstrates that the use of unrealistic traffic models can change the relative performance of different protocols, as well as skew absolute performance measurements.
-
-%\begin{figure}
-%\vspace{0.6em}
-%\begin{centering}
-%\includegraphics[width=3.45in]{mac-control-overhead-cmp}
-%\caption{Comparison of {\footnotesize{MAC}} control overhead for {\footnotesize{AODV}} and {\footnotesize{OLSR}} using both the {\footnotesize{UUU}} and {\footnotesize{TTT}} traffic models. The fit lines show locally weighted, smoothed performance trends.}
-%\label{fig:mac-control-overhead-cmp}
-%\end{centering}
-%\vspace{-1.5em}
-%\end{figure}
 
 \subsection{Generality of Results}
 
@@ -648,11 +647,11 @@ The most significant limitation on the generality of this analysis is that it is
 
 \subsection{Towards Realistic Models of Wireless Workload}
 
-What would better traffic models look like? How can we create them? One possible approach is to use actual traffic traces as we have done. This approach is unsatisfactory, however, because it provides the experimenter with almost no control over experiments. Synthetic models have parameters, which can be tweaked as necessary---adjusting, for example, the number of active nodes in a simulation, without affecting other parameters. Traffic traces, on the other hand, must be used without significant alteration if they are to actually provide the desired realism. The ``messiness'' of the performance comparison from trace data in Figure~\ref{fig:mac-control-overhead-cmp} illustrates why using traces directly is not ideal: each data point differs not only in the number of nodes shown on the $x$-axis, but also in other dimensions, such as the number of flows and packets, and the average flow duration. The result is a highly noisy comparison, affected by many unseen parameters. Only by applying a local smoothing algorithm are trends somewhat elucidated.
+What would better traffic models look like? How can we create them? One possible approach is to use actual traffic traces as we have done. This approach is unsatisfactory, however, because it provides the experimenter with almost no control over experiments. Synthetic models have parameters, which can be tweaked as necessary---adjusting, for example, the number of active nodes in a simulation, without affecting other parameters. Traffic traces, on the other hand, must be used without significant alteration if they are to actually provide the desired realism. %The ``messiness'' of the performance comparison from trace data in Figure~\ref{fig:mac-control-overhead-cmp} illustrates why using traces directly is not ideal: each data point differs not only in the number of nodes shown on the $x$-axis, but also in other dimensions, such as the number of flows and packets, and the average flow duration. The result is a highly noisy comparison, affected by many unseen parameters. Only by applying a local smoothing algorithm are trends somewhat elucidated.
 
 Instead of using trace data directly, it should be possible to configure a synthetic traffic model based on observations from a real data set, and then run side-by-side simulations using the synthetic model and the real data, producing statistically equivalent performance results. This is precisely what our definition of sufficient realism entails. The work in this paper provides the tools to measure how close to this ideal a model is and in what areas it needs improvement. Without this feedback, any improvements in realism are purely guesswork. Our breakdown of traffic behavior into three orthogonal levels also allows the problem to be approached in smaller pieces, rather than being solved all at once.
 
-The next step towards better traffic models is to investigate which aspects of real traces may be altered without detrimentally affecting the resulting performance metrics. For example, to test whether a complex time-series model of packet behavior is necessary, we randomize the order of the packet sizes and/or inter-packet intervals and compare performance using these randomized traces against performance using the original traces. If the performance is unchanged, we can conclude that no complex time-series model of packet behavior is necessary: sampling the packet sizes and inter-packet intervals from empirical distributions is sufficiently realistic. If, on the other hand, the performance characteristics are altered by shuffling packets, then some time-series model of packet behavior is needed. By partially randomizing the packet order in specific ways, the exact limits of realism necessary can be found. A similar approach will allow the development of realistic models for the other levels of network usage behavior.
+%The next step towards better traffic models is to investigate which aspects of real traces may be altered without detrimentally affecting the resulting performance metrics. For example, to test whether a complex time-series model of packet behavior is necessary, we randomize the order of the packet sizes and/or inter-packet intervals and compare performance using these randomized traces against performance using the original traces. If the performance is unchanged, we can conclude that no complex time-series model of packet behavior is necessary: sampling the packet sizes and inter-packet intervals from empirical distributions is sufficiently realistic. If, on the other hand, the performance characteristics are altered by shuffling packets, then some time-series model of packet behavior is needed. By partially randomizing the packet order in specific ways, the exact limits of realism necessary can be found. A similar approach will allow the development of realistic models for the other levels of network usage behavior.
 
 \section{Conclusions}\label{sec:conclusions}
 
