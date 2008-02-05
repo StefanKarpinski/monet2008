@@ -87,12 +87,99 @@ University of California, Santa Barbara
 \begin{document}
 \maketitle
 
-%\begin{abstract}
-%\input{abstract.tex}
-%\end{abstract}
+\begin{abstract}
+We demonstrate how linear algebra can be effectively used to represent and perform computations with traffic behaviors in wireless networks. Moreover, we map common concepts and techniques from traffic modeling into this new algebraic domain, showing how they can be expressed with mathematical precision and succinctness, while simultaneously being made clearer and more general. We demonstrate experimentally that the general matrix model accurately reproduces network performance metrics, using the differential simulation methodology introduced in~\cite{Karpinski07:realism} and applied in~\cite{Karpinski07:cbr-failure} to discredit the common constant bit-rate model. A range of common modeling approaches are implemented in the general matrix model and evaluated experimentally. We conclude with future directions for modeling research based on the new algebraic framework.
+\end{abstract}
+
+\section{Introduction}\label{sec:intro}
+
+%Most of what are called traffic models are only partial descriptions of one or a handful of aspects of a total pattern of traffic in a network. The ubiquitous constant bit-rate (\caps{CBR}) model, for example, merely describes the nature of the packets in each flow in a workload: in a given flow, the sizes of packets and the intervals between them are are all uniform. Hence, the transmitted bit-rate is constant.
+
+%Two things are require for the direct empirical comparison of traffic models:
+%\begin{itemize}
+%\item An objective standard for comparing quality of models.
+%% WinMee/Broadnets provide this
+%\item A common framework in which different models can be implemented and compared.
+%% this paper provides this
+%\end{itemize}
+
+More than twenty years of research in analysis and modeling of network traffic have yielded tremendous advances in our understanding of the complex behaviors that emerge from the interaction of millions of humans and billions of computers on the Internet and in local area networks~(\caps{LAN}s). The rate of packet arrivals at routers on the Internet backbone is known to exhibit complex, self-similar patterns with long-range dependence~\cite{Paxson95,Paxson96,Willinger98}. Other research~\cite{Hernandez06:dissertation} has demonstrated how to accurately model the behavior of a single flow of packets between two application endpoints, including ``closed-loop'' feedback induced by the ubiquitous transmission control protocol~(\caps{TCP}). Recently, the high-level statistical properties of wireless \caps{LAN} traffic have been rigorously modeled with a variety of parametric distributions~\cite{Hernandez06:wlan-traffic}.
+
+Despite great breakthroughs in understanding and methodology, the networking community remains without a cookbook for generating realistic \caps{LAN} workloads. Drastic assumptions of uniformity abound in typical experimental workload generation. Flows are commonly modeled as constant bit-rate (\caps{CBR}) streams of identical packets sent at an invariant rate; the flows in an experiment are commonly given the same duration and data rate; nodes in the network are often selected as flow endpoints randomly or arbitrarily. While more complex approaches have been proposed~\cite{Sommers04,Avallone04,Avallone06}, % TODO: better references here.
+the simplest, most na\"ive models remain standard because no objective criterion exists by which to compellingly argue that other models are any better. It is simply unclear that simplistic models do any harm, or how, if at all, complex models provide benefit.
+
+We believe that two major breakthroughs are needed to bring a much needed revolution to the world of traffic modeling. The first requirement is an objective standard of realism by which to compare traffic models. Such a standard has already been introduced in~\cite{Karpinski07:realism} and used to demonstrate that uniform traffic modeling, including the ubiquitous \caps{CBR} model, drastically distort performance metrics at all levels of the network protocol stack~\cite{Karpinski07:cbr-failure}. The second required breakthrough is a unified framework for expressing traffic models that allows researchers to systematically express and understand the assumptions and transformations entailed in each model.
+
+In this paper, we present a highly general model for representing detailed full-network traffic patterns algebraically. The General Matrix Model (\caps{GMM}) represents the behavior or each network flow as a vector in a high-dimensional linear space, and represents total network behavior as a large matrix whose rows are the behavior vectors. The crucial property of this representation is that it respects vector space operations: summation of behavior vectors gives an accurate description of the aggregate behavior of the flows represented by those vectors. The benefit of this representation is that it makes it immediately possible to express a broad variety of assumptions and conditions on traffic patterns in terms of simple matrix operations. It also allows provides great mathematical insight and allows us to bring all the tools of modern linear algebra to bear on the problem of traffic modeling.
+
+%Worse still, it is unclear what ``realistic'' should mean in this context. Foremost, a clear and testable definition of realism for traffic models is needed. In the absence of such a definition, it remains standard in wireless experiments to generate traffic using the simplest possible model: all nodes, flows and packets are assumed to behave uniformly. Flows are commonly modeled as constant bit-rate (\caps{CBR}) streams of identical packets sent at an invariant rate; the flows in an experiment are commonly given the same duration and data rate; nodes in the network are often selected as flow endpoints randomly or arbitrarily. While more complex approaches have been proposed~\cite{Sommers04,Avallone04,Avallone06}, % TODO: better references here.
+%the simplest, most na\"ive models remain standard because no objective criterion exists by which to compellingly argue that other models are any better. It is simply unclear that simplistic models do any harm, or how, if at all, complex models provide benefit.
+
+%To address this foundational problem in network traffic modeling, we have introduced a fundamentally different approach to evaluating the realism of workload models~\cite{Karpinski07:realism,Karpinski07:cbr-failure}. Rather than subjectively choosing statistical measures that may or may not actually influence network performance, the realism of a model is measured directly in terms of its ability to accurately reproduce critical performance metrics. We define a traffic model to be \textit{sufficiently realistic} with respect to a given performance metric, if the model produces metric values similar to those observed using the original trace to generate traffic. Using this new approach, we explore the space of traffic models, establishing rigorously that the commonly used uniform models for node, flow and packet behavior drastically misrepresent important \caps{WLAN} performance metrics at all levels of the protocol stack.
+
+%It is natural to compare these common, na\"ive models with the high-level parametric models proposed by \FHC~\cite{Hernandez06:wlan-traffic}. Here, however, we face another fundamental challenge in traffic modeling. Even with specific models for various aspects of network behavior, it remains non-trivial to combine them into a coherent composite model capable of generating concrete workloads. The {\FHC} models, for example, specify the distribution of flows per node in the network; since every flow has two end-points, however, it remains unclear how to assign end-points to flows such that the marginal distribution of flow per node matches the BiPareto model indicated. Similarly, the models dictate BiPareto marginal distribution of flow sizes across the entire network, but say nothing about how these sizes are to be distributed among the nodes. We could assume that the number of flows per node is independent from the size of the flows at that node, but, as we shall see, this assumption is invalid. Moreover, the details of flow behavior---packet sizes and inter-packet intervals---remain entirely undefined.
+
+%Our point is not to denigrate the models proposed in~\cite{Hernandez06:wlan-traffic} in any way. On the contrary: these parametric models are the state of the art in modeling traffic patterns for wireless local area networks. The purpose, rather, is to point out how large a gap still remains between having accurate high-level models of marginal aspects of network behavior and being able to generate usable workloads with those models. Moreover, a great deal of ambiguity lies in that gap since there is no single obvious way to combine models.
+
+%To clarify, disambiguate and standardize the specification of generative local area traffic models, we propose the \textit{Traffic Object Model} (\textit{\caps{TOM}}). The \caps{TOM} entails a hierarchy of abstract classes: \class{Node}, \class{Flow}, and \class{Packet} are the primary classes; the \class{Network} class collects everything. Each abstract class defines an interface of properties. A traffic model defines concrete classes at each level that provide the required interfaces; each class defines its own properties by delegation, inheritance, or overriding properties of other classes. Because of the separation of the \caps{TOM} into well-defined levels, each concrete class naturally defines a sub-model, specific to that level's behavior; sub-models can be mixed and matched combinatorially.
+
+%We define a range of sub-models at each level of the \caps{TOM}, with decreasing similarity to the original trace behavior: \class{Trace} (reproduce original behavior), \class{Nonparametric}, \class{Parametric}, and \class{Uniform}. The control model uses the Trace sub-model at every level, exactly reproducing the behavior recorded from the original network. The standard na\"ive model uses the \class{Uniform} sub-model at all levels. The models proposed by {\FHC} are implemented by applying the \class{Parametric} sub-models at all levels. The \class{Nonparametric} sub-models provide a measure of how much error is introduced by parametric approximation and parameter estimation.
+
+%: objects and their properties together with rules for delegating, inheriting, and overriding the properties across the objects in the \caps{TOM} hierarchy. The \caps{TOM} allows 
+
+%The {\FHC} models, like most network behavior models, are marginal, meaning that they are fitted to data aggregated of over all nodes in the network, and not fitted on a per-node basis. With marginal models, since all information about interactions between the models is lost, so we must apply each model independently and hope that the result is good enough.
+
+%Before we can define traffic models, however, we face the next major fundamental challenge in traffic modeling.
+
+%In this paper, we address this fundamental problem in network traffic modeling by presenting an 
+%In this paper, we propose objective criteria by which to judge whether 
+
+%The experimental evaluation of new wireless technologies inevitably requires network traffic. The most commonly used models for generating wireless local-area network (\caps{WLAN}) workload are simple, treating both nodes and flows uniformly, and are generally understood to be na\"ive. They remain popular because of the lack of compelling alternatives. The scope of impact of different workloads on network performance is largely unresearched and thus, poorly understood. We believe that one of the major handicaps preventing wireless experiments from more accurately predicting real-world performance is the lack of realistic models of \caps{WLAN} workload.
+
+%The evaluation of wireless technology requires the generation of workload to test the viability and performance of the new protocol or technique being studied. We believe that lack of realism in traffic workload generation is one of the major limiting factors that prevents simulations and experimental test-bed deployments from accurately predicting the real-world performance of wireless technologies. Today, very little is understood about the impact of different workloads on network performance. Uniform constant bit-rate traffic (\caps{CBR}) is commonly used to evaluate protocols, but there is no evidence that behavior under such workloads is an accurate predictor of performance under real usage patterns. The inability to experimentally forecast real-world performance is a severe handicap to the entire networking community. It hinders the ability to effectively develop better solutions to the many difficult problems that face emerging wireless technologies.
+
+%One of the hardest problems in modeling phenomena as complex as network traffic patterns lies in determining which characteristics of any given exemplar of behavior are essential and which can safely be abstracted away. In \caps{WLAN} traffic modeling, important characteristics have largely been determined based on intuition. In previous work~\cite{Karpinski07:realism}, we introduced a fundamentally different approach to evaluating the realism of workload models. Rather than subjectively choosing statistical measures that may or may not actually influence network performance, the realism of a model is measured directly in terms of its ability to accurately reproduce critical performance metrics. We define a traffic model to be \textit{sufficiently realistic} with respect to a given performance metric, if the model produces metric values that are similar to those observed using the original trace to generate traffic. Using this new approach, we explore the space of traffic models, establishing rigorously for the first time that common but simplistic models of \caps{WLAN} traffic drastically misrepresent important performance metrics at all levels of the protocol stack.
+
+%Our analysis shows that the standard constant bit-rate (\caps{CBR}) traffic model, with uniformly chosen nodes and uniform flows of traffic, significantly misrepresents important performance metrics at every level of the network. To qualify these results in more depth, we also investigate partially synthetic variants of this standard model, allowing us to reason about which aspects of workload models have the most impact. For the most commonly used model, the delay of application data traversing the network from sender to receiver is underestimated by more than a factor of 5, \textit{on average}, and by more than a factor of 11 in a quarter of usage scenarios. Network control overhead is overestimated, on average, by a factor of about 2.5, while link control overhead is underestimated by almost a factor of 2. Even for metrics where the average and median misrepresentations are not so extreme, the statistical characteristics of error values often indicate that something is fundamentally unrealistic. None of the partially synthetic models manage to accurately represent more than one or two performance characteristics. We further use the \caps{AODV}~\cite{rfc:aodv} and \caps{OLSR}~\cite{rfc:olsr} ad~hoc routing protocols to show that the relative performance of protocols can be inverted when changing from using a simplistic traffic model to using real traffic: using random end-point, uniform \caps{CBR} traffic, \caps{AODV} appears to induce less link-layer overhead than \caps{OLSR}, whereas using real traffic, it in fact induces more.
+
+%The first major contribution of this work is the definition of ``sufficient realism,'' together with the analytical and statistical methodology to rigorously test whether synthetic traffic models meet this definition. The second contribution is the conclusion that the most commonly used model of wireless traffic drastically and consistently misrepresents some of the most important metrics for performance evaluation of wireless protocols. Many performance comparisons based on this model may need revisiting. The last and most important contribution is the collection of ideas and analytical tools necessary to create more realistic synthetic traffic models in the future. By applying the methods developed in this work, it will be possible to discover precisely which aspects of network usage affect the realism of performance results. Once this is known, it will become feasible to create models that accurately reproduce those aspects of real wireless usage.
+
+The rest of the paper is organized as follows. In \Section{motivation} we present motivation and related work. The General Matrix Model is presented in \Section{general-matrix-model}. Our experimental and analytical methodology for evaluating traffic models presented in \Section{methodology}, while the results of our experiments are explained and analyzed in \Section{results}. The ramifications of these results are discussed in \Section{discussion}. Finally, in \Section{conclusions}, we conclude with a discussion of how this research may be applied to current wireless studies, and how it points the way to better traffic models for the future.
+
+\section{Motivation \& Related Work}\label{sec:motivation}\label{sec:related-work}
+
+The history of networking research contains many examples of simplistic models that have proven not only to be inaccurate, but also to drastically skew important characteristics of network behavior. Paxson and Floyd showed that the Poisson packet arrival model, which had been standard for studying wide-area Internet traffic, failed to capture the burstiness and self-similarity of real traffic~\cite{Paxson95}. The equally common but simplistic Random Way-Point~(\caps{RWP}) mobility model was found to exhibit ``density waves'' and gradual slow-down of average node speed~\cite{Royer01,Yoon03:speed-decay}. In the worst cases, overly simplistic models can switch the relative performance of protocols, thereby invalidating the conclusions drawn from performance comparisons using those models.
+
+The interaction of wireless users and application behavior with the lower layers of the networking stack is characterized by where, when, how much, and to whom data is transmitted. The joint pattern of traffic generation and mobility through time and space completely determines the effect of wireless usage on the lower levels of the network. This is due to the data-agnostic nature of the protocol stack: by design, \caps{IP} networks treat all data in the same manner.%~\cite{Clark88}.
+\footnote{This is violated by some quality of service (QoS) schemes. However, we can simply add QoS metadata---such as traffic classes or urgency flags---to our models of user behavior and the rest of our arguments remain valid. The network is still disinterested in the exact content of the data being transported; only the QoS metadata is relevant.} The credibility of conclusions derived from simulation or experimental deployment depends crucially on our confidence that the models used to generate traffic and motion in the experiments are sufficiently realistic.
+
+Paxson and Floyd observed in~\cite{Paxson95} that the interplay between end-point behavior and the network conditions is inherently \textit{closed-loop} in the sense that it is potentially affected by complex feedback. Traffic models typically attempt to preserve the closed-loop behavior of network traffic~\cite{Avallone04,Hernandez06:dissertation}. This presents a fundamental difficulty, however, in that it presumes that we know the intent of end-points: what \textit{would} they have done under different conditions? While we can speculate about what an individual node might hypothetically do, we currently do not understand the impact of the full-network traffic pattern upon performance metrics at all---even without trying to account for hypothetical reactions to alternate situations. Especially in the wireless setting, a fuller understanding of total network behavior must be reached before we can sensibly tackle the complexities of multi-level behavioral feedback. Accordingly, in this paper we attempt to provide a first-order approximation of complete network behavior by studying the response of performance metrics to \textit{open-loop} traffic models without multi-level feedback. It is important to realize that while this does not provide a final picture, we currently lack even a first-order understanding of the effect of different workloads on performance. This first-order understanding is an essential initial step.
+
+There have been a significant number of studies of large wireless network deployments~\cite{Tang99,Balachandran02,Balazinska03,Kotz02,Henderson04,Schwab04,Chinchilla04,Jardosh05:ewind}. These analyses have described a wide variety of aspects of wireless network behavior, and provide much insight into the workings of real, deployed wireless networks. These studies present a broad analysis of general system features and trends of specific corporate wireless local-area networks (\caps{WLAN}s)~\cite{Tang99,Balazinska03}, university campus \caps{WLAN}s~\cite{Tang00,Kotz02,Chinchilla04,Schwab04,Henderson04,Tuduce05}, and temporary \caps{WLAN}s at conference venues~\cite{Balachandran02,Jardosh05:ewind}. They also provide a large body of raw data for subsequent analysis and modeling research. Our work provides the methodology for turning this rich foundation of field data into usable, realistic models of workload for a wide variety of networking situations.
+
+The choice of mobility models for mobile wireless simulations can have a drastic impact on important performance metrics~\cite{Camp02,Yoon03:speed-decay,Yoon03:sound-models,Jardosh03,Zheng04}. Moreover, commonly used but simplistic mobility models, such as \caps{RWP}, exhibit characteristics, including density waves and speed decay, that are categorically dissimilar from any known real-world behavior~\cite{Royer01,Yoon03:speed-decay,Yoon03:sound-models}. In response to this evidence, more realistic mobility models have been proposed~\cite{Jardosh03,Tuduce05,Jardosh05:voronoi}. While much of this work focuses on making models that are simply more intuitively appealing~\cite{Jardosh03,Jardosh05:voronoi}, some work has begun to capitalize on this newly created wealth of wireless field data by deriving models from observed usage behavior, rather than intuition alone~\cite{Balazinska03,Tuduce05}.
+%The analysis of Balazinska \textit{et al.}~\cite{Balazinska03} introduces the notions of the prevalence and persistence of an \caps{AP} with respect to mobile nodes.\footnote{These concepts are adapted from Paxson's work on Internet routing behavior: ``\textit{prevalence} meaning the overall likelihood that a particular route is encountered, and \textit{persistence}, the likelihood that a route remains unchanged over a long period of time''~\cite{Paxson96}.} Tuduce \textit{et al.}~\cite{Tuduce05} have based their mobility model on the persistence and prevalence characteristics of real trace data, which makes their work particularly relevant to our definition of sufficient realism. They do not, however, determine the impact of prevalence and persistence characteristics on performance metrics.
+
+In this paper, instead of mobility, we examine an even more fundamental aspect of user behavior in wireless networks: the pattern of traffic generated by users and applications. This aspect of behavior is more fundamental because it applies to all types of wireless networks, not just mobile and ad~hoc networks. Moreover, the effect of traffic patterns applies not only to simulations, but also to experimental deployments, which have become the gold standard for wireless protocol evaluation.  Experimental deployments sidestep the problem of accurately modeling the lower layers of the network. Unless traffic and mobility are modeled realistically, however, the experimental results will still be unreliable.
+
+There is a large and diverse body of work on traffic analysis, modeling, and generation~\cite{Paxson95,Paxson96,Sommers04,Avallone04,Hernandez06:dissertation}. We are only able to discuss a small, but hopefully representative sampling of this work. Almost all of the traffic generation work has focused on wide-area Internet backbone traffic.
+%Because of the comparatively unlimited capacity of wired networks, traffic workload generally does not offer interesting technical challenges at the edge of the network.
+The two most prominent traffic generation frameworks are Harpoon and \caps{D-ITG}. Harpoon~\cite{Sommers04} uses a traffic trace for self-training, and can subsequently generate synthetic traffic with certain statistical properties based on the original trace. The properties reproduced are the empirical distributions of the following: ``file size, inter-connection time, source and destination IP ranges, number of active sessions.'' There is no criterion proposed to determine whether these properties characterize the original traffic adequately---we can only hope that this approximation is good enough. For many purposes, it likely is sufficient; in particular, it is probably appropriate for the intended use in generating traffic for Internet backbone simulations. Wireless networks, however, are particularly sensitive to workload conditions, and sampling from a limited set of empirical distributions does not suffice to reproduce realistic network-wide traffic.
+
+\caps{D-ITG}~\cite{Avallone04} generates flows using an independent sampling model for packet sizes and inter-packet intervals. The framework contains pre-made models for several common types of Internet traffic. The focus of this project, however, is on providing the infrastructure to generate very large volumes of synthetic Internet-like backbone traffic. No analysis is provided for determining the realism of traffic mixes, or for choosing flow end-points realistically. In wireless networks, these factors are of crucial importance to performance, and cannot be overlooked. Both Harpoon and \caps{D-ITG} provide excellent traffic generation platforms, but do not provide a systematic framework for understanding or reproducing realistic whole-network workload in the wireless setting.
+
+%This work extends that published in~\cite{Karpinski07:realism}~and~\cite{Karpinski07:cbr-failure}, using the same methodology for defining and quantifying the realism of synthetic traffic models. The Traffic Object Model builds on the combinatorial approach taken in~\cite{Karpinski07:cbr-failure}, while providing an flexible and general object-oriented framework for constructing generative traffic models. The traffic models evaluated here overlap and augment those evaluated in both prior works; comparison with the models proposed in {\FHC} is entirely new. The Qualnet simulation methodology has been enhanced by the implementation of full-duplex, client-server, trace-driven raw \caps{IP}, \caps{TCP}, and \caps{UDP} flows. We have also implemented performance metric aggregation based on the \caps{IETF} framework for \caps{IP} performance metrics~\cite{rfc:ip-metrics,rfc:jitter}.
+
+% TODO: add in the Hernandez-Cortes' dissertation.
+% TODO: concluding remarks about what's missing from traffic work in general.
+%   + there's no central goal or theme---because realism is ill-defined and subjective
+%   + there are no rigorous tests for whether realism is achieved since it's ill-defined
+%   + in wireless, where the impact is greater, there's been virtually no research of impact
+% TODO: cite a bunch of papers that use the CBR traffic model.
 
 %\section{Algebraic Representations \\of Network Behavior}
 \section{The General Matrix Model}
+\label{sec:general-matrix-model}
 \label{sec:representations}
 
 %The traffic workload pattern in a network is the collection of actions taken by hosts, on behalf of users and applications, that affect the behavior of the network itself. By design, Internet Protocol (\caps{IP}) networks treat all data in the same manner~\cite{Clark88}. Therefore, the actual information transmitted is irrelevant, only the manner of transmission matters. Although networks are packet-switched, packets are logically organized into sequences of packets sharing the same \caps{IP} protocol, source and destination \caps{IP} address, and source and destination  \caps{TCP} or \caps{UDP} port numbers. Such a sequence of packets is called a \textit{flow}. Although there are a vast multitude different application types which use \caps{IP}, there are two fundamentally different behaviors of flows which we distinguish here: \caps{TCP}, which delivers data reliably through feedback and retransmissions; and \caps{UDP}, which delivers data only on a best-effort basis. While it is possible to implement reliable transmission similar to \caps{TCP} over \caps{UDP}, it is uncommon, so we make the generalization that network events, such as packet drops, do not significantly feedback to the behavior of upper layers. With \caps{TCP}, on the other hand, network events are known to affect the transport layer
@@ -174,11 +261,11 @@ From the matrices $Z$ and $V$, we can compute the packet count, size (total byte
 \end{align}
 Using these representative values, the vector of packet-counts is $Z\ones{d_z}=V\ones{d_v}$, the vector of flow sizes vector is $Z\vec{\sigma}$, and the vector of approximate durations is $V\vec{\tau}$.
 
-\subsection{Network: Marginal Behavior}
-\label{sec:marginal-behavior}
+%\subsection{Network: Marginal Behavior}
+%\label{sec:marginal-behavior}
 
-\noindent
-...
+%\noindent
+%...
 
 \section{Expression of Common Models}
 
@@ -186,7 +273,7 @@ Existing traffic models are typically not explicit methods of generating complet
 
 %A generic traffic model is a way of generating the six matrices described in \Section{representations}. A trace-derived traffic model transforms the matrices for an actual trace of network behavior into a simplified or regularized form. For experimental comparison, the dimensions of the matrices should all be preserved. If a trace-derived model produces experimental performance metrics that are similar to those produced by the original trace data, then simplifications made by the model are viable; if the performance is distorted, then the simplifications are discarding essential information about the traffic pattern.
 
-\subsection{Uniformity}
+\subsection{Uniform Models}
 
 It is common in generating traffic behaviors for experiments to treat packets, nodes, and flows uniformly to varying degrees, largely because of the high complexity of doing otherwise and the lack of compelling alternatives. Here we examine how various notions of uniformity are expressed in the matrix model. In general, \textit{intra-flow uniformity} is effected by right multiplication, which mixes the elements in each row, whereas \textit{inter-flow uniformity} is effected by left multiplication, which mixes elements across rows. The constant bit-rate (\caps{CBR}) flow model, for example, in its strictest sense, is an intra-flow model, which stipulates that all the packets in each flow behave identically, having identical sizes and intervals; thus each flow's bit-rate is constant, as the name implies. The strict \caps{CBR} model can be easily expressed with the packets-bytes-duration (\caps{PBD}) model used as an example in \Section{representations}. The pair of matrices $\seq{Z,V}$ is transformed to \caps{PBD} form using the vectors defined in \Section{flow-totals}: $\seq{Z,V}\Gamma\in\R^{f \times 3}$, where
 \begin{align}
@@ -205,97 +292,15 @@ Although assumptions about uniformity across flows are common, there is little a
 
 The matrix model has the benefit of making the uniformization of behaviors completely explicit. It also allows us to easily define intermediate choices. If we wish make the behavior of each flow a weighted average of the aggregate behaviors of its source and destination nodes, we can express this easily:
 \begin{align}
-F' = ((1-\alpha)(SS^t)+\alpha(DD^t))F.
+F' = \frac{1}{f}((1-\alpha)(SS^t)+\alpha(DD^t))F.
 \end{align}
-The parameter $\alpha$ allows us to smoothly vary the weighting of the source and destination behaviors. Source-only behavior is given by $\alpha=0$, for destination-only set $\alpha=1$, and for the standard average, set $\alpha=\frac{1}{2}$.
+The parameter $\alpha$ allows us to smoothly vary the weighting of the source and destination behaviors. Source-only behavior is given by $\alpha=0$; destination-only by $\alpha=1$; to weight source and destination equally, take $\alpha=\frac{1}{2}$.
 
 Another benefit of the matrix model is that all aspects of network behavior are determined concurrently. We are not left wondering what to do about source and destination nodes or flow start and end times after we have computed our simplified packet behaviors: the same transformation that average the packet behaviors also naturally averages the start and
 
-\section{Introduction}\label{sec:intro}
+\section{Experimental Methodology}\label{sec:methodology}
 
-We demonstrate how linear algebra can be effectively used to represent and perform computations with traffic behaviors in local area networks (\caps{LAN}s). Moreover, we map common concepts and techniques from traffic modeling into this new algebraic domain, showing how they can be expressed with mathematic precision and succinctness, while simultaneously being made clearer and more general.
-
-Most of what are called traffic models are actually only partial descriptions of one or a handful of aspects of a complete model. The ubiquitous constant bit-rate (\caps{CBR}) model, for example, merely describes the nature of the packets in each flow in a workload: in a given flow, the sizes of packets and the intervals between them are are all uniform. Hence, the transmitted bit-rate is constant.
-
-Two things are require for the direct empirical comparison of traffic models:
-\begin{itemize}
-\item An objective standard for comparing quality of models.
-% WinMee/Broadnets provide this
-\item A common framework in which different models can be implemented and compared.
-% this paper provides this
-\end{itemize}
-
-More than twenty years of research in analysis and modeling of network traffic have yielded tremendous advances in our understanding of the complex behaviors that emerge from the interaction of millions of humans and billions of computers on the Internet and in local area networks~(\caps{LAN}s). The rate of packet arrivals at routers on the Internet backbone is known to exhibit complex, self-similar patterns with long-range dependence~\cite{Paxson95,Paxson96,Willinger98}. Other research~\cite{Hernandez06:dissertation} has demonstrated how to accurately model the behavior of a single flow of packets between two application endpoints, including ``closed-loop'' feedback induced by the ubiquitous transmission control protocol~(\caps{TCP}). Recently, the high-level statistical properties of wireless \caps{LAN} traffic have been rigorously modeled with a variety of parametric distributions~\cite{Hernandez06:wlan-traffic}.
-
-Despite great breakthroughs in understanding and methodology, the networking community remains without a cookbook for generating realistic \caps{LAN} workloads. Worse still, it is unclear what ``realistic'' should mean in this context. Foremost, a clear and testable definition of realism for traffic models is needed. In the absence of such a definition, it remains standard in wireless experiments to generate traffic using the simplest possible model: all nodes, flows and packets are assumed to behave uniformly. Flows are commonly modeled as constant bit-rate (\caps{CBR}) streams of identical packets sent at an invariant rate; the flows in an experiment are commonly given the same duration and data rate; nodes in the network are often selected as flow endpoints randomly or arbitrarily. While more complex approaches have been proposed~\cite{Sommers04,Avallone04,Avallone06}, % TODO: better references here.
-the simplest, most na\"ive models remain standard because no objective criterion exists by which to compellingly argue that other models are any better. It is simply unclear that simplistic models do any harm, or how, if at all, complex models provide benefit.
-
-To address this foundational problem in network traffic modeling, we have introduced a fundamentally different approach to evaluating the realism of workload models~\cite{Karpinski07:realism,Karpinski07:cbr-failure}. Rather than subjectively choosing statistical measures that may or may not actually influence network performance, the realism of a model is measured directly in terms of its ability to accurately reproduce critical performance metrics. We define a traffic model to be \textit{sufficiently realistic} with respect to a given performance metric, if the model produces metric values similar to those observed using the original trace to generate traffic. Using this new approach, we explore the space of traffic models, establishing rigorously that the commonly used uniform models for node, flow and packet behavior drastically misrepresent important \caps{WLAN} performance metrics at all levels of the protocol stack.
-
-It is natural to compare these common, na\"ive models with the high-level parametric models proposed by \FHC~\cite{Hernandez06:wlan-traffic}. Here, however, we face another fundamental challenge in traffic modeling. Even with specific models for various aspects of network behavior, it remains non-trivial to combine them into a coherent composite model capable of generating concrete workloads. The {\FHC} models, for example, specify the distribution of flows per node in the network; since every flow has two end-points, however, it remains unclear how to assign end-points to flows such that the marginal distribution of flow per node matches the BiPareto model indicated. Similarly, the models dictate BiPareto marginal distribution of flow sizes across the entire network, but say nothing about how these sizes are to be distributed among the nodes. We could assume that the number of flows per node is independent from the size of the flows at that node, but, as we shall see, this assumption is invalid. Moreover, the details of flow behavior---packet sizes and inter-packet intervals---remain entirely undefined.
-
-Our point is not to denigrate the models proposed in~\cite{Hernandez06:wlan-traffic} in any way. On the contrary: these parametric models are the state of the art in modeling traffic patterns for wireless local area networks. The purpose, rather, is to point out how large a gap still remains between having accurate high-level models of marginal aspects of network behavior and being able to generate usable workloads with those models. Moreover, a great deal of ambiguity lies in that gap since there is no single obvious way to combine models.
-
-To clarify, disambiguate and standardize the specification of generative local area traffic models, we propose the \textit{Traffic Object Model} (\textit{\caps{TOM}}). The \caps{TOM} entails a hierarchy of abstract classes: \class{Node}, \class{Flow}, and \class{Packet} are the primary classes; the \class{Network} class collects everything. Each abstract class defines an interface of properties. A traffic model defines concrete classes at each level that provide the required interfaces; each class defines its own properties by delegation, inheritance, or overriding properties of other classes. Because of the separation of the \caps{TOM} into well-defined levels, each concrete class naturally defines a sub-model, specific to that level's behavior; sub-models can be mixed and matched combinatorially.
-
-We define a range of sub-models at each level of the \caps{TOM}, with decreasing similarity to the original trace behavior: \class{Trace} (reproduce original behavior), \class{Nonparametric}, \class{Parametric}, and \class{Uniform}. The control model uses the Trace sub-model at every level, exactly reproducing the behavior recorded from the original network. The standard na\"ive model uses the \class{Uniform} sub-model at all levels. The models proposed by {\FHC} are implemented by applying the \class{Parametric} sub-models at all levels. The \class{Nonparametric} sub-models provide a measure of how much error is introduced by parametric approximation and parameter estimation.
-
-%: objects and their properties together with rules for delegating, inheriting, and overriding the properties across the objects in the \caps{TOM} hierarchy. The \caps{TOM} allows 
-
-%The {\FHC} models, like most network behavior models, are marginal, meaning that they are fitted to data aggregated of over all nodes in the network, and not fitted on a per-node basis. With marginal models, since all information about interactions between the models is lost, so we must apply each model independently and hope that the result is good enough.
-
-%Before we can define traffic models, however, we face the next major fundamental challenge in traffic modeling.
-
-
-%In this paper, we address this fundamental problem in network traffic modeling by presenting an 
-%In this paper, we propose objective criteria by which to judge whether 
-
-%The experimental evaluation of new wireless technologies inevitably requires network traffic. The most commonly used models for generating wireless local-area network (\caps{WLAN}) workload are simple, treating both nodes and flows uniformly, and are generally understood to be na\"ive. They remain popular because of the lack of compelling alternatives. The scope of impact of different workloads on network performance is largely unresearched and thus, poorly understood. We believe that one of the major handicaps preventing wireless experiments from more accurately predicting real-world performance is the lack of realistic models of \caps{WLAN} workload.
-
-%The evaluation of wireless technology requires the generation of workload to test the viability and performance of the new protocol or technique being studied. We believe that lack of realism in traffic workload generation is one of the major limiting factors that prevents simulations and experimental test-bed deployments from accurately predicting the real-world performance of wireless technologies. Today, very little is understood about the impact of different workloads on network performance. Uniform constant bit-rate traffic (\caps{CBR}) is commonly used to evaluate protocols, but there is no evidence that behavior under such workloads is an accurate predictor of performance under real usage patterns. The inability to experimentally forecast real-world performance is a severe handicap to the entire networking community. It hinders the ability to effectively develop better solutions to the many difficult problems that face emerging wireless technologies.
-
-%One of the hardest problems in modeling phenomena as complex as network traffic patterns lies in determining which characteristics of any given exemplar of behavior are essential and which can safely be abstracted away. In \caps{WLAN} traffic modeling, important characteristics have largely been determined based on intuition. In previous work~\cite{Karpinski07:realism}, we introduced a fundamentally different approach to evaluating the realism of workload models. Rather than subjectively choosing statistical measures that may or may not actually influence network performance, the realism of a model is measured directly in terms of its ability to accurately reproduce critical performance metrics. We define a traffic model to be \textit{sufficiently realistic} with respect to a given performance metric, if the model produces metric values that are similar to those observed using the original trace to generate traffic. Using this new approach, we explore the space of traffic models, establishing rigorously for the first time that common but simplistic models of \caps{WLAN} traffic drastically misrepresent important performance metrics at all levels of the protocol stack.
-
-%Our analysis shows that the standard constant bit-rate (\caps{CBR}) traffic model, with uniformly chosen nodes and uniform flows of traffic, significantly misrepresents important performance metrics at every level of the network. To qualify these results in more depth, we also investigate partially synthetic variants of this standard model, allowing us to reason about which aspects of workload models have the most impact. For the most commonly used model, the delay of application data traversing the network from sender to receiver is underestimated by more than a factor of 5, \textit{on average}, and by more than a factor of 11 in a quarter of usage scenarios. Network control overhead is overestimated, on average, by a factor of about 2.5, while link control overhead is underestimated by almost a factor of 2. Even for metrics where the average and median misrepresentations are not so extreme, the statistical characteristics of error values often indicate that something is fundamentally unrealistic. None of the partially synthetic models manage to accurately represent more than one or two performance characteristics. We further use the \caps{AODV}~\cite{rfc:aodv} and \caps{OLSR}~\cite{rfc:olsr} ad~hoc routing protocols to show that the relative performance of protocols can be inverted when changing from using a simplistic traffic model to using real traffic: using random end-point, uniform \caps{CBR} traffic, \caps{AODV} appears to induce less link-layer overhead than \caps{OLSR}, whereas using real traffic, it in fact induces more.
-
-%The first major contribution of this work is the definition of ``sufficient realism,'' together with the analytical and statistical methodology to rigorously test whether synthetic traffic models meet this definition. The second contribution is the conclusion that the most commonly used model of wireless traffic drastically and consistently misrepresents some of the most important metrics for performance evaluation of wireless protocols. Many performance comparisons based on this model may need revisiting. The last and most important contribution is the collection of ideas and analytical tools necessary to create more realistic synthetic traffic models in the future. By applying the methods developed in this work, it will be possible to discover precisely which aspects of network usage affect the realism of performance results. Once this is known, it will become feasible to create models that accurately reproduce those aspects of real wireless usage.
-
-The rest of the paper is organized as follows. In \Section{motivation} we present motivation and related work. Our experimental and analytical methodology is presented in \Section{methodology}, while the results of our experiments are explained and analyzed in \Section{results}. The ramifications of these results are discussed in \Section{discussion}. Finally, in \Section{conclusions}, we conclude with a discussion of how this research may be applied to current wireless studies, and how it points the way to better traffic models for the future.
-
-\section{Motivation \& Related Work}\label{sec:motivation}\label{sec:related-work}
-
-The history of networking research contains many examples of simplistic models that have proven not only to be inaccurate, but also to drastically skew important characteristics of network behavior. Paxson and Floyd showed that the Poisson packet arrival model, which had been standard for studying wide-area Internet traffic, failed to capture the burstiness and self-similarity of real traffic~\cite{Paxson95}. The equally common but simplistic Random Way-Point~(\caps{RWP}) mobility model was found to exhibit ``density waves'' and gradual slow-down of average node speed~\cite{Royer01,Yoon03:speed-decay}. In the worst cases, overly simplistic models can switch the relative performance of protocols, thereby invalidating the conclusions drawn from performance comparisons using those models.
-
-The interaction of wireless users and application behavior with the lower layers of the networking stack is characterized by where, when, how much, and to whom data is transmitted. The joint pattern of traffic generation and mobility through time and space completely determines the effect of wireless usage on the lower levels of the network. This is due to the data-agnostic nature of the protocol stack: by design, \caps{IP} networks treat all data in the same manner.%~\cite{Clark88}.
-\footnote{This is violated by some quality of service (QoS) schemes. However, we can simply add QoS metadata---such as traffic classes or urgency flags---to our models of user behavior and the rest of our arguments remain valid. The network is still disinterested in the exact content of the data being transported; only the QoS metadata is relevant.} The credibility of conclusions derived from simulation or experimental deployment depends crucially on our confidence that the models used to generate traffic and motion in the experiments are sufficiently realistic.
-
-Paxson and Floyd observed in~\cite{Paxson95} that the interplay between end-point behavior and the network conditions is inherently \textit{closed-loop} in the sense that it is potentially affected by complex feedback. Traffic models typically attempt to preserve the closed-loop behavior of network traffic~\cite{Avallone04,Hernandez06:dissertation}. This presents a fundamental difficulty, however, in that it presumes that we know the intent of end-points: what \textit{would} they have done under different conditions? While we can speculate about what an individual node might hypothetically do, we currently do not understand the impact of the full-network traffic pattern upon performance metrics at all---even without trying to account for hypothetical reactions to alternate situations. Especially in the wireless setting, a fuller understanding of total network behavior must be reached before we can sensibly tackle the complexities of multi-level behavioral feedback. Accordingly, in this paper we attempt to provide a first-order approximation of complete network behavior by studying the response of performance metrics to \textit{open-loop} traffic models without multi-level feedback. It is important to realize that while this does not provide a final picture, we currently lack even a first-order understanding of the effect of different workloads on performance. This first-order understanding is an essential initial step.
-
-There have been a significant number of studies of large wireless network deployments~\cite{Tang99,Balachandran02,Balazinska03,Kotz02,Henderson04,Schwab04,Chinchilla04,Jardosh05:ewind}. These analyses have described a wide variety of aspects of wireless network behavior, and provide much insight into the workings of real, deployed wireless networks. These studies present a broad analysis of general system features and trends of specific corporate wireless local-area networks (\caps{WLAN}s)~\cite{Tang99,Balazinska03}, university campus \caps{WLAN}s~\cite{Tang00,Kotz02,Chinchilla04,Schwab04,Henderson04,Tuduce05}, and temporary \caps{WLAN}s at conference venues~\cite{Balachandran02,Jardosh05:ewind}. They also provide a large body of raw data for subsequent analysis and modeling research. Our work provides the methodology for turning this rich foundation of field data into usable, realistic models of workload for a wide variety of networking situations.
-
-The choice of mobility models for mobile wireless simulations can have a drastic impact on important performance metrics~\cite{Camp02,Yoon03:speed-decay,Yoon03:sound-models,Jardosh03,Zheng04}. Moreover, commonly used but simplistic mobility models, such as \caps{RWP}, exhibit characteristics, including density waves and speed decay, that are categorically dissimilar from any known real-world behavior~\cite{Royer01,Yoon03:speed-decay,Yoon03:sound-models}. In response to this evidence, more realistic mobility models have been proposed~\cite{Jardosh03,Tuduce05,Jardosh05:voronoi}. While much of this work focuses on making models that are simply more intuitively appealing~\cite{Jardosh03,Jardosh05:voronoi}, some work has begun to capitalize on this newly created wealth of wireless field data by deriving models from observed usage behavior, rather than intuition alone~\cite{Balazinska03,Tuduce05}.
-%The analysis of Balazinska \textit{et al.}~\cite{Balazinska03} introduces the notions of the prevalence and persistence of an \caps{AP} with respect to mobile nodes.\footnote{These concepts are adapted from Paxson's work on Internet routing behavior: ``\textit{prevalence} meaning the overall likelihood that a particular route is encountered, and \textit{persistence}, the likelihood that a route remains unchanged over a long period of time''~\cite{Paxson96}.} Tuduce \textit{et al.}~\cite{Tuduce05} have based their mobility model on the persistence and prevalence characteristics of real trace data, which makes their work particularly relevant to our definition of sufficient realism. They do not, however, determine the impact of prevalence and persistence characteristics on performance metrics.
-
-In this paper, instead of mobility, we examine an even more fundamental aspect of user behavior in wireless networks: the pattern of traffic generated by users and applications. This aspect of behavior is more fundamental because it applies to all types of wireless networks, not just mobile and ad~hoc networks. Moreover, the effect of traffic patterns applies not only to simulations, but also to experimental deployments, which have become the gold standard for wireless protocol evaluation.  Experimental deployments sidestep the problem of accurately modeling the lower layers of the network. Unless traffic and mobility are modeled realistically, however, the experimental results will still be unreliable.
-
-There is a large and diverse body of work on traffic analysis, modeling, and generation~\cite{Paxson95,Paxson96,Sommers04,Avallone04,Hernandez06:dissertation}. We are only able to discuss a small, but hopefully representative sampling of this work. Almost all of the traffic generation work has focused on wide-area Internet backbone traffic.
-%Because of the comparatively unlimited capacity of wired networks, traffic workload generally does not offer interesting technical challenges at the edge of the network.
-The two most prominent traffic generation frameworks are Harpoon and \caps{D-ITG}. Harpoon~\cite{Sommers04} uses a traffic trace for self-training, and can subsequently generate synthetic traffic with certain statistical properties based on the original trace. The properties reproduced are the empirical distributions of the following: ``file size, inter-connection time, source and destination IP ranges, number of active sessions.'' There is no criterion proposed to determine whether these properties characterize the original traffic adequately---we can only hope that this approximation is good enough. For many purposes, it likely is sufficient; in particular, it is probably appropriate for the intended use in generating traffic for Internet backbone simulations. Wireless networks, however, are particularly sensitive to workload conditions, and sampling from a limited set of empirical distributions does not suffice to reproduce realistic network-wide traffic.
-
-\caps{D-ITG}~\cite{Avallone04} generates flows using an independent sampling model for packet sizes and inter-packet intervals. The framework contains pre-made models for several common types of Internet traffic. The focus of this project, however, is on providing the infrastructure to generate very large volumes of synthetic Internet-like backbone traffic. No analysis is provided for determining the realism of traffic mixes, or for choosing flow end-points realistically. In wireless networks, these factors are of crucial importance to performance, and cannot be overlooked. Both Harpoon and \caps{D-ITG} provide excellent traffic generation platforms, but do not provide a systematic framework for understanding or reproducing realistic whole-network workload in the wireless setting.
-
-This work extends that published in~\cite{Karpinski07:realism}~and~\cite{Karpinski07:cbr-failure}, using the same methodology for defining and quantifying the realism of synthetic traffic models. The Traffic Object Model builds on the combinatorial approach taken in~\cite{Karpinski07:cbr-failure}, while providing an flexible and general object-oriented framework for constructing generative traffic models. The traffic models evaluated here overlap and augment those evaluated in both prior works; comparison with the models proposed in {\FHC} is entirely new. The Qualnet simulation methodology has been enhanced by the implementation of full-duplex, client-server, trace-driven raw \caps{IP}, \caps{TCP}, and \caps{UDP} flows. We have also implemented performance metric aggregation based on the \caps{IETF} framework for \caps{IP} performance metrics~\cite{rfc:ip-metrics,rfc:jitter}.
-
-% TODO: add in the Hernandez-Cortes' dissertation.
-% TODO: concluding remarks about what's missing from traffic work in general.
-%   + there's no central goal or theme---because realism is ill-defined and subjective
-%   + there are no rigorous tests for whether realism is achieved since it's ill-defined
-%   + in wireless, where the impact is greater, there's been virtually no research of impact
-% TODO: cite a bunch of papers that use the CBR traffic model.
-
-\section{Methodology}\label{sec:methodology}
-
-The art of simulation lies in knowing which details must be realistic and which may be abstracted into simpler, approximate models without affecting the accuracy of the results. Clearly, we need not simulate subatomic particle interactions in a wireless network simulator. Instead we use high-level physical models that approximate the real physics well enough that the performance results are the same. Similarly, when modeling network usage, we must require that our models produce the same results as actual user behavior. This requirement leads us to the following definition:
+To evaluate whether traffic models are realistic or not, we use the differential simulation methodology introduced in~\cite{Karpinski07:realism} and used in~\cite{Karpinski07:cbr-failure} to compare a variety of uniform and trace-based models. This approach is based on the following definition, initially proposed in~\cite{Karpinski07:realism} and formalized in \cite{Karpinski07:cbr-failure}:
 
 \vspace{0.5em}
 \begin{samepage}
@@ -303,15 +308,23 @@ The art of simulation lies in knowing which details must be realistic and which 
 \end{samepage}
 \vspace{0.5em}
 
-This definition depends on many factors: the type of wireless scenario, the performance metrics under consideration, the actual usage behavior used for comparison, and how strong a notion of statistical equivalence is required. We discuss different measures of error and how to evaluate statistical equivalence in Sections~\ref{sec:error-measures}~and~\ref{sec:statistical-equivalence}.
+The essential idea behind the differential simulation technique is to compare traffic produced by synthetic models with known examples of actual real-world trace traffic in a variety of experimental scenarios. To accomplish this, we begin with a large 24-hour example of wireless trace traffic, break it into 144 ten-minute scenarios, and use each scenario's behavior as a control for a set synthetic traces, generated by various synthetic traffic models whose realism we with to evaluate. For each scenario, the synthetic models are configured to approximate the original trace behavior as closely as the models allow. Important network-wide performance metrics are then collected from simulations, and synthetic performance results compared with control results to determine the realism of the synthetic models.
+
+%The art of simulation lies in knowing which details must be realistic and which may be abstracted into simpler, approximate models without affecting the accuracy of the results. Clearly, we need not simulate subatomic particle interactions in a wireless network simulator. Instead we use high-level physical models that approximate the real physics well enough that the performance results are the same. Similarly, when modeling network usage, we must require that our models produce the same results as actual user behavior. This requirement leads us to the following definition:
+
+%This definition depends on many factors: the type of wireless scenario, the performance metrics under consideration, the actual usage behavior used for comparison, and how strong a notion of statistical equivalence is required. We discuss different measures of error and how to evaluate statistical equivalence in Sections~\ref{sec:error-measures}~and~\ref{sec:statistical-equivalence}.
+
+\subsection{Traffic Models}
+\label{sec:traffic-models}
+
+The original trace traffic constitutes the first model we simulate, although it is not really a model, {per se}. This serves as a control group against which to compare all other models. Before we can evaluate the General Matrix Model (\caps{GMM}) presented in \Section{general-matrix-model}, we must establish that one potentially important aspect of traffic behavior that is \textit{not} represented in the \caps{GMM} can legitimately be discarded. That aspect of behavior is \textit{\caps{TCP} feedback}. The \caps{GMM} does not specify the \caps{IP} protocol type of each flow. Therefore we must establish the extent to which using \caps{UDP} flows, without reliable delivery or congestion control, affects performance metrics.
+%\caps{GMM} also does not indicate which flows are paired with each other in a client-server relationship. While this pairing does not affect non-\caps{TCP} flows, we implement.
 
 \subsection{Trace Data}\label{sec:trace-data}
 %\subsection{Trace Data \& Simulations}\label{sec:trace-data}\label{sec:simulations}
 
-Our general methodology is to compare performance metrics in simulations using real traffic patterns from traces to the same metrics in simulations using a variety of synthetic traffic models defined using the Traffic Object Model (\caps{TOM}) framework. We use a 24-hour trace recorded in an infrastructured 802.11g wireless \caps{LAN} with 18 access points, deployed at the 60th Internet Engineering Task Force meeting (\caps{IETF}60), held in San Diego during August of 2004. The traffic trace was captured using \texttt{\small{tcpdump}} at a single router, through which all wireless traffic for the meeting was routed, including traffic between wireless nodes. The snap length of the capture was 100 bytes, allowing \caps{IP}, \caps{ICMP}, \caps{UDP} and \caps{TCP} headers to be analyzed. We limit our work to the 24-hour sub-trace recorded on Wednesday, August 4th. This trace contains a broad variety of behaviors and entails a very large volume of traffic: 2.1 million flows, 58 million packets, and 52 billion bytes.
+Our general methodology is to compare performance metrics in simulations using real traffic patterns from traces to the same metrics in simulations using a variety of trace-based models and synthetic traffic models defined using the General Matrix Model. We use a 24-hour trace recorded in an infrastructured 802.11g wireless \caps{LAN} with 18 access points, deployed at the 60th Internet Engineering Task Force meeting (\caps{IETF}60), held in San Diego during August of 2004. The traffic trace was captured using \texttt{\small{tcpdump}} at a single router, through which all wireless traffic for the meeting was routed, including traffic between wireless nodes. The snap length of the capture was 100 bytes, allowing \caps{IP}, \caps{ICMP}, \caps{UDP} and \caps{TCP} headers to be analyzed. We limit our work to the 24-hour sub-trace recorded on Wednesday, August 4th. This trace contains a broad variety of behaviors and entails a very large volume of traffic: 2.1 million flows, 58 million packets, and 52 billion bytes.
 % 2,085,563 flows, 58,377,994 packets of application data, and 51,988,245,537 bytes of application data.
-
-We do not assume or claim that the traffic found at \caps{IETF}60 is representative of conference settings in general. The observed behaviors are also unlikely to resemble those found in a typical commercial or residential setting. We have chosen this trace, however, because within it can be found behaviors resembling many different types of wireless usage cases. Figure~\ref{fig:nodes-flows} shows the wide variations in the number of active flows and nodes over the course of the trace. In the night and morning hours, the traffic patterns are similar to those one might find in a moderately trafficked business or residential area. During working group sessions, we see highly concentrated, heavy usage patterns. At the zenith of activity, over 800 users, 33 thousand flows, and 1 million packets are seen in a single 10-minute trace segment. At the nadir, a lone node sent only a single 61-byte packet over the course of 10 minutes. All levels of activity between these extremes are represented. Moreover, the mix of traffic types observed changes dramatically over the course of the day, providing a wide representation of possible blends of behavior. This heterogeneity and extreme range of behaviors makes the \caps{IETF} data set ideal for this evaluation. The variety of activity gives us greater confidence that success or failure of traffic models is not tied to any specific network condition, but is broadly and generally applicable. %For a traffic model to be truly realistic, it must be realistic across many different usage cases.
 
 \begin{figure}
 \vspace{0.45em}
@@ -324,62 +337,64 @@ We do not assume or claim that the traffic found at \caps{IETF}60 is representat
 \vspace{-2em}
 \end{figure}
 
+We do not assume or claim that the traffic found at \caps{IETF}60 is representative of conference settings in general. The observed behaviors are also unlikely to resemble those found in a typical commercial or residential setting. We have chosen this trace, however, because within it can be found behaviors resembling many different types of wireless usage cases. Figure~\ref{fig:nodes-flows} shows the wide variations in the number of active flows and nodes over the course of the trace. In the night and morning hours, the traffic patterns are similar to those one might find in a moderately trafficked business or residential area. During working group sessions, we see highly concentrated, heavy usage patterns. At the zenith of activity, over 800 users, 33 thousand flows, and 1 million packets are seen in a single 10-minute trace segment. At the nadir, a lone node sent only a single 61-byte packet over the course of 10 minutes. All levels of activity between these extremes are represented. Moreover, the mix of traffic types observed changes dramatically over the course of the day, providing a wide representation of possible blends of behavior. This heterogeneity and extreme range of behaviors makes the \caps{IETF} data set ideal for this evaluation. The variety of activity gives us greater confidence that success or failure of traffic models is not tied to any specific network condition, but is broadly and generally applicable. %For a traffic model to be truly realistic, it must be realistic across many different usage cases.
+
 Before using the traces, it is necessary to extract application-level behavior from the trace header data. First, we split the trace into individual packet flows. A flow is a series of packets sharing the following five attributes: \caps{IP} and transport protocols (raw \caps{IP}, \caps{ICMP}, \caps{TCP}, \caps{UDP}); source and destination \caps{IP} addresses and \caps{TCP}/\caps{UDP} port numbers. Next, the quantity of application-initiated data contained in each packet is calculated. For non-\caps{TCP} packets, this quantity is simply the size of the transport-layer payload, but for \caps{TCP} the calculation is more complicated: only new data transfers, explicitly initiated by the application are counted. Data retransmitted by \caps{TCP} is disregarded, and empty \caps{ACK}s are ignored. \caps{SYN} and \caps{FIN} flags in packets (even empty ones) are counted as a single byte each, since they are explicitly signaled by the application. %After processing, we have a collection of flows, each with a sequence of timestamps and the amount of application-initiated data sent at that time.
 
-\begin{table}[t]
-\vspace{0.75em}
-\begin{center}
-\begin{tabular}[t]{|l|}
-\hline
-\begin{minipage}[l]{2.7in}
-\begin{small}
-\vspace{0.7em}
-\input{properties.tex}
-%\vspace{0.6em}
-\end{small}
-\end{minipage}
-\\\hline
-\end{tabular}
-\end{center}
-\vspace{-0.5em}
-\caption{{\footnotesize{TOM}} base classes and their attributes.}
-\label{tab:properties}
-\vspace{-2em}
-\end{table}
+%\begin{table}[t]
+%\vspace{0.75em}
+%\begin{center}
+%\begin{tabular}[t]{|l|}
+%\hline
+%\begin{minipage}[l]{2.7in}
+%\begin{small}
+%\vspace{0.7em}
+%\input{properties.tex}
+%%\vspace{0.6em}
+%\end{small}
+%\end{minipage}
+%\\\hline
+%\end{tabular}
+%\end{center}
+%\vspace{-0.5em}
+%\caption{{\footnotesize{TOM}} base classes and their attributes.}
+%\label{tab:properties}
+%\vspace{-2em}
+%\end{table}
 
-\subsection{The Traffic Object Model~(\caps{TOM})}\label{sec:tom}
+%\subsection{The Traffic Object Model~(\caps{TOM})}\label{sec:tom}
 
-\begin{table*}[t]
-\begin{center}
-\small
-\input{models.tex}
-\footnotesize\\[0.5em]
-%\raisebox{1pt}{*}Parametric models fitted to inherited empirical distributions using maximum likelihood estimation ({\scriptsize{MLE}}).
-\end{center}
-\vspace{-0.75em}
-\caption{Details of how the sub-models at each behavioral level of the {\footnotesize{TOM}} inherit, override and delegate properties.}
-\label{tab:models}
-\vspace{-1em}
-\end{table*}
+%\begin{table*}[t]
+%\begin{center}
+%\small
+%\input{models.tex}
+%\footnotesize\\[0.5em]
+%%\raisebox{1pt}{*}Parametric models fitted to inherited empirical distributions using maximum likelihood estimation ({\scriptsize{MLE}}).
+%\end{center}
+%\vspace{-0.75em}
+%\caption{Details of how the sub-models at each behavioral level of the {\footnotesize{TOM}} inherit, override and delegate properties.}
+%\label{tab:models}
+%\vspace{-1em}
+%\end{table*}
 
-In this section, we present a generic object-oriented framework for implementing traffic generation models. This framework is called the Traffic Object Model (\caps{TOM}). It defines four levels of responsibility: network, node, flow and packet. The framework is designed so that different behaviors at each level can be naturally implemented  as classes in object-oriented programming languages. The framework automatically gains the advantages of object orientation, in particular modularity and encapsulation. Every traffic model is naturally split into separate spheres of responsibility, which constitute sub-models for the aspects of the model's behavior at each layer. Encapsulation and polymorphism of objects, allows us to mix-and-match the sub-models from different models to create new hybrid behaviors. It is trivial, for example, to produce trace-based node behavior, coupled with parametric flow behavior, and uniform packet behavior. Not all combinations of sub-models are valid, however; which classes may be combined depends on the details of each class.
+%In this section, we present a generic object-oriented framework for implementing traffic generation models. This framework is called the Traffic Object Model (\caps{TOM}). It defines four levels of responsibility: network, node, flow and packet. The framework is designed so that different behaviors at each level can be naturally implemented  as classes in object-oriented programming languages. The framework automatically gains the advantages of object orientation, in particular modularity and encapsulation. Every traffic model is naturally split into separate spheres of responsibility, which constitute sub-models for the aspects of the model's behavior at each layer. Encapsulation and polymorphism of objects, allows us to mix-and-match the sub-models from different models to create new hybrid behaviors. It is trivial, for example, to produce trace-based node behavior, coupled with parametric flow behavior, and uniform packet behavior. Not all combinations of sub-models are valid, however; which classes may be combined depends on the details of each class.
 
-% TODO: fix-up client-server vs. source-destination terminology.
+%% TODO: fix-up client-server vs. source-destination terminology.
 
-Abstract base classes define the properties at each level that traffic models must implement.\footnote{In Java or C\#, this role may be served either by an actual abstract class or by an interface. In duck-typed languages such as Ruby or Python, no actual abstract class need exist, since type is implicitly defined by usage; if abstract classes are desired, they can be simulated by creating base classes with stub methods that throw informative exceptions upon being called.} 
-Table~\ref{tab:properties} enumerates all the properties exposed by traffic models used in this work. Future traffic models may necessitate exposing additional properties, but this list suffices to implement the models used in this paper. Concrete subclasses implement the behavior of specific traffic models at each level. A complete synthetic workload is instantiated as follows:
-\begin{enumerate}
-\item create a \class{Network} object of the appropriate subclass;
-\item the top-level \class{Network} object in turn creates a collection of \class{Node} objects and associated \class{Flow} objects;
-\item each \class{Flow} object generates a stream of \class{Packet} objects.
-\end{enumerate}
-The hierarchy of objects may be used to directly drive a simulation, or may generate configuration files that in turn drive a simulation. Our implementation does the latter, generating a collection of Qualnet configuration files and trace files specific to each workload instantiation (see \Section{simulations}).
+%Abstract base classes define the properties at each level that traffic models must implement.\footnote{In Java or C\#, this role may be served either by an actual abstract class or by an interface. In duck-typed languages such as Ruby or Python, no actual abstract class need exist, since type is implicitly defined by usage; if abstract classes are desired, they can be simulated by creating base classes with stub methods that throw informative exceptions upon being called.} 
+%Table~\ref{tab:properties} enumerates all the properties exposed by traffic models used in this work. Future traffic models may necessitate exposing additional properties, but this list suffices to implement the models used in this paper. Concrete subclasses implement the behavior of specific traffic models at each level. A complete synthetic workload is instantiated as follows:
+%\begin{enumerate}
+%\item create a \class{Network} object of the appropriate subclass;
+%\item the top-level \class{Network} object in turn creates a collection of \class{Node} objects and associated \class{Flow} objects;
+%\item each \class{Flow} object generates a stream of \class{Packet} objects.
+%\end{enumerate}
+%The hierarchy of objects may be used to directly drive a simulation, or may generate configuration files that in turn drive a simulation. Our implementation does the latter, generating a collection of Qualnet configuration files and trace files specific to each workload instantiation (see \Section{simulations}).
 
-\subsection{Traffic Models}\label{sec:models}
+%\subsection{Traffic Models}\label{sec:models}
 
-For each of the \class{Node}, \class{Flow} and \class{Packet} abstract superclasses, we define four concrete subclasses: \class{Trace}, \class{Nonparametric}, \class{Parametric}, and \class{Uniform}. The \class{Trace} classes take properties of objects directly from the behavior of the corresponding object in the original trace. The \class{Nonparametric} and \class{Parametric} classes use models of the corresponding type to randomly generate the properties of objects. The \class{Uniform} classes generate identical objects with average properties. The specific details of how each the concrete classes at each level are defined are specified in Table~\ref{tab:models}. The parameters for the fitted models used in the \class{Parametric} subclasses are estimated from the corresponding nonparametric distribution using maximum likelihood estimation. Figure~\ref{fig:trace-vs-uniform} shows visual depictions comparing trace versus uniform behavior at various levels in example scenarios.
+%For each of the \class{Node}, \class{Flow} and \class{Packet} abstract superclasses, we define four concrete subclasses: \class{Trace}, \class{Nonparametric}, \class{Parametric}, and \class{Uniform}. The \class{Trace} classes take properties of objects directly from the behavior of the corresponding object in the original trace. The \class{Nonparametric} and \class{Parametric} classes use models of the corresponding type to randomly generate the properties of objects. The \class{Uniform} classes generate identical objects with average properties. The specific details of how each the concrete classes at each level are defined are specified in Table~\ref{tab:models}. The parameters for the fitted models used in the \class{Parametric} subclasses are estimated from the corresponding nonparametric distribution using maximum likelihood estimation. Figure~\ref{fig:trace-vs-uniform} shows visual depictions comparing trace versus uniform behavior at various levels in example scenarios.
 
-While the modularity of the Traffic Object Model allows us to mix and match sub-models, not all possible combinations are valid. In particular, note that the \class{Trace} classes are tied to a specific object from the underlying trace, whereas for other classes, there is no such correspondence to any specific object. Consequently, once a non-trace model has been used, trace models may not be used at the lower levels. This still leaves 40 valid composite combinations of sub-models; we only evaluate twelve of these. Composite models are abbreviated by the initials of their constituent sub-models. The fully trace-base model, \class{TTT}, serves as an experimental control. We consider \class{TTN}, \class{TTP}, and \class{TTU} in order to compare models of packet behavior. We evaluate different flow models, using the best possible model at the packet level: \class{TNN}, \class{TPN}, \class{TUN}. Similarly, we compare models for node behavior: \class{NNN}, \class{PNN}, \class{UNN}. Finally, we use the na\"ive uniform model, \class{UUU}, and the composite parametric model, \class{PPP}, proposed by {\FHC}~\cite{Hernandez06:wlan-traffic}, as external points of comparison.
+%While the modularity of the Traffic Object Model allows us to mix and match sub-models, not all possible combinations are valid. In particular, note that the \class{Trace} classes are tied to a specific object from the underlying trace, whereas for other classes, there is no such correspondence to any specific object. Consequently, once a non-trace model has been used, trace models may not be used at the lower levels. This still leaves 40 valid composite combinations of sub-models; we only evaluate twelve of these. Composite models are abbreviated by the initials of their constituent sub-models. The fully trace-base model, \class{TTT}, serves as an experimental control. We consider \class{TTN}, \class{TTP}, and \class{TTU} in order to compare models of packet behavior. We evaluate different flow models, using the best possible model at the packet level: \class{TNN}, \class{TPN}, \class{TUN}. Similarly, we compare models for node behavior: \class{NNN}, \class{PNN}, \class{UNN}. Finally, we use the na\"ive uniform model, \class{UUU}, and the composite parametric model, \class{PPP}, proposed by {\FHC}~\cite{Hernandez06:wlan-traffic}, as external points of comparison.
 
 \begin{figure*}[tb]
 \begin{center}
@@ -440,7 +455,7 @@ In addition to the active nodes corresponding to trace \caps{IP}s, half as many 
 
 There are a number of potential objections to this approach. We use single-hop trace data to drive multi-hop simulations; the physical environment, node mobility, handover behavior, and closed-loop dynamics of the original wireless setting are not faithfully reproduced. One must keep in mind, however, that the goal of this research is \textit{not} to understand the conditions of the original network. Rather, we are using the traffic behaviors observed as examples to help us better understand how different types of workload can affect performance metrics. In particular, we aim to understand how real workload compares with common synthetic traffic models. Of course, the reason for such objections is that networking researchers understand that the many aspects of behavior interact with each other in a complex and nearly inextricable manner. However, before we can hope to understand the interaction between workload and other features affecting network behavior, we must study traffic patterns alone, and learn to model them with reasonable accuracy in the absence of additional complicating factors. Accordingly, in this study, we detach application level traffic patterns from the other factors influencing network conditions, and study them in isolation.
 
-The 24-hour trace is split into 144 10-minute segments, each of which serves as the basis for a set of simulations using different traffic models. The traffic models range from a completely realistic trace-driven model, to a standard \caps{CBR} traffic model. Various partially synthetic intermediate models, described in \Section{models}, are simulated to study the impact of different aspects of traffic behavior on network performance. To preserve the fairness of the performance comparison, we keep as many features as possible constant across different traffic models. The traffic generated by each synthetic model preserves as many characteristics from the original trace as possible, within the constraints of the model. Moreover, the following features are preserved across all models: the numbers of wireless nodes, the number of flows, the number of application-initiated data units sent, the total bytes of application data sent, and the average flow duration (and therefore the average data rate).
+The 24-hour trace is split into 144 10-minute segments, each of which serves as the basis for a set of simulations using different traffic models. The traffic models range from a completely realistic trace-driven model, to a standard \caps{CBR} traffic model. Various partially synthetic intermediate models, described in \Section{traffic-models}, are simulated to study the impact of different aspects of traffic behavior on network performance. To preserve the fairness of the performance comparison, we keep as many features as possible constant across different traffic models. The traffic generated by each synthetic model preserves as many characteristics from the original trace as possible, within the constraints of the model. Moreover, the following features are preserved across all models: the numbers of wireless nodes, the number of flows, the number of application-initiated data units sent, the total bytes of application data sent, and the average flow duration (and therefore the average data rate).
 
 We have modified the standard Qualnet distribution in the two significant ways. First, In our previous work~\cite{Karpinski07:realism,Karpinski07:cbr-failure}, we approximated full-duplex \caps{TCP} with a pair of \caps{UDP} flows. For this work, we have implemented a new Qualnet application driver that allows trace-driven full-duplex \caps{TCP} flows. This allows us to accurately reproduce the full dynamics of \caps{TCP} feedback. Moreover, raw \caps{IP} and \caps{UDP} flows are implemented using the same code, guaranteeing that all traffic is simulated uniformly and that all performance metrics are aggregated in the same manner. The second modification is that we have instrumented Qualnet to collect \caps{IP} performance metrics in strict adherence to the recommendations of the \caps{IETF} working group recommendations~\cite{rfc:ip-metrics,rfc:jitter}.
 
@@ -494,44 +509,44 @@ It is easily verified that the difference, ratio, and standard error measures do
 
 \subsection{Tests of Statistical Equivalence}\label{sec:statistical-equivalence}
 
-\begin{sidewaysfigure*}
-%\begin{centering}
-\noindent
-\subfloat[Application: Average Jitter]
-{\includegraphics[width=4.6in]{Application-Average-Jitter}
-\label{fig:Application-Average-Jitter}}
-\subfloat[Application: Average Delay]
-{\includegraphics[width=4.6in]{Application-Average-Delay}
-\label{fig:Application-Average-Delay}}
-\subfloat[Application: Received Throughput]
-{\includegraphics[width=4.6in]{Application-Received-Throughput}
- \label{fig:Application-Received-Throughput}}
-\subfloat[Network: Control Overhead]
-{\includegraphics[width=4.6in]{Network-Control-Overhead}
- \label{fig:Network-Control-Overhead}}
-\subfloat[Network: Packet Drop Rate]
-{\includegraphics[width=4.6in]{Network-Packet-Drop-Rate}
- \label{fig:Network-Packet-Drop-Rate}}
-\subfloat[Network: \caps{RREQ}s Initiated]
-{\includegraphics[width=4.6in]{Network-RREQs-Initiated}
- \label{fig:Network-RREQs-Initiated}}
-\subfloat[Link (MAC): Control Overhead]
-{\includegraphics[width=4.6in]{MAC-Control-Overhead}
- \label{fig:MAC-Control-Overhead}}
-\subfloat[Link (MAC): Retransmissions]
-{\includegraphics[width=4.6in]{MAC-Retransmissions}
- \label{fig:MAC-Retransmissions}}
-\subfloat[Link (\caps{MAC}): Retransmission Failures]
-{\includegraphics[width=4.6in]{MAC-Retransmission-Failures}
- \label{fig:MAC-Retransmission-Failures}}
-\hspace{0.035in}
-\begin{minipage}[t]{4.545in}
-\vspace{-2em}
-\caption{Box-and-whisker plots of log-ratio error values for all metrics and traffic models. The lower axis indicates the log-ratio, while the upper axis shows raw ratio values. Each box contains the central majority of log-ratio values: the left and right bounds are at the $25^\text{th}$ and $75^\text{th}$ percentiles. The dark middle line indicates the median value, while the diamond marks the mean. The whiskers (dotted lines) extend to the furthest non-outlier values, while the points beyond that are outliers. The notches in the middle show a $95\%$ confidence interval for the actual underlying median value; if two notches do not overlap, they are very unlikely to have the same median. Numbers to the right are $p$-values for the median, mean, and 3-mean tests, respectively; $p$-values above $\alpha=0.05$ appear in bold.}
-\label{fig:boxplots}
-\end{minipage}
-%\end{centering}
-\end{sidewaysfigure*}
+%\begin{sidewaysfigure*}
+%%\begin{centering}
+%\noindent
+%\subfloat[Application: Average Jitter]
+%{\includegraphics[width=4.6in]{Application-Average-Jitter}
+%\label{fig:Application-Average-Jitter}}
+%\subfloat[Application: Average Delay]
+%{\includegraphics[width=4.6in]{Application-Average-Delay}
+%\label{fig:Application-Average-Delay}}
+%\subfloat[Application: Received Throughput]
+%{\includegraphics[width=4.6in]{Application-Received-Throughput}
+% \label{fig:Application-Received-Throughput}}
+%\subfloat[Network: Control Overhead]
+%{\includegraphics[width=4.6in]{Network-Control-Overhead}
+% \label{fig:Network-Control-Overhead}}
+%\subfloat[Network: Packet Drop Rate]
+%{\includegraphics[width=4.6in]{Network-Packet-Drop-Rate}
+% \label{fig:Network-Packet-Drop-Rate}}
+%\subfloat[Network: \caps{RREQ}s Initiated]
+%{\includegraphics[width=4.6in]{Network-RREQs-Initiated}
+% \label{fig:Network-RREQs-Initiated}}
+%\subfloat[Link (MAC): Control Overhead]
+%{\includegraphics[width=4.6in]{MAC-Control-Overhead}
+% \label{fig:MAC-Control-Overhead}}
+%\subfloat[Link (MAC): Retransmissions]
+%{\includegraphics[width=4.6in]{MAC-Retransmissions}
+% \label{fig:MAC-Retransmissions}}
+%\subfloat[Link (\caps{MAC}): Retransmission Failures]
+%{\includegraphics[width=4.6in]{MAC-Retransmission-Failures}
+% \label{fig:MAC-Retransmission-Failures}}
+%\hspace{0.035in}
+%\begin{minipage}[t]{4.545in}
+%\vspace{-2em}
+%\caption{Box-and-whisker plots of log-ratio error values for all metrics and traffic models. The lower axis indicates the log-ratio, while the upper axis shows raw ratio values. Each box contains the central majority of log-ratio values: the left and right bounds are at the $25^\text{th}$ and $75^\text{th}$ percentiles. The dark middle line indicates the median value, while the diamond marks the mean. The whiskers (dotted lines) extend to the furthest non-outlier values, while the points beyond that are outliers. The notches in the middle show a $95\%$ confidence interval for the actual underlying median value; if two notches do not overlap, they are very unlikely to have the same median. Numbers to the right are $p$-values for the median, mean, and 3-mean tests, respectively; $p$-values above $\alpha=0.05$ appear in bold.}
+%\label{fig:boxplots}
+%\end{minipage}
+%%\end{centering}
+%\end{sidewaysfigure*}
 
 In this section, we consider the values of performance metrics as random variables, drawn from unknown distributions. We present three tests for the statistical equivalence of the metric values induced by synthetic and real traffic. Let $\M$ be a traffic model as before and let $\X$ be a performance metric. Let $X_k^\M$ be a random variable representing the value of $\X$ in the $k^{\text{th}}$ scenario using the traffic model $\M$. If the distribution of $X_k^\M$ is the same as that of $X_k^\TTT$, then both the median and mean values of the log-ratio $R_k^\M=\log(X_k^\M/X_k^\TTT)$ should be zero. The first two tests check the plausibility of precisely these hypotheses. The third test separates small, medium, and large simulation scenarios, and test their means separately to catch any size-dependent performance bias.
 
@@ -545,25 +560,25 @@ In this section, we consider the values of performance metrics as random variabl
 If the median value of $R_k^\M$ is truly zero, then $I_k^\M$ is a Bernoulli variable with probability parameter $p=\frac{1}{2}$. The variables $I_k^\M$ are all independent since they come from separate simulations, and cannot affect each other's outcomes. Therefore, the sum $S_n^\M = \sum_{k=1}^n {I_k^\M}$ should follow a binomial distribution of $n$ trials with $p=\frac{1}{2}$. The median test applies the exact binomial cumulative distribution function (\caps{CDF}) % TODO: cite this.
  for $n$ and $p$ to the observed value of $S_n^\M$, yielding a $p$-value: the probability that such an extreme value would occur by chance under the hypothesis that the median of each $R_k^\M$ is zero. % TODO: fix the wording here.
 
-\begin{figure*}
-\begin{centering}
-\subfloat[App. Average Jitter: {\footnotesize{STU}}]
-{\includegraphics[width=1.75in]{application-average-jitter-stu}%
-\label{fig:application-average-jitter-stu}}
-\subfloat[Net. Packet Drop Rate: {\footnotesize{UTU}}]
-{\includegraphics[width=1.75in]{network-packet-drop-rate-utu}%
-\label{fig:network-packet-drop-rate-utu}}
-\subfloat[Net. Packet Drop Rate: {\footnotesize{STU}}]
-{\includegraphics[width=1.75in]{network-packet-drop-rate-stu}%
-\label{fig:network-packet-drop-rate-stu}}
-\subfloat[Link Retrans. Failures: {\footnotesize{SUU}}]
-{\includegraphics[width=1.75in]{mac-retransmission-failures-suu}%
-\label{fig:mac-retransmission-failures-suu}}
-\caption{Scatter plots of various metrics for an alternate traffic model ({\footnotesize{STU}}, {\footnotesize{UTU}}, {\footnotesize{SUU}}) versus real trace traffic~({\footnotesize{TTT}}). Each data point represents a pair of matched simulations: the $x$-coordinate is the metric value for trace traffic, the $y$-coordinate is the metric value for the synthetic model. Scenarios are plotted according to the amount of flows in their trace segment: the bottom third with filled dots; the middle third with circles; the top third with squares.}
-\label{fig:scatterplots}
-\end{centering}
-\vspace{-1em}
-\end{figure*}
+%\begin{figure*}
+%\begin{centering}
+%\subfloat[App. Average Jitter: {\footnotesize{STU}}]
+%{\includegraphics[width=1.75in]{application-average-jitter-stu}%
+%\label{fig:application-average-jitter-stu}}
+%\subfloat[Net. Packet Drop Rate: {\footnotesize{UTU}}]
+%{\includegraphics[width=1.75in]{network-packet-drop-rate-utu}%
+%\label{fig:network-packet-drop-rate-utu}}
+%\subfloat[Net. Packet Drop Rate: {\footnotesize{STU}}]
+%{\includegraphics[width=1.75in]{network-packet-drop-rate-stu}%
+%\label{fig:network-packet-drop-rate-stu}}
+%\subfloat[Link Retrans. Failures: {\footnotesize{SUU}}]
+%{\includegraphics[width=1.75in]{mac-retransmission-failures-suu}%
+%\label{fig:mac-retransmission-failures-suu}}
+%\caption{Scatter plots of various metrics for an alternate traffic model ({\footnotesize{STU}}, {\footnotesize{UTU}}, {\footnotesize{SUU}}) versus real trace traffic~({\footnotesize{TTT}}). Each data point represents a pair of matched simulations: the $x$-coordinate is the metric value for trace traffic, the $y$-coordinate is the metric value for the synthetic model. Scenarios are plotted according to the amount of flows in their trace segment: the bottom third with filled dots; the middle third with circles; the top third with squares.}
+%\label{fig:scatterplots}
+%\end{centering}
+%\vspace{-1em}
+%\end{figure*}
 
 \textbf{The Mean Test.} We use Lyapunov's generalization of the Central Limit Theorem (\caps{LCLT}) to test the hypothesis that the mean of each $R_k^\M$ is zero. We present the theorem and its application to the series $R_k^\M$ in the Appendix. Here we simply present the resulting test statistic and its usage. If the mean of each $R_k^\M$ is zero, then \caps{LCLT} implies that the test statistic
 \begin{align}
@@ -574,6 +589,22 @@ converges to a standard normal distribution for large values of $n$, where $n$ i
 \textbf{The 3-Mean Test.} Performance behavior in scenarios with a large number of nodes or flows is often very different from behavior in small scenarios. In some cases, $R_k^\M$ is skewed positively for one group, but negatively for another. In such cases, $R_k^\M$ can pass the median and mean tests even though behavior in each case is unrealistic. To catch such situations, we split the simulations into three groups by the number of flows: the lower, middle, and upper thirds. The 3-mean test simply applies the mean test to each of these groups separately and uses the minimum $p$-value of the three. This reduces the power of the test, since each group is smaller, but can catch cases where the error has size-dependent biases that cancel out on average.
 
 \section{Results}\label{sec:results}
+
+\begin{figure*}[htb]
+\subfloat[\textbf{Application:} Average End-to-End Delay]%
+{\includegraphics[width=7in]{plots/Application/delay.pdf}}
+\subfloat[\textbf{Application:} Average Received Throughput]%
+{\includegraphics[width=7in]{plots/Application/throughput.pdf}}
+\subfloat[\textbf{Application:} Total Received Data]%
+{\includegraphics[width=7in]{plots/Application/total_recv_packets.pdf}}
+\subfloat[\textbf{Network:} AODV Control Overhead]%
+{\includegraphics[width=7in]{plots/Network/control_packets.pdf}}
+\subfloat[\textbf{Link:} 802.11 Control Overhead]%
+{\includegraphics[width=7in]{plots/Link/overhead.pdf}}%
+\caption{Box-and-whisker plots of log-ratio error values for all metrics and traffic models. The lower axis indicates the log-ratio, while the upper axis shows raw ratio values. Each box contains the central majority of log-ratio values: the left and right bounds are at the $25^\text{th}$ and $75^\text{th}$ percentiles. The dark middle line indicates the median value, while the diamond marks the mean. The whiskers (dotted lines) extend to the furthest non-outlier values, while the points beyond that are outliers. The notch in the middle of each bar indicates a $95\%$ confidence interval for the true underlying median value; if two notches do not overlap, they are very unlikely to have the same median.}
+\label{fig:box-plots}
+\vspace{-1.25em}
+\end{figure*}
 
 Our simulation results are summarized in Figure~\ref{fig:boxplots}. Each subfigure shows a single performance metric. The distribution of errors for each traffic model is visualized with a box-and-whisker plot. These plots allow immediate assessment of realism: a good traffic model should have log-ratio values that are tightly clustered around the center, with a small, evenly balanced box. Additionally, the mean and median markers should be close to the center. Complementing the visual display of summary statistics, Figure~\ref{fig:boxplots} also lists three $p$-values to the right of each box-and-whisker plot. These are, in order, the $p$-values for the median, mean and 3-mean tests described in \Section{statistical-equivalence}. Each test catches a different type of unrealistic statistical behavior.
 
@@ -598,15 +629,15 @@ We focus on the trace segments with 75 or fewer active nodes, since published pe
 
 The key result of our comparison is that, for certain performance metrics, \textbf{the relative performance of \caps{AODV} and \caps{OLSR} is inverted, simply  by changing traffic models.} Figure~\ref{fig:mac-control-overhead-cmp} shows some of the results from this experiment. The graph plots \caps{MAC} control overhead against the number of nodes in each simulation scenario. Each data point shows the average overhead for the simulations of that scenario using ten seed values. With the standard \caps{UUU} traffic model, \caps{OLSR} consistently has much higher overhead, across the board, than \caps{AODV}. When real traffic is used, however, \caps{OLSR} performs significantly better than \caps{AODV}. A similar switch occurs for the number of \caps{MAC} retransmissions. This experiment demonstrates that the use of unrealistic traffic models can change the relative performance of different protocols, as well as skew absolute performance measurements.
 
-\begin{figure}
-\vspace{0.6em}
-\begin{centering}
-\includegraphics[width=3.45in]{mac-control-overhead-cmp}
-\caption{Comparison of {\footnotesize{MAC}} control overhead for {\footnotesize{AODV}} and {\footnotesize{OLSR}} using both the {\footnotesize{UUU}} and {\footnotesize{TTT}} traffic models. The fit lines show locally weighted, smoothed performance trends.}
-\label{fig:mac-control-overhead-cmp}
-\end{centering}
-\vspace{-1.5em}
-\end{figure}
+%\begin{figure}
+%\vspace{0.6em}
+%\begin{centering}
+%\includegraphics[width=3.45in]{mac-control-overhead-cmp}
+%\caption{Comparison of {\footnotesize{MAC}} control overhead for {\footnotesize{AODV}} and {\footnotesize{OLSR}} using both the {\footnotesize{UUU}} and {\footnotesize{TTT}} traffic models. The fit lines show locally weighted, smoothed performance trends.}
+%\label{fig:mac-control-overhead-cmp}
+%\end{centering}
+%\vspace{-1.5em}
+%\end{figure}
 
 \subsection{Generality of Results}
 
