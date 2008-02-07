@@ -15,7 +15,7 @@
 \newcommand{\email}[1]{$\left<{\textit{#1}}\right>$}
 \newcommand{\caps}[1]{{\small{#1}}}
 
-\title{Linear Algebra as a Unifying Theory\\of Wireless Workload Modeling}
+\title{An Algebraic Representation of Wireless Workload}
 \author{
 {\large{Stefan~Karpinski, Elizabeth~M.~Belding, Kevin~C.~Almeroth}}\\
 \textit{\{sgk,ebelding,almeroth\}@cs.ucsb.edu}\vspace{0.5em}\\
@@ -90,7 +90,11 @@ University of California, Santa Barbara
 \maketitle
 
 \begin{abstract}
-We demonstrate how linear algebra can be effectively used to represent and perform computations with traffic behaviors in wireless networks. Moreover, we map common concepts and techniques from traffic modeling into this new algebraic domain, showing how they can be expressed with mathematical precision and succinctness, while simultaneously being made clearer and more general. We demonstrate experimentally that the general matrix model accurately reproduces network performance metrics, using the differential simulation methodology introduced in~\cite{Karpinski07:realism} and applied in~\cite{Karpinski07:cbr-failure} to discredit the common constant bit-rate model. A range of common modeling approaches are implemented in the general matrix model and evaluated experimentally. We conclude with future directions for modeling research based on the new algebraic framework.
+We present a representation of wireless workload patterns as large, sparse matrices, together with a method for stochastically generating experimental workload from any given matrix. Each row vector represents a single flow of packets in the network, with components representing the \caps{IP} protocol type, source and destination nodes, flow size, start time, and packet behavior. The essential property of the algebraic representation is that the summation of rows naturally yields a faithful description of the aggregate behavior of the corresponding flows. This deceptively simple property allows us to express many common types of traffic models succinctly in terms of a few matrix multiplications and linear constraints. This approach has many benefits: 1) it makes the meaning of certain generally understood but vague concepts, such as ``uniform behavior,'' mathematically precise and unambiguous; 2) it allows us to see clearly, through the lens of linear algebra, the implications of common modeling assumptions; 3) the implementation of traffic models becomes unprecedentedly simple and orthogonal, requiring only a handful of high-level matrix operations, which can be freely composed.
+We use the differential simulation methodology introduced in~\cite{Karpinski07:realism} and applied in~\cite{Karpinski07:cbr-failure} to common uniform traffic models, to experimentally validate the general matrix model. 
+%We demonstrate experimentally that the general matrix model accurately reproduces network performance metrics, using the differential simulation methodology introduced in~\cite{Karpinski07:realism} and applied in~\cite{Karpinski07:cbr-failure} to common uniform traffic models. A range of common modeling approaches are implemented in the general matrix model and evaluated experimentally.
+%
+%We demonstrate how linear algebra can be effectively used to represent and perform computations with traffic behaviors in wireless networks. Moreover, we map common concepts and techniques from traffic modeling into this new algebraic domain, showing how they can be expressed with mathematical precision and succinctness, while simultaneously being made clearer and more general. We demonstrate experimentally that the general matrix model accurately reproduces network performance metrics, using the differential simulation methodology introduced in~\cite{Karpinski07:realism} and applied in~\cite{Karpinski07:cbr-failure} to discredit the common constant bit-rate model. A range of common modeling approaches are implemented in the general matrix model and evaluated experimentally. We conclude with future directions for modeling research based on the new algebraic framework.
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
@@ -105,14 +109,16 @@ We demonstrate how linear algebra can be effectively used to represent and perfo
 %% this paper provides this
 %\end{itemize}
 
-More than twenty years of research in analysis and modeling of network traffic have yielded tremendous advances in our understanding of the complex behaviors that emerge from the interaction of millions of humans and billions of computers on the Internet and in local area networks~(\caps{LAN}s). The rate of packet arrivals at routers on the Internet backbone is known to exhibit complex, self-similar patterns with long-range dependence~\cite{Paxson95,Paxson96,Willinger98}. Other research~\cite{Hernandez06:dissertation} has demonstrated how to accurately model the behavior of a single flow of packets between two application endpoints, including ``closed-loop'' feedback induced by the ubiquitous transmission control protocol~(\caps{TCP}). Recently, the high-level statistical properties of wireless \caps{LAN} traffic have been rigorously modeled with a variety of parametric distributions~\cite{Hernandez06:wlan-traffic}.
+More than twenty years of research in analysis and modeling of network traffic have yielded tremendous advances in our understanding of the complex behaviors that emerge from the interaction of millions of humans and computers on the Internet and in local area networks~(\caps{LAN}s). The rate of packet arrivals at routers on the Internet backbone is known to exhibit complex, self-similar patterns with long-range dependence~\cite{Paxson95,Paxson96,Willinger98}. Other research~\cite{Hernandez06:dissertation} has demonstrated how to accurately model the behavior of a single flow of packets between two application endpoints, including ``closed-loop'' feedback induced by the ubiquitous transmission control protocol~(\caps{TCP}). Recently, the high-level statistical properties of wireless \caps{LAN} traffic have been rigorously modeled with a variety of parametric distributions~\cite{Hernandez06:wlan-traffic}.
 
-Despite great breakthroughs in understanding and methodology, the networking community remains without a cookbook for generating realistic \caps{LAN} workloads. Drastic assumptions of uniformity abound in typical experimental workload generation. Flows are commonly modeled as constant bit-rate (\caps{CBR}) streams of identical packets sent at an invariant rate; the flows in an experiment are commonly given the same duration and data rate; nodes in the network are often selected as flow endpoints randomly or arbitrarily. While more complex approaches have been proposed~\cite{Sommers04,Avallone04,Avallone06}, % TODO: better references here.
-the simplest, most na\"ive models remain standard because no objective criterion exists by which to compellingly argue that other models are any better. It is simply unclear that simplistic models do any harm, or how, if at all, complex models provide benefit.
+Despite great breakthroughs in understanding and methodology, the networking community remains without a ``cookbook'' for generating realistic \caps{LAN} workloads. By ``cookbook,'' we mean an explicit method for generating network traffic---down to the size and send time of each application data unit. In the current standard practice for experimental workload generation, drastic assumptions of uniformity abound. Flows are commonly modeled as constant bit-rate (\caps{CBR}) streams of identical packets sent at an invariant rate; the flows in an experiment are commonly given the same duration and data rate; nodes in the network are often selected as flow endpoints randomly or arbitrarily. While more complex approaches have been proposed~\cite{Sommers04,Avallone04,Avallone06}, % TODO: better references here.
+the simplest, most na\"ive models remain standard because no objective criterion exists by which to compellingly argue that any one model is better than the rest. It is simply unclear that simplistic models do any harm, or how, if at all, complex models provide benefit.
 
-We believe that two major breakthroughs are needed to bring a much needed revolution to the world of traffic modeling. The first requirement is an objective standard of realism by which to compare traffic models. Such a standard has already been introduced in~\cite{Karpinski07:realism} and used to demonstrate that uniform traffic modeling, including the ubiquitous \caps{CBR} model, drastically distort performance metrics at all levels of the network protocol stack~\cite{Karpinski07:cbr-failure}. The second required breakthrough is a unified framework for expressing traffic models that allows researchers to systematically express and understand the assumptions and transformations entailed in each model.
+We believe that two major breakthroughs are needed to improve traffic modeling. The first requirement is an objective standard of realism by which to compare traffic models. Such a standard has already been introduced in~\cite{Karpinski07:realism} and used to demonstrate that uniform traffic modeling, including the ubiquitous \caps{CBR} model, drastically distort performance metrics at all levels of the network protocol stack~\cite{Karpinski07:cbr-failure}. The second required breakthrough is a unified framework for expressing traffic models that allows researchers to systematically express and understand the assumptions and transformations entailed in each model. The major contribution of this paper is in addressing this second requirement.
 
-In this paper, we present a highly general model for representing detailed full-network traffic patterns algebraically. The General Matrix Model (\caps{GMM}) represents the behavior or each network flow as a vector in a high-dimensional linear space, and represents total network behavior as a large matrix whose rows are the behavior vectors. The crucial property of this representation is that it respects vector space operations: summation of behavior vectors gives an accurate description of the aggregate behavior of the flows represented by those vectors. The benefit of this representation is that it makes it immediately possible to express a broad variety of assumptions and conditions on traffic patterns in terms of simple matrix operations. It also allows provides great mathematical insight and allows us to bring all the tools of modern linear algebra to bear on the problem of traffic modeling.
+%Our previous work on traffic modeling provided the means 
+
+In this paper, we present a highly general model for representing detailed full-network traffic patterns algebraically. The General Matrix Model (\caps{GMM}) represents the behavior or each network flow as a vector in a high-dimensional linear space, and represents total network behavior as a large matrix whose rows are these flow-behavior vectors. The crucial property of this representation is that it respects vector space operations: summation of behavior vectors gives an accurate description of the aggregate behavior of the flows represented by those vectors. The benefit of this representation is that it makes it immediately possible to express a broad variety of assumptions and conditions on traffic patterns in terms of simple matrix operations. It also provides vital mathematical clarity and allows us to apply all the tools of modern linear algebra to the problems of traffic modeling.
 
 %Worse still, it is unclear what ``realistic'' should mean in this context. Foremost, a clear and testable definition of realism for traffic models is needed. In the absence of such a definition, it remains standard in wireless experiments to generate traffic using the simplest possible model: all nodes, flows and packets are assumed to behave uniformly. Flows are commonly modeled as constant bit-rate (\caps{CBR}) streams of identical packets sent at an invariant rate; the flows in an experiment are commonly given the same duration and data rate; nodes in the network are often selected as flow endpoints randomly or arbitrarily. While more complex approaches have been proposed~\cite{Sommers04,Avallone04,Avallone06}, % TODO: better references here.
 %the simplest, most na\"ive models remain standard because no objective criterion exists by which to compellingly argue that other models are any better. It is simply unclear that simplistic models do any harm, or how, if at all, complex models provide benefit.
@@ -231,11 +237,11 @@ The packets size behavior of a flow is represented by a histogram vector, $\vec{
 \Qi(v) &= \max\set{1,\ceil{d_v\fracp{v-v_{\min}}{v_{\max}-v_{\min}}^\gamma}}.
 \end{align}
 The element $v_{ij}$ is the number of intervals, $v$, for the $i$th flow such that $\Qi(v)=i$.
-The parameter values defining $\Qi$ must be chosen by the experimenter. In our case, the time measurements had microsecond precision, so $v_{\min}=10^{-6}$. The length of each simulated scenario is ten minutes, so the upper limit on intervals is $v_{\max}=600$. The number of dimensions was chosen to match the dimensions for packet size: $d_v=1500$. Finally, the parameter $\gamma\in(0,1)$ allows us to fine-tune how the resolution scales with interval size; we have chosen $\gamma=\fracx{1}{3}$ because this choice provides resolution that scales smoothly from the microseconds for small intervals to seconds for large intervals.
+The parameter values defining $\Qi$ must be chosen by the experimenter. In our case, the time measurements had microsecond precision, so $v_{\min}=10^{-6}$. The length of each simulated scenario is ten minutes, so the upper limit on intervals is $v_{\max}=600$. The number of dimensions was chosen to match the dimensions for packet size: $d_v=1500$. Finally, the parameter $\gamma\in(0,1)$ allows us to fine-tune how the resolution scales with interval size; we have chosen $\gamma=\frac{1}{3}$ because this choice provides resolution that scales smoothly from the microseconds for small intervals to seconds for large intervals.
 
 \subsection{Traffic Generation}
 
-Given an instance of the general matrix model, how do we produce an actual workload form it? Each row of the model is used to randomly generate the behavior of a single flow. The source and destination nodes of the flow are randomly chosen, using histogram vectors $\vec{s}$ and $\vec{d}$ as the proportional probabilities of each node being chosen.\footnote{Since a flow must have distinct source and destination nodes, this sampling must be done jointly, avoiding the collisions. The simplest technique is the rejection method: if the same node is chosen for both source and destination, reject that pair and begin the selection process again.}
+Given an instance of the general matrix model, how do we produce an actual workload from it? Each row of the model is used to randomly generate the behavior of a single flow. The source and destination nodes of the flow are randomly chosen, using histogram vectors $\vec{s}$ and $\vec{d}$ as the proportional probabilities of each node being chosen.\footnote{Since a flow must have distinct source and destination nodes, this sampling must be done jointly, avoiding the collisions. The simplest technique is the rejection method: if the same node is chosen for both source and destination, reject that pair and begin the selection process again.}
 For start and end times, a bin for each is chosen with probability proportional to the vector values; given a bin, a random value is uniformly chosen from the range of values in the bin.\footnote{The start time must precede the end time, so these choices must also be made jointly, enforcing this restriction. The rejection method is used.}
 The first packet is sent at chosen start time; the size of each packet is sampled from the histogram of packet sizes, $\vec{z}$; the interval until the next packet is determined from the interval vector, $\vec{v}$. Specifically, an interval index, $k$, is chosen with probability proportional to $\vec{v}(k)$; a second value, $u$, is chosen uniformly from $(0,1]$; the pair $\seq{k,u}$ is transformed back into a continuous time value using the ``dequantization'' function:
 \begin{align}
@@ -531,86 +537,86 @@ It is easily verified that the difference, ratio, and standard error measures do
 % TODO: should Appendix be capitalized?
 % TODO: hyperref the Appendix for PDF.
 
-\subsection{Tests of Statistical Equivalence}\label{sec:statistical-equivalence}
+%\subsection{Tests of Statistical Equivalence}\label{sec:statistical-equivalence}
 
-%\begin{sidewaysfigure*}
+%%\begin{sidewaysfigure*}
+%%%\begin{centering}
+%%\noindent
+%%\subfloat[Application: Average Jitter]
+%%{\includegraphics[width=4.6in]{Application-Average-Jitter}
+%%\label{fig:Application-Average-Jitter}}
+%%\subfloat[Application: Average Delay]
+%%{\includegraphics[width=4.6in]{Application-Average-Delay}
+%%\label{fig:Application-Average-Delay}}
+%%\subfloat[Application: Received Throughput]
+%%{\includegraphics[width=4.6in]{Application-Received-Throughput}
+%% \label{fig:Application-Received-Throughput}}
+%%\subfloat[Network: Control Overhead]
+%%{\includegraphics[width=4.6in]{Network-Control-Overhead}
+%% \label{fig:Network-Control-Overhead}}
+%%\subfloat[Network: Packet Drop Rate]
+%%{\includegraphics[width=4.6in]{Network-Packet-Drop-Rate}
+%% \label{fig:Network-Packet-Drop-Rate}}
+%%\subfloat[Network: \caps{RREQ}s Initiated]
+%%{\includegraphics[width=4.6in]{Network-RREQs-Initiated}
+%% \label{fig:Network-RREQs-Initiated}}
+%%\subfloat[Link (MAC): Control Overhead]
+%%{\includegraphics[width=4.6in]{MAC-Control-Overhead}
+%% \label{fig:MAC-Control-Overhead}}
+%%\subfloat[Link (MAC): Retransmissions]
+%%{\includegraphics[width=4.6in]{MAC-Retransmissions}
+%% \label{fig:MAC-Retransmissions}}
+%%\subfloat[Link (\caps{MAC}): Retransmission Failures]
+%%{\includegraphics[width=4.6in]{MAC-Retransmission-Failures}
+%% \label{fig:MAC-Retransmission-Failures}}
+%%\hspace{0.035in}
+%%\begin{minipage}[t]{4.545in}
+%%\vspace{-2em}
+%%\caption{Box-and-whisker plots of log-ratio error values for all metrics and traffic models. The lower axis indicates the log-ratio, while the upper axis shows raw ratio values. Each box contains the central majority of log-ratio values: the left and right bounds are at the $25^\text{th}$ and $75^\text{th}$ percentiles. The dark middle line indicates the median value, while the diamond marks the mean. The whiskers (dotted lines) extend to the furthest non-outlier values, while the points beyond that are outliers. The notches in the middle show a $95\%$ confidence interval for the actual underlying median value; if two notches do not overlap, they are very unlikely to have the same median. Numbers to the right are $p$-values for the median, mean, and 3-mean tests, respectively; $p$-values above $\alpha=0.05$ appear in bold.}
+%%\label{fig:boxplots}
+%%\end{minipage}
+%%%\end{centering}
+%%\end{sidewaysfigure*}
+
+%In this section, we consider the values of performance metrics as random variables, drawn from unknown distributions. We present three tests for the statistical equivalence of the metric values induced by synthetic and real traffic. Let $\M$ be a traffic model as before and let $\X$ be a performance metric. Let $X_k^\M$ be a random variable representing the value of $\X$ in the $k^{\text{th}}$ scenario using the traffic model $\M$. If the distribution of $X_k^\M$ is the same as that of $X_k^\TTT$, then both the median and mean values of the log-ratio $R_k^\M=\log(X_k^\M/X_k^\TTT)$ should be zero. The first two tests check the plausibility of precisely these hypotheses. The third test separates small, medium, and large simulation scenarios, and test their means separately to catch any size-dependent performance bias.
+
+%\textbf{The Median Test.} If $\M$ induces realistic performance, then the median of each log-ratio variable, $R_k^\M=\log(X_k^\M/X_k^\TTT)$, should be zero. The $k^\text{th}$ indicator variable is defined as
+%\begin{align}
+%	I_k^\M = \begin{cases}
+%		0 & \text{if $R_k^\M < 0$,} \\
+%		1 & \text{if $R_k^\M \ge 0$.}
+%	\end{cases}
+%\end{align}
+%If the median value of $R_k^\M$ is truly zero, then $I_k^\M$ is a Bernoulli variable with probability parameter $p=\frac{1}{2}$. The variables $I_k^\M$ are all independent since they come from separate simulations, and cannot affect each other's outcomes. Therefore, the sum $S_n^\M = \sum_{k=1}^n {I_k^\M}$ should follow a binomial distribution of $n$ trials with $p=\frac{1}{2}$. The median test applies the exact binomial cumulative distribution function (\caps{CDF}) % TODO: cite this.
+% for $n$ and $p$ to the observed value of $S_n^\M$, yielding a $p$-value: the probability that such an extreme value would occur by chance under the hypothesis that the median of each $R_k^\M$ is zero. % TODO: fix the wording here.
+
+%%\begin{figure*}
 %%\begin{centering}
-%\noindent
-%\subfloat[Application: Average Jitter]
-%{\includegraphics[width=4.6in]{Application-Average-Jitter}
-%\label{fig:Application-Average-Jitter}}
-%\subfloat[Application: Average Delay]
-%{\includegraphics[width=4.6in]{Application-Average-Delay}
-%\label{fig:Application-Average-Delay}}
-%\subfloat[Application: Received Throughput]
-%{\includegraphics[width=4.6in]{Application-Received-Throughput}
-% \label{fig:Application-Received-Throughput}}
-%\subfloat[Network: Control Overhead]
-%{\includegraphics[width=4.6in]{Network-Control-Overhead}
-% \label{fig:Network-Control-Overhead}}
-%\subfloat[Network: Packet Drop Rate]
-%{\includegraphics[width=4.6in]{Network-Packet-Drop-Rate}
-% \label{fig:Network-Packet-Drop-Rate}}
-%\subfloat[Network: \caps{RREQ}s Initiated]
-%{\includegraphics[width=4.6in]{Network-RREQs-Initiated}
-% \label{fig:Network-RREQs-Initiated}}
-%\subfloat[Link (MAC): Control Overhead]
-%{\includegraphics[width=4.6in]{MAC-Control-Overhead}
-% \label{fig:MAC-Control-Overhead}}
-%\subfloat[Link (MAC): Retransmissions]
-%{\includegraphics[width=4.6in]{MAC-Retransmissions}
-% \label{fig:MAC-Retransmissions}}
-%\subfloat[Link (\caps{MAC}): Retransmission Failures]
-%{\includegraphics[width=4.6in]{MAC-Retransmission-Failures}
-% \label{fig:MAC-Retransmission-Failures}}
-%\hspace{0.035in}
-%\begin{minipage}[t]{4.545in}
-%\vspace{-2em}
-%\caption{Box-and-whisker plots of log-ratio error values for all metrics and traffic models. The lower axis indicates the log-ratio, while the upper axis shows raw ratio values. Each box contains the central majority of log-ratio values: the left and right bounds are at the $25^\text{th}$ and $75^\text{th}$ percentiles. The dark middle line indicates the median value, while the diamond marks the mean. The whiskers (dotted lines) extend to the furthest non-outlier values, while the points beyond that are outliers. The notches in the middle show a $95\%$ confidence interval for the actual underlying median value; if two notches do not overlap, they are very unlikely to have the same median. Numbers to the right are $p$-values for the median, mean, and 3-mean tests, respectively; $p$-values above $\alpha=0.05$ appear in bold.}
-%\label{fig:boxplots}
-%\end{minipage}
+%%\subfloat[App. Average Jitter: {\footnotesize{STU}}]
+%%{\includegraphics[width=1.75in]{application-average-jitter-stu}%
+%%\label{fig:application-average-jitter-stu}}
+%%\subfloat[Net. Packet Drop Rate: {\footnotesize{UTU}}]
+%%{\includegraphics[width=1.75in]{network-packet-drop-rate-utu}%
+%%\label{fig:network-packet-drop-rate-utu}}
+%%\subfloat[Net. Packet Drop Rate: {\footnotesize{STU}}]
+%%{\includegraphics[width=1.75in]{network-packet-drop-rate-stu}%
+%%\label{fig:network-packet-drop-rate-stu}}
+%%\subfloat[Link Retrans. Failures: {\footnotesize{SUU}}]
+%%{\includegraphics[width=1.75in]{mac-retransmission-failures-suu}%
+%%\label{fig:mac-retransmission-failures-suu}}
+%%\caption{Scatter plots of various metrics for an alternate traffic model ({\footnotesize{STU}}, {\footnotesize{UTU}}, {\footnotesize{SUU}}) versus real trace traffic~({\footnotesize{TTT}}). Each data point represents a pair of matched simulations: the $x$-coordinate is the metric value for trace traffic, the $y$-coordinate is the metric value for the synthetic model. Scenarios are plotted according to the amount of flows in their trace segment: the bottom third with filled dots; the middle third with circles; the top third with squares.}
+%%\label{fig:scatterplots}
 %%\end{centering}
-%\end{sidewaysfigure*}
+%%\vspace{-1em}
+%%\end{figure*}
 
-In this section, we consider the values of performance metrics as random variables, drawn from unknown distributions. We present three tests for the statistical equivalence of the metric values induced by synthetic and real traffic. Let $\M$ be a traffic model as before and let $\X$ be a performance metric. Let $X_k^\M$ be a random variable representing the value of $\X$ in the $k^{\text{th}}$ scenario using the traffic model $\M$. If the distribution of $X_k^\M$ is the same as that of $X_k^\TTT$, then both the median and mean values of the log-ratio $R_k^\M=\log(X_k^\M/X_k^\TTT)$ should be zero. The first two tests check the plausibility of precisely these hypotheses. The third test separates small, medium, and large simulation scenarios, and test their means separately to catch any size-dependent performance bias.
+%\textbf{The Mean Test.} We use Lyapunov's generalization of the Central Limit Theorem (\caps{LCLT}) to test the hypothesis that the mean of each $R_k^\M$ is zero. We present the theorem and its application to the series $R_k^\M$ in the Appendix. Here we simply present the resulting test statistic and its usage. If the mean of each $R_k^\M$ is zero, then \caps{LCLT} implies that the test statistic
+%\begin{align}
+%\hat{Z}_n^\M &= \frac{\sum_{k=1}^n{R_k^\M}}{\sqrt{\sum_{k=1}^n{(R_k^\M)^2}}}
+%\end{align}
+%converges to a standard normal distribution for large values of $n$, where $n$ is the number of simulated scenarios. In this case, $n=144$, which is fairly large by traditional statistical standards. The $p$-value of the mean test is given by applying the standard normal \caps{CDF} to the test statistic, $\hat{Z}_n^\M$.
 
-\textbf{The Median Test.} If $\M$ induces realistic performance, then the median of each log-ratio variable, $R_k^\M=\log(X_k^\M/X_k^\TTT)$, should be zero. The $k^\text{th}$ indicator variable is defined as
-\begin{align}
-	I_k^\M = \begin{cases}
-		0 & \text{if $R_k^\M < 0$,} \\
-		1 & \text{if $R_k^\M \ge 0$.}
-	\end{cases}
-\end{align}
-If the median value of $R_k^\M$ is truly zero, then $I_k^\M$ is a Bernoulli variable with probability parameter $p=\frac{1}{2}$. The variables $I_k^\M$ are all independent since they come from separate simulations, and cannot affect each other's outcomes. Therefore, the sum $S_n^\M = \sum_{k=1}^n {I_k^\M}$ should follow a binomial distribution of $n$ trials with $p=\frac{1}{2}$. The median test applies the exact binomial cumulative distribution function (\caps{CDF}) % TODO: cite this.
- for $n$ and $p$ to the observed value of $S_n^\M$, yielding a $p$-value: the probability that such an extreme value would occur by chance under the hypothesis that the median of each $R_k^\M$ is zero. % TODO: fix the wording here.
-
-%\begin{figure*}
-%\begin{centering}
-%\subfloat[App. Average Jitter: {\footnotesize{STU}}]
-%{\includegraphics[width=1.75in]{application-average-jitter-stu}%
-%\label{fig:application-average-jitter-stu}}
-%\subfloat[Net. Packet Drop Rate: {\footnotesize{UTU}}]
-%{\includegraphics[width=1.75in]{network-packet-drop-rate-utu}%
-%\label{fig:network-packet-drop-rate-utu}}
-%\subfloat[Net. Packet Drop Rate: {\footnotesize{STU}}]
-%{\includegraphics[width=1.75in]{network-packet-drop-rate-stu}%
-%\label{fig:network-packet-drop-rate-stu}}
-%\subfloat[Link Retrans. Failures: {\footnotesize{SUU}}]
-%{\includegraphics[width=1.75in]{mac-retransmission-failures-suu}%
-%\label{fig:mac-retransmission-failures-suu}}
-%\caption{Scatter plots of various metrics for an alternate traffic model ({\footnotesize{STU}}, {\footnotesize{UTU}}, {\footnotesize{SUU}}) versus real trace traffic~({\footnotesize{TTT}}). Each data point represents a pair of matched simulations: the $x$-coordinate is the metric value for trace traffic, the $y$-coordinate is the metric value for the synthetic model. Scenarios are plotted according to the amount of flows in their trace segment: the bottom third with filled dots; the middle third with circles; the top third with squares.}
-%\label{fig:scatterplots}
-%\end{centering}
-%\vspace{-1em}
-%\end{figure*}
-
-\textbf{The Mean Test.} We use Lyapunov's generalization of the Central Limit Theorem (\caps{LCLT}) to test the hypothesis that the mean of each $R_k^\M$ is zero. We present the theorem and its application to the series $R_k^\M$ in the Appendix. Here we simply present the resulting test statistic and its usage. If the mean of each $R_k^\M$ is zero, then \caps{LCLT} implies that the test statistic
-\begin{align}
-\hat{Z}_n^\M &= \frac{\sum_{k=1}^n{R_k^\M}}{\sqrt{\sum_{k=1}^n{(R_k^\M)^2}}}
-\end{align}
-converges to a standard normal distribution for large values of $n$, where $n$ is the number of simulated scenarios. In this case, $n=144$, which is fairly large by traditional statistical standards. The $p$-value of the mean test is given by applying the standard normal \caps{CDF} to the test statistic, $\hat{Z}_n^\M$.
-
-\textbf{The 3-Mean Test.} Performance behavior in scenarios with a large number of nodes or flows is often very different from behavior in small scenarios. In some cases, $R_k^\M$ is skewed positively for one group, but negatively for another. In such cases, $R_k^\M$ can pass the median and mean tests even though behavior in each case is unrealistic. To catch such situations, we split the simulations into three groups by the number of flows: the lower, middle, and upper thirds. The 3-mean test simply applies the mean test to each of these groups separately and uses the minimum $p$-value of the three. This reduces the power of the test, since each group is smaller, but can catch cases where the error has size-dependent biases that cancel out on average.
+%\textbf{The 3-Mean Test.} Performance behavior in scenarios with a large number of nodes or flows is often very different from behavior in small scenarios. In some cases, $R_k^\M$ is skewed positively for one group, but negatively for another. In such cases, $R_k^\M$ can pass the median and mean tests even though behavior in each case is unrealistic. To catch such situations, we split the simulations into three groups by the number of flows: the lower, middle, and upper thirds. The 3-mean test simply applies the mean test to each of these groups separately and uses the minimum $p$-value of the three. This reduces the power of the test, since each group is smaller, but can catch cases where the error has size-dependent biases that cancel out on average.
 
 \section{Results}\label{sec:results}
 
@@ -678,8 +684,8 @@ On the practical side, this paper gives crucial insight into why most researcher
 This approach will allow the precise mapping of which aspects of traffic patterns have an impact on performance and which ones can be safely abstracted away.
 % TODO: maybe cut out some of this last bit.
 
-\section{Acknowledgments}
-This work was funded in part through NSF Career Award CNS-0347886.
+%\section{Acknowledgments}
+%This work was funded in part through NSF Career Award CNS-0347886.
 
 \vspace{-0.5em}
 \appendix\footnotesize
@@ -689,11 +695,11 @@ This work was funded in part through NSF Career Award CNS-0347886.
 $f(z) = f'(1) \int z^{-1} dz + c = f'(1) \ln(z) + c$.
 By Eq.~\ref{eqn:linear-compounding}, $f(1)=0$, so $c=0$. Thus $f(e)=f'(1)\ln(e)=f'(1)$. We conclude that $f(z)=f(e)\ln(z)$, so $E(x,y) = f(y/x) = f(e)\ln(y/x) = E(1,e)\ln(y/x)$, as desired.\hfill\QED
 
-\vspace{1em}\noindent
-\textbf{Theorem.}~[\textit{Lyapunov's Central Limit Theorem}] Let $\{R_k\}_{k=1}^{\infty}$ be a series of independent variables with $\E{R_k}=0$. Let $s_n^2 = \sum_{k=1}^n{\E{\abs{R_k^2}}}$ and $r_n^3 = \sum_{k=1}^n{\E{\abs{R_k^3}}}$. For each $n$, let $Z_n$ be the normalized mean of $\{R_k\}_{k=1}^n$: $Z_n = \sum_{k=1}^n{R_k/s_n}$. If $\lim_{n\to\infty} {r_n/s_n} = 0$, then $\lim_{n\to\infty}{Z_n} \sim \mathcal{N}(0,1)$ (the standard normal distribution). (See~\cite{Feller68} page 229.)
+%\vspace{1em}\noindent
+%\textbf{Theorem.}~[\textit{Lyapunov's Central Limit Theorem}] Let $\{R_k\}_{k=1}^{\infty}$ be a series of independent variables with $\E{R_k}=0$. Let $s_n^2 = \sum_{k=1}^n{\E{\abs{R_k^2}}}$ and $r_n^3 = \sum_{k=1}^n{\E{\abs{R_k^3}}}$. For each $n$, let $Z_n$ be the normalized mean of $\{R_k\}_{k=1}^n$: $Z_n = \sum_{k=1}^n{R_k/s_n}$. If $\lim_{n\to\infty} {r_n/s_n} = 0$, then $\lim_{n\to\infty}{Z_n} \sim \mathcal{N}(0,1)$ (the standard normal distribution). (See~\cite{Feller68} page 229.)
 
-\vspace{1em}
-To apply the LCLT to the series $R_k^\M=\log(X_k^\M/X_k^\TTT)$, we must show that under the null hypothesis, the assumptions of the theorem are satisfied by this series. First, the null hypothesis, implies that $\E{R_k}=0$. Variables from separate simulations are independent since they cannot influence each other's values. Formally, $\Pr\left(X_k\middle|X_j\right)=\Pr\left(X_k\right)$. Therefore the log-ratios are also independent for different $k$. The last requirement is that $\lim_{n\to\infty}{r_n/s_n}=0$. To verify this, we use the estimators $\hat{s}_n^2=\sum{\abs{R_k^2}}$, and $\hat{r}_n^3=\sum{\abs{R_k^3}}$. When $\hat{r}_n/\hat{s}_n$ are plotted on a log-log scatter plot, with $n$ increasing up to the number of simulations, they asymptotically approach a downwardly sloped line as $n$ grows. Thus $\lim_{n\to\infty}{\ln(\hat{r}_n/\hat{s}_n)/\ln(n)}=c<0$. This implies that $\lim_{n\to\infty}{\ln(\hat{r}_n/\hat{s}_n)}=-\infty$, and therefore $\lim_{n\to\infty}{r_n/s_n}=\lim_{n\to\infty}{\hat{r}_n/\hat{s}_n}=0$. This test for the convergence of $r_n/s_n$ is applied to each model and metric pair. %The asymptotic approach of the ratio $\hat{r}_n/\hat{s}_n$ to a downwardly sloped line is verified visually and by comparison to a fitted regression line.
+%\vspace{1em}
+%To apply the LCLT to the series $R_k^\M=\log(X_k^\M/X_k^\TTT)$, we must show that under the null hypothesis, the assumptions of the theorem are satisfied by this series. First, the null hypothesis, implies that $\E{R_k}=0$. Variables from separate simulations are independent since they cannot influence each other's values. Formally, $\Pr\left(X_k\middle|X_j\right)=\Pr\left(X_k\right)$. Therefore the log-ratios are also independent for different $k$. The last requirement is that $\lim_{n\to\infty}{r_n/s_n}=0$. To verify this, we use the estimators $\hat{s}_n^2=\sum{\abs{R_k^2}}$, and $\hat{r}_n^3=\sum{\abs{R_k^3}}$. When $\hat{r}_n/\hat{s}_n$ are plotted on a log-log scatter plot, with $n$ increasing up to the number of simulations, they asymptotically approach a downwardly sloped line as $n$ grows. Thus $\lim_{n\to\infty}{\ln(\hat{r}_n/\hat{s}_n)/\ln(n)}=c<0$. This implies that $\lim_{n\to\infty}{\ln(\hat{r}_n/\hat{s}_n)}=-\infty$, and therefore $\lim_{n\to\infty}{r_n/s_n}=\lim_{n\to\infty}{\hat{r}_n/\hat{s}_n}=0$. This test for the convergence of $r_n/s_n$ is applied to each model and metric pair. %The asymptotic approach of the ratio $\hat{r}_n/\hat{s}_n$ to a downwardly sloped line is verified visually and by comparison to a fitted regression line.
 
 %\vfill
 
