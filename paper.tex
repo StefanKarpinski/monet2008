@@ -1,27 +1,29 @@
-\documentclass[conference]{IEEEtran}
+\documentclass[twocolumn,final]{svjour3}
 
 \newcommand{\thetitle}{An Algebraic Representation of Wireless Workload}
+\newcommand{\theauthors}{%
+  Stefan~Karpinski \and
+  Elizabeth~M.~Belding \and
+  Kevin~C.~Almeroth \and
+  John~R.~Gilbert%
+}
 
-\usepackage[pdftex]{graphicx}
+%\usepackage[pdftex]{graphicx}
 \usepackage[labelfont=bf,small]{caption}
 \usepackage[font=small,labelfont=bf,position=top,nearskip=0em]{subfig}
 \usepackage{cite,amsmath,amssymb,rotating,multirow,bigstrut,url,wrapfig}
 \usepackage[hyperfigures,bookmarks,bookmarksopen,bookmarksnumbered,colorlinks,linkcolor=black,citecolor=black,filecolor=blue,menucolor=black,pagecolor=blue,frenchlinks=true,pdftitle={\thetitle}]{hyperref}
 \usepackage{array}
 
-\hyphenation{net-works IEEEtran}
-\bibliographystyle{IEEEtran}
-
-\newcommand{\email}[1]{$\left<{\textit{#1}}\right>$}
 \newcommand{\caps}[1]{{\small{#1}}}
 
-\title{An Algebraic Representation of Wireless Workload}
-\author{
-{\large{Stefan~Karpinski, Elizabeth~M.~Belding, Kevin~C.~Almeroth}}\\
-\textit{\{sgk,ebelding,almeroth\}@cs.ucsb.edu}\vspace{0.5em}\\
-Department of Computer Science\\
-University of California, Santa Barbara
-\vspace{-0.5em}
+\title{\thetitle}
+\author{\theauthors}
+\institute{
+  \theauthors\\
+  Department of Computer Science\\
+  University of California, Santa Barbara\\
+  Email: \texttt{\{sgk,ebelding,almeroth,gilbert\}@cs.ucsb.edu}
 }
 
 \newcommand{\Section}[1]{\hyperref[sec:#1]{Section~\ref*{sec:#1}}}
@@ -71,9 +73,6 @@ University of California, Santa Barbara
 \newcommand{\fracx}[2]{#1/#2}
 \newcommand{\fracp}[2]{\left(\frac{#1}{#2}\right)}
 \newcommand{\fracpx}[2]{(#1/#2)}
-
-\newcommand{\figurename}{Figure}
-\newcommand{\tablename}{Table}
 
 \renewcommand{\bullet}{\raisebox{2pt}{$\centerdot$}}
 %\renewcommand{\labelitemi}{\bullet}
@@ -628,13 +627,13 @@ We have presented a fundamentally new, algebraic way of representing traffic pat
 %\section{Acknowledgments}
 %This work was funded in part through NSF Career Award CNS-0347886.
 
-\vspace{-0.5em}
-\appendix\footnotesize
+\section*{Appendix}
+\footnotesize
 
 \noindent
 \textbf{Theorem.} The unique differentiable function satisfying Eqs.~\ref{eqn:normalization-invariance}~\&~\ref{eqn:linear-compounding} is $E(1,e) \ln(y/x)$. \textit{Proof:} Let $f(z) = E(1,z)$. Eq.~\ref{eqn:normalization-invariance} gives $E(x,y) = E(1,y/x) = f(y/x)$. Eq.~\ref{eqn:linear-compounding} gives: $f(z) = f(z/w) + f(w)$. Differentiation by $z$ yields $f'(z) = w^{-1} f'(z/w)$. In particular, if we choose $w=z$, we get $f'(z) = z^{-1} f'(1)$. Integration by $z$ gives:
 $f(z) = f'(1) \int z^{-1} dz + c = f'(1) \ln(z) + c$.
-By Eq.~\ref{eqn:linear-compounding}, $f(1)=0$, so $c=0$. Thus $f(e)=f'(1)\ln(e)=f'(1)$. We conclude that $f(z)=f(e)\ln(z)$, so $E(x,y) = f(y/x) = f(e)\ln(y/x) = E(1,e)\ln(y/x)$, as desired.\hfill\QED
+By Eq.~\ref{eqn:linear-compounding}, $f(1)=0$, so $c=0$. Thus $f(e)=f'(1)\ln(e)=f'(1)$. We conclude that $f(z)=f(e)\ln(z)$, so $E(x,y) = f(y/x) = f(e)\ln(y/x) = E(1,e)\ln(y/x)$, as desired.\hfill%\QED
 
 %\vspace{1em}\noindent
 %\textbf{Theorem.}~[\textit{Lyapunov's Central Limit Theorem}] Let $\{R_k\}_{k=1}^{\infty}$ be a series of independent variables with $\E{R_k}=0$. Let $s_n^2 = \sum_{k=1}^n{\E{\abs{R_k^2}}}$ and $r_n^3 = \sum_{k=1}^n{\E{\abs{R_k^3}}}$. For each $n$, let $Z_n$ be the normalized mean of $\{R_k\}_{k=1}^n$: $Z_n = \sum_{k=1}^n{R_k/s_n}$. If $\lim_{n\to\infty} {r_n/s_n} = 0$, then $\lim_{n\to\infty}{Z_n} \sim \mathcal{N}(0,1)$ (the standard normal distribution). (See~\cite{Feller68} page 229.)
