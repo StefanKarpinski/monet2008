@@ -1,6 +1,6 @@
 \documentclass[twocolumn,final]{svjour3}
 
-\newcommand{\thetitle}{An Algebraic Representation of Wireless Workload}
+\newcommand{\thetitle}{Linear Representation of Wireless Workload}
 \newcommand{\theauthors}{%
   Stefan~Karpinski \and
   Elizabeth~M.~Belding \and
@@ -204,7 +204,7 @@ When mapping flow behaviors into a vector space, it is important that the mappin
 
 The {packets-bytes-duration} representation is clearly overly simplistic and very incomplete. It captures nothing about variability of packet sizes, nor about the ``burstiness'' of packet transmissions; it leaves start time and flow size unspecified; it says nothing about the source or destination of the flow. At the opposite extreme, it is possible to embed the exact start time of each flow, and the exact size and transmission times of its packets, etc. into a vector space. The difficulty comes in doing so in a manner that makes the summation of vectors correspond naturally and meaningfully to the aggregate behavior of flows. We take a highly detailed but intermediate approach, suggested by the results of~\cite{Karpinski07:realism}: to reproduce network performance accurately, it suffices to know, for each flow, the flow type, source node, destination node, start time, flow size, and empirical distributions of packet sizes and inter-packet intervals. If there are $f$ flows in the entire workload pattern, then the collective behavior can be described with six matrices; the rows of each matrix are the behavior vectors of the flows, indexed in some chosen order. We use the following notation for the behavior matrices and their constituent vectors:\vspace{-0.25em}
 \begin{tabbing}
-\hspace{1.5em}\=\bullet\hspace{0.5em}\=\hspace{9.75em}\=
+\hspace{1em}\=\bullet\hspace{0.5em}\=\hspace{9.75em}\=
 $D\:$\=$=\parensx{\vec{d}_i}\:$\=$=\parensx{d_{ij}}\:$\=\kill
 \>\bullet\> type: \>$T$\>$=\parensx{\vec{t}_i}$\>$=\parensx{t_{ij}}$\>$\in\R^{f \times 255}$,\\
 \>\bullet\> sources: \>$S$\>$=\parensx{\vec{s}_i}$\>$=\parensx{s_{ij}}$\>$\in\R^{f \times n}$,\\
@@ -268,16 +268,16 @@ The packet stream ends when the number of bytes allocated to the flow have been 
 
 \begin{figure*}[tb]
 \begin{center}
-\subfloat[trace node behavior]
-{\includegraphics[width=1.392in]{flow_topology_trace}\label{fig:flow-topology-trace}}
-\subfloat[uniform node behavior]
-{\includegraphics[width=1.392in]{flow_topology_uniform}\label{fig:flow-topology-uniform}}
-\subfloat[trace flow behavior]
-{\includegraphics[width=1.392in]{flow_behavior_trace}\label{fig:flow-behavior-trace}}
-\subfloat[uniform flow behavior]
-{\includegraphics[width=1.392in]{flow_behavior_uniform}\label{fig:flow-behavior-uniform}}
-\subfloat[packet behavior]
-{\includegraphics[width=1.392in]{flow_packet_behavior}\label{fig:packet-behavior}}
+\subfloat[node trace]
+{\includegraphics[width=1.335in]{flow_topology_trace}\label{fig:flow-topology-trace}}
+\subfloat[node uniform]
+{\includegraphics[width=1.335in]{flow_topology_uniform}\label{fig:flow-topology-uniform}}
+\subfloat[flow trace]
+{\includegraphics[width=1.335in]{flow_behavior_trace}\label{fig:flow-behavior-trace}}
+\subfloat[flow uniform]
+{\includegraphics[width=1.335in]{flow_behavior_uniform}\label{fig:flow-behavior-uniform}}
+\subfloat[packet]
+{\includegraphics[width=1.335in]{flow_packet_behavior}\label{fig:packet-behavior}}
 \caption{Examples illustrating trace (real) versus uniform (na\"ive synthetic) behaviors at the node, flow and packet levels. Figures \ref{fig:flow-topology-trace} and \ref{fig:flow-topology-uniform} show example node behaviors. The width of each line is proportional to the logarithm of the number of flows between the nodes it connects (zero is the Internet gateway). Uniform and trace flow behavior examples are plotted in Figures \ref{fig:flow-behavior-trace} and \ref{fig:flow-behavior-uniform}. The time axis indicates when flows start and end; the width of each flow line is proportional to the logarithm of its data rate. Figure \ref{fig:packet-behavior} compares uniform (i.e. {\footnotesize{CBR}}) packet behavior with the trace of an actual flow. In the uniform model, the cumulative data sent increases smoothly over time, whereas in the actual packet trace, the transmissions are variable both in size and in inter-packet interval, leading to a ``lumpy'' cumulative data plot.}
 \label{fig:trace-vs-uniform}
 \end{center}
@@ -371,30 +371,6 @@ The parameter $\alpha$ allows us to smoothly vary the weighting of the source an
 
 %Another benefit of the matrix model is that all aspects of network behavior are determined concurrently. We are not left wondering what to do about source and destination nodes or flow start and end times after we have computed our simplified packet behaviors: the same transformation that average the packet behaviors also naturally averages the start and
 
-\section{Experimental Methodology}
-\label{sec:methodology}
-
-To evaluate whether traffic models are realistic or not, we use the method of \textit{paired differential simulation} introduced in our previous work on traffic modeling~\cite{Karpinski07:realism,Karpinski07:cbr-failure}. %This approach is based on the following definition:
-%
-%\begin{samepage}
-%\noindent\textbf{Definition.}~A model of user behavior is \textit{sufficiently realistic} if, compared with actual user behavior, the model, with parameter values extracted from the real data, yields statistically equivalent performance results.
-%\end{samepage}
-%\vspace{0.5em}
-%
-Paired differential simulation is based on the standard scientific technique of controlled experimentation. 
-The hypothesis we are testing is that a given synthetic model accurately reproduces the performance metrics exhibited by real network traffic. To test this hypothesis, we conduct a series of paired experiments and compare the results for each test subject with a corresponding control subject. In this case, the experiments are wireless network simulations, and the subjects are real or synthetic workload instances. The control group is the set of simulations where the workload is an actual traffic trace, recorded as described in \Section{trace-data}. The test group is a set of simulations where workload is synthetically generated using a simplified traffic model. The experiments are paired: for each control simulation, there is a synthetic workload, with behavior as similar to the control as model will allow, against which the results are compared. The output of the series of experiments are paired values of performance metrics for each simulated scenario: one from the control, one from the test model.
-
-The remainder of this section proceeds as follows. In \Section{traffic-models} we present the collection of traffic models we will evaluate. In \Section{trace-data} we describe the trace data that serves as the control for our experiments. Our simulation methodology is detailed in \Section{simulations}, and the performance metrics used for statistical comparison of control and test experiments are described in \Section{performance-metrics}. Finally, \Section{measures-of-error} is an in-depth mathematical discussion of the appropriate measure of error for the pairs of metric values that are produced by the paired differential simulation methodology.
-
-% to compare traffic produced by synthetic models with known examples of recorded trace traffic in a variety of experimental scenarios. To accomplish this, we begin with a large 24-hour example of wireless trace traffic, break it into 144 ten-minute scenarios, and use each scenario's simulated trace behavior as a control for a set synthetic traces, generated by various traffic models. For each scenario, the synthetic models are configured to approximate the original trace behavior as closely as the models allow. Important network-wide performance metrics are then collected from simulations, and synthetic performance results compared with control results to determine the realism of the synthetic models.
-
-%The art of simulation lies in knowing which details must be realistic and which may be abstracted into simpler, approximate models without affecting the accuracy of the results. Clearly, we need not simulate subatomic particle interactions in a wireless network simulator. Instead we use high-level physical models that approximate the real physics well enough that the performance results are the same. Similarly, when modeling network usage, we must require that our models produce the same results as actual user behavior. This requirement leads us to the following definition:
-
-%This definition depends on many factors: the type of wireless scenario, the performance metrics under consideration, the actual usage behavior used for comparison, and how strong a notion of statistical equivalence is required. We discuss different measures of error and how to evaluate statistical equivalence in Sections~\ref{sec:error-measures}~and~\ref{sec:statistical-equivalence}.
-
-\subsection{Traffic Models}
-\label{sec:traffic-models}
-
 \begin{table*}
 \begin{center}
 \small
@@ -421,6 +397,30 @@ mixed regular & $F'=\frac{1}{2f}(SS^t+DD^t)F$ & flow behaviors are aggregated on
 \end{center}
 \vspace{-2em}
 \end{table*}
+
+\section{Experimental Methodology}
+\label{sec:methodology}
+
+To evaluate whether traffic models are realistic or not, we use the method of \textit{paired differential simulation} introduced in our previous work on traffic modeling~\cite{Karpinski07:realism,Karpinski07:cbr-failure}. %This approach is based on the following definition:
+%
+%\begin{samepage}
+%\noindent\textbf{Definition.}~A model of user behavior is \textit{sufficiently realistic} if, compared with actual user behavior, the model, with parameter values extracted from the real data, yields statistically equivalent performance results.
+%\end{samepage}
+%\vspace{0.5em}
+%
+Paired differential simulation is based on the standard scientific technique of controlled experimentation. 
+The hypothesis we are testing is that a given synthetic model accurately reproduces the performance metrics exhibited by real network traffic. To test this hypothesis, we conduct a series of paired experiments and compare the results for each test subject with a corresponding control subject. In this case, the experiments are wireless network simulations, and the subjects are real or synthetic workload instances. The control group is the set of simulations where the workload is an actual traffic trace, recorded as described in \Section{trace-data}. The test group is a set of simulations where workload is synthetically generated using a simplified traffic model. The experiments are paired: for each control simulation, there is a synthetic workload, with behavior as similar to the control as model will allow, against which the results are compared. The output of the series of experiments are paired values of performance metrics for each simulated scenario: one from the control, one from the test model.
+
+The remainder of this section proceeds as follows. In \Section{traffic-models} we present the collection of traffic models we will evaluate. In \Section{trace-data} we describe the trace data that serves as the control for our experiments. Our simulation methodology is detailed in \Section{simulations}, and the performance metrics used for statistical comparison of control and test experiments are described in \Section{performance-metrics}. Finally, \Section{measures-of-error} is an in-depth mathematical discussion of the appropriate measure of error for the pairs of metric values that are produced by the paired differential simulation methodology.
+
+% to compare traffic produced by synthetic models with known examples of recorded trace traffic in a variety of experimental scenarios. To accomplish this, we begin with a large 24-hour example of wireless trace traffic, break it into 144 ten-minute scenarios, and use each scenario's simulated trace behavior as a control for a set synthetic traces, generated by various traffic models. For each scenario, the synthetic models are configured to approximate the original trace behavior as closely as the models allow. Important network-wide performance metrics are then collected from simulations, and synthetic performance results compared with control results to determine the realism of the synthetic models.
+
+%The art of simulation lies in knowing which details must be realistic and which may be abstracted into simpler, approximate models without affecting the accuracy of the results. Clearly, we need not simulate subatomic particle interactions in a wireless network simulator. Instead we use high-level physical models that approximate the real physics well enough that the performance results are the same. Similarly, when modeling network usage, we must require that our models produce the same results as actual user behavior. This requirement leads us to the following definition:
+
+%This definition depends on many factors: the type of wireless scenario, the performance metrics under consideration, the actual usage behavior used for comparison, and how strong a notion of statistical equivalence is required. We discuss different measures of error and how to evaluate statistical equivalence in Sections~\ref{sec:error-measures}~and~\ref{sec:statistical-equivalence}.
+
+\subsection{Traffic Models}
+\label{sec:traffic-models}
 
 The first model we evaluate is the General Matrix Model itself. We derive the matrix representation directly from the trace data and use it to generate workload as described in \Section{traffic-generation}. This serves to test whether the \caps{GMM} is sufficiently general: if it accurately reproduces all performance metrics across the collection of scenarios simulated, this provides strong evidence that \caps{GMM} captures enough of the detail of trace behavior to be considered a sufficiently general representation of network traffic patterns. %An affirmation of the generality of the \caps{GMM} acts as reduction of the 
 
@@ -536,17 +536,17 @@ It is easily verified that the difference, ratio, and standard error measures do
 \begin{sidewaysfigure*}
 %\begin{figure*}[htb]
 \subfloat[\textbf{Application:} Average End-to-End Delay]%
-{\includegraphics[width=4.6in]{plots/Application/delay.pdf}}
+{\includegraphics[width=4.45in]{plots/Application/delay.pdf}}
 \subfloat[\textbf{Application:} Packet Delivery Ratio]%
-{\includegraphics[width=4.6in]{plots/Application/delivery_ratio.pdf}}
+{\includegraphics[width=4.45in]{plots/Application/delivery_ratio.pdf}}
 \subfloat[\textbf{Application:} Average Received Throughput]%
-{\includegraphics[width=4.6in]{plots/Application/throughput.pdf}}
+{\includegraphics[width=4.45in]{plots/Application/throughput.pdf}}
 \subfloat[\textbf{Network:} AODV Control Overhead]%
-{\includegraphics[width=4.6in]{plots/Network/control_packets.pdf}}
+{\includegraphics[width=4.45in]{plots/Network/control_packets.pdf}}
 \subfloat[\textbf{Network:} Packets Dropped in Routing Queue]%
-{\includegraphics[width=4.6in]{plots/Network/dropped.pdf}}
+{\includegraphics[width=4.45in]{plots/Network/dropped.pdf}}
 \subfloat[\textbf{Link:} 802.11 Control Overhead]%
-{\includegraphics[width=4.6in]{plots/Link/overhead.pdf}}%
+{\includegraphics[width=4.45in]{plots/Link/overhead.pdf}}%
 \caption{Box-and-whisker plots of log-ratio error values for all metrics and traffic models. The lower axis indicates the log-ratio, while the upper axis shows raw ratio values. Each box contains the central majority of log-ratio values: the left and right bounds are at the $25^\text{th}$ and $75^\text{th}$ percentiles. The dark middle line indicates the median value, while the diamond marks the mean. The whiskers (dotted lines) extend to the furthest non-outlier values, while the points beyond that are outliers. The notch in the middle of each bar indicates a $95\%$ confidence interval for the true underlying median value; if two notches do not overlap, they are very unlikely to have the same median.}
 \label{fig:box-plots}
 %\vspace{-1.25em}
