@@ -39,7 +39,7 @@
 %%%
 \DeclareOption{onecolumn}{}
 \DeclareOption{smallcondensed}{}
-\DeclareOption{twocolumn}{\@twocolumntrue\ExecuteOptions{fleqn}}
+\DeclareOption{twocolumn}{\@twocolumntrue}
 \newif\if@smallext\@smallextfalse
 \DeclareOption{smallextended}{\@smallexttrue}
 \let\if@mathematic\iftrue
