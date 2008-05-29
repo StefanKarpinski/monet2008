@@ -58,6 +58,8 @@
 \newcommand{\zeros}[1]{\mathbf{0}_{#1}}
 \newcommand{\mat}[1]{\mathbf{#1}}
 \newcommand{\mean}[1]{\bar{#1}}
+\newcommand{\trans}[1]{{#1}^T}
+\newcommand{\inner}[2]{{#1}\cdot{#2}}
 
 \newcommand{\abs}[1]{\left|#1\right|}
 \newcommand{\absx}[1]{|#1|}
@@ -239,11 +241,11 @@ We represent start time of each flow using an indicator vector. Unlike node indi
 \Qt(t) &= \max\set{1,\ceil{d_t\fracpx{t}{t_{\max}}}}.
 \end{align}
 %Suppose the $i$th flow has a quantized start index of $j$ and a end index of $k$. Then $b_{ij'}=\delta{jj'}$ and $e_{ik'}=\delta_{kk'}$.
-Let $k$ be the quantized start index of a flow. Then the start vectors for the flow is $\vec{a}=\mathbf{e}_k$ ($\mathbf{e}_k$ has 1 at index $k$ and zeros elsewhere). The advantage of this representation becomes clear when we aggregate flows: the sum of start vectors over a collection of flows is a $d_t$-dimensional histogram indicating the frequency of start times occurring in each quantization bin. In practice, we use $d_t=1500$.
+Let $k$ be the quantized start index of a flow. Then the start vectors for the flow is $\vec{a}=\vec{e}_k$ (the $k$th standard basis vector, having 1 at index $k$ and zeros elsewhere). The advantage of this representation becomes clear when we aggregate flows: the sum of start vectors over a collection of flows is a $d_t$-dimensional histogram indicating the frequency of start times occurring in each quantization bin. In practice, we use $d_t=1500$.
 
 \subsection{Flow Size}
 
-We represent flow size with another indicator vector. Although the set of possible flow sizes is discrete, for practical reasons we map the very large range of possible flow sizes down to a much smaller range of indices (some flows in our trace have 109\caps{MB} of data in a single ten-minute period, which would give an indicator vector of over 100 million dimensions). We use the following function to convert flow sizes to indexes:
+We represent flow size with another indicator vector. Although the set of possible flow sizes is discrete, for practical reasons we map the very large range of possible flow sizes down to a much smaller range of indices (some flows in our trace have 109\caps{MB} of data in a single ten-minute period, which would give an indicator vector of over 100 million entries). We use the following function to convert flow sizes to indexes:
 \begin{align*}
 %\label{eqn:byte-quantization}
 \Qb(b) &= \max\set{1,\ceil{d_b\fracp{b-1}{b_{\max}-1}^\beta}}.
@@ -252,7 +254,7 @@ Here $b_{\max}$ is the maximum input flow size. The parameter $\beta$ is a non-l
 
 \subsection{Packet Sizes \& Inter-Packet Intervals}
 
-The packets size behavior of a flow is represented by a histogram vector, $\vec{z}$, of packet sizes. Explicitly,  $z_{ij}$ is the number of packets in the $i$th flow with $j$ bytes of payload data. The dimension, $d_z$, is the largest possible packet size, which in practice is the maximum transfer unit of the wireless medium, typically 1500 bytes. The representation of inter-packet intervals as a vector, $\vec{v}$, is similar, but the domain of possible intervals is a continuum, so we must map this range onto the discrete index values $\left\{1,\dots,d_v\right\}$. We use similar non-linear quantization function as before:
+The packet size behavior of a flow is represented by a histogram vector, $\vec{z}$, of packet sizes. Explicitly,  $z_{ij}$ is the number of packets in the $i$th flow with $j$ bytes of payload data. The dimension, $d_z$, is the largest possible packet size, which in practice is the maximum transfer unit of the wireless medium, typically 1500 bytes. The representation of inter-packet intervals as a vector, $\vec{v}$, is similar, but the domain of possible intervals is a continuum, so we must map this range onto the discrete index values $\left\{1,\dots,d_v\right\}$. We use similar non-linear quantization function as before:
 \begin{align}
 \label{eqn:interval-quantization}
 \Qi(v) &= \max\set{1,\ceil{d_v\fracp{v-v_{\min}}{v_{\max}-v_{\min}}^\gamma}}.
@@ -299,7 +301,7 @@ Having defined our representation of network behavior, we turn to deriving usefu
 \subsection{Communication Topology}
 \label{sec:communication-topology}
 
-The number of flows between each pair of nodes in the network is expressed by the matrix product $\mat{SD}^t\in\R^{n \times n}$ ($*^t$~denotes transpose). That is $(\mat{SD}^t)_{ij}$ is the number of flows from node $i$ to node $j$. The total number of source flows for each node is given by the vector $\mat{S}^t\ones{f}$, and the total number of destination flows is given by $\mat{D}^t\ones{f}$. ($\ones{f}$ is the $f$-dimensional column vector consisting of all ones.)
+The number of flows between each pair of nodes in the network is expressed by the matrix product $\trans{\mat{SD}}\in\R^{n \times n}$ ($\trans{*}$~denotes transpose). That is $(\trans{\mat{SD}})_{ij}$ is the number of flows from node $i$ to node $j$. The total number of source flows for each node is given by the vector $\trans{\mat{S}}\ones{f}$, and the total number of destination flows is given by $\trans{\mat{D}}\ones{f}$. ($\ones{f}$ is the $f$-dimensional column vector consisting of all ones.)
 
 \subsection{Expected Average Packet Size \& Intervals}
 \label{sec:flow-totals}
@@ -309,7 +311,12 @@ From the matrices $\mat{Z}$ and $\mat{V}$, we can compute the expected average p
 \vec{\sigma}&=\seq{1,2,3,\dots,d_z},\\
 \vec{\tau}&=\seq{\Di\left(k,\fracx{1}{2}\right)}_{k=1}^{d_v}.
 \end{align}
-Using these representative values, the expected average packet size for a flow may be computed as $\mean{z}=\fracx{\vec{z}\cdot\vec{\sigma}}{\vec{z}\cdot\ones{d_z}}$, and the expected average inter-packet interval size as $\mean{v}=\fracx{\vec{v}\cdot\vec{\tau}}{\vec{v}\cdot\ones{d_v}}$.
+Using these representative values, the expected average packet size and expected average inter-packet interval size for a flow may be computed as
+\begin{align}
+  \mean{z}&=\fracx{\inner{\vec{z}}{\vec{\sigma}}}{\inner{\vec{z}}{\ones{d_z}}},\\
+  \mean{v}&=\fracx{\inner{\vec{v}}{\vec{\tau}}}{\inner{\vec{v}}{\ones{d_v}}},
+\end{align}
+respectively, where $\inner{\vec{x}}{\vec{y}}$ denotes the standard inner product of vectors.
 
 \section{Expression of Common Modeling Concepts}
 \label{sec:modeling-concepts}
@@ -351,11 +358,11 @@ The traffic models proposed by {\FHC} are all marginal: they propose certain net
 
 \subsection{Regularized Behavior}
 
-The final form of homogenization we consider, is regularization. This is a restricted form of marginality: we may assume that marginal distributions apply to all the flows in certain groupings. For example, we can provide a distribution of flow sizes on a per-source basis. That is, each source node can have its \textit{own} distribution, and the sizes of its flows are drawn from that distribution, independent of their other properties. This is simply accomplished by left-multiplication by a non-uniform matrix. For example, to make flow behavior uniform on a per source basis, we left-multiply by the ``source-uniformizing'' matrix: $\mat{F}'=(\mat{SS}^t/f)\mat{F}$. Per destination uniformity can be achieved similarly, with left-multiplication by a corresponding destination-uniformizing matrix: $F'=(\mat{DD}^t/f)\mat{F}$.
+The final form of homogenization we consider, is regularization. This is a restricted form of marginality: we may assume that marginal distributions apply to all the flows in certain groupings. For example, we can provide a distribution of flow sizes on a per-source basis. That is, each source node can have its \textit{own} distribution, and the sizes of its flows are drawn from that distribution, independent of their other properties. This is simply accomplished by left-multiplication by a non-uniform matrix. For example, to make flow behavior uniform on a per source basis, we left-multiply by the ``source-uniformizing'' matrix: $\mat{F}'=(\trans{\mat{SS}}/f)\mat{F}$. Per destination uniformity can be achieved similarly, with left-multiplication by a corresponding destination-uniformizing matrix: $F'=(\trans{\mat{DD}}/f)\mat{F}$.
 %Although assumptions about uniformity across flows are common, there is little agreement about which notion of uniformity is most appropriate; often it is simply left unspecified. The confusion arises due to the lack of a unique way of associating flows with nodes. Each node can equally viably be associated with its source or its destination. Which association is more valid? Consider a web request: should the behavior of the request be determined by what the client typically does? Or should the requests that the server typically receives determine behavior? There is no armchair answer: only analysis of real data can give us the answer. The matrix model provides an analytical framework for doing so.
 The matrix model has the benefit of making the uniformization of behaviors completely explicit. It also allows us to easily define intermediate choices. If we wish make the behavior of each flow a weighted average of the aggregate behaviors of its source and destination nodes, we can express this easily:
 \begin{align}
-\mat{F}' = \frac{1}{f}((1-\alpha)(\mat{SS}^t)+\alpha(\mat{DD}^t))\mat{F}.
+\mat{F}' = \frac{1}{f}((1-\alpha)(\trans{\mat{SS}})+\alpha(\trans{\mat{DD}}))\mat{F}.
 \end{align}
 The parameter $\alpha$ allows us to smoothly vary the weighting of the source and destination behaviors. Source-only behavior is given by $\alpha=0$; destination-only by $\alpha=1$; to weight source and destination equally, take $\alpha=\frac{1}{2}$.
 
@@ -395,9 +402,9 @@ size marginal & $\mat{B}'=(\ones{f \times f}/f)\mat{B}$ & flow size (bytes) is c
 node marginal & $\mat{S}'=(\ones{f \times f}/f)\mat{S}$~~~~$\mat{D}'=(\ones{f \times f}/f)\mat{D}$ & nodes behave distinctly, but behavior is independent of flows \\\hline
 packet marginal & $\mat{Z}'=(\ones{f \times f}/f)\mat{Z}$~~~~$\mat{V}'=(\ones{f \times f}/f)\mat{V}$ & packet behavior is variable bit-rate, aggregated across all flows \\\hline
 full marginal & \textit{all marginal transformations} & applies all the marginality assumptions of the above four models \\\hline\hline
-source regular & $\mat{F}'=(\mat{SS}^t/f)\mat{F}$ & flow behaviors are aggregated on a per source-node basis \\\hline
-dest regular & $\mat{F}'=(\mat{DD}^t/f)\mat{F}$ & flow behaviors are aggregated on a per destination-node basis \\\hline
-mixed regular & $\mat{F}'=\frac{1}{2f}(\mat{SS}^t+\mat{DD}^t)\mat{F}$ & flow behaviors are aggregated on a mixed source/destination basis \\\hline
+source regular & $\mat{F}'=(\trans{\mat{SS}}/f)\mat{F}$ & flow behaviors are aggregated on a per source-node basis \\\hline
+dest regular & $\mat{F}'=(\trans{\mat{DD}}/f)\mat{F}$ & flow behaviors are aggregated on a per destination-node basis \\\hline
+mixed regular & $\mat{F}'=\frac{1}{2f}(\trans{\mat{SS}}+\trans{\mat{DD}})\mat{F}$ & flow behaviors are aggregated on a mixed source/destination basis \\\hline
 \end{tabular}
 \caption{Matrix-based traffic models evaluated by paired differential simulation.}
 \label{tab:traffic-models}
@@ -639,7 +646,7 @@ We have presented a fundamentally new, algebraic way of representing traffic pat
 \footnotesize
 
 \noindent
-\textbf{Theorem.} The unique differentiable function satisfying Eqs.~\ref{eqn:normalization-invariance}~\&~\ref{eqn:linear-compounding} is $E(1,e) \ln(y/x)$. \textit{Proof:} Let $f(z) = E(1,z)$. Eq.~\ref{eqn:normalization-invariance} gives $E(x,y) = E(1,y/x) = f(y/x)$. Eq.~\ref{eqn:linear-compounding} gives: $f(z) = f(z/w) + f(w)$. Differentiation by $z$ yields $f'(z) = w^{-1} f'(z/w)$. In particular, if we choose $w=z$, we get $f'(z) = z^{-1} f'(1)$. Integration by $z$ gives:
+\textbf{Theorem.} The unique differentiable function satisfying Eqs.~\ref{eqn:normalization-invariance} and \ref{eqn:linear-compounding} is $E(1,e) \ln(y/x)$. \textit{Proof:} Let $f(z) = E(1,z)$. Eq.~\ref{eqn:normalization-invariance} gives $E(x,y) = E(1,y/x) = f(y/x)$. Eq.~\ref{eqn:linear-compounding} gives: $f(z) = f(z/w) + f(w)$. Differentiation by $z$ yields $f'(z) = w^{-1} f'(z/w)$. In particular, if we choose $w=z$, we get $f'(z) = z^{-1} f'(1)$. Integration by $z$ gives:
 $f(z) = f'(1) \int z^{-1} dz + c = f'(1) \ln(z) + c$.
 By Eq.~\ref{eqn:linear-compounding}, $f(1)=0$, so $c=0$. Thus $f(e)=f'(1)\ln(e)=f'(1)$. We conclude that $f(z)=f(e)\ln(z)$, so $E(x,y) = f(y/x) = f(e)\ln(y/x) = E(1,e)\ln(y/x)$, as desired.\hfill%\QED
 
