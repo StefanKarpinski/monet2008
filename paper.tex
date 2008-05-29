@@ -57,6 +57,7 @@
 \newcommand{\ones}[1]{\mathbf{1}_{#1}}
 \newcommand{\zeros}[1]{\mathbf{0}_{#1}}
 \newcommand{\mat}[1]{\mathbf{#1}}
+\renewcommand{\vec}[1]{\mathbf{#1}}
 \newcommand{\mean}[1]{\bar{#1}}
 \newcommand{\trans}[1]{{#1}^T}
 \newcommand{\inner}[2]{{#1}\cdot{#2}}
@@ -106,7 +107,20 @@ We propose a representation of wireless workload patterns as large, sparse matri
 %% this paper provides this
 %\end{itemize}
 
-More than twenty years of research in analysis and modeling of network traffic have yielded tremendous advances in our understanding of the complex behaviors that emerge from the interaction of millions of humans and computers on the Internet and in local area networks~(\caps{LAN}s). The rate of packet arrivals at routers on the Internet backbone is known to exhibit complex, self-similar patterns with long-range dependence~\cite{Paxson95,Paxson96,Willinger98}. Other research has demonstrated how to accurately model the behavior of a single flow of packets between two application endpoints, including ``closed-loop'' feedback induced by the ubiquitous transmission control protocol~(\caps{TCP})~\cite{Hernandez06:dissertation}. Recently, the high-level statistical properties of wireless \caps{LAN} traffic have been rigorously modeled with a variety of parametric distributions~\cite{Hernandez06:wlan-traffic}.
+More than twenty years of research in analysis and modeling of network traffic have yielded tremendous advances in our understanding of the complex behaviors that emerge from the interaction of millions of humans and computers on the Internet and in local area networks~(\caps{LAN}s).
+The field of realistic workload generation, however, remains an active area of research with many unanswered questions.
+One of the major challenges of modeling full-network traffic is the manifest multilevel interdependence of behaviors.
+% The packet is the fundamental unit of traffic in any packet-switched network, including \caps{IP} networks.
+% Packets are aggregated at a variety of logical levels: by protocol type, by source and destination nodes, by flows sequences between communicating applications.
+% The behaviors of packets are specific to each aggregated group: the distribution of packet sizes is specific to each node as both source and destination, and to each flow as well.
+Because of the lack of adequate techniques for modeling this complex multilevel interdependence, three fundamental types of simplifying assumptions are commonly applied to both the analysis and generation of traffic:
+\begin{enumerate}
+\item \textbf{Uniformity:} that certain aspects of traffic behavior are uniformly distributed. For example, that  all nodes in a network have equal probability of being the source or destination of traffic.
+\item \textbf{Independence:} that traffic properties share a single marginal distribution across the entire network, and individual values are independently drawn from this marginal distribution. For example, assuming that a single distribution describes an entire network, as opposed to modeling each flow with its own distribution of packet sizes.
+\item \textbf{Subdivided Independence:} that traffic properties behave independently, but only within certain groupings. The assumption, for example, that all flows emanating from each single node share the same distribution of packet sizes.
+\end{enumerate}
+
+The rate of packet arrivals at routers on the Internet backbone is known to exhibit complex, self-similar patterns with long-range dependence~\cite{Paxson95,Paxson96,Willinger98}. Other research has demonstrated how to accurately model the behavior of a single flow of packets between two application endpoints, including ``closed-loop'' feedback induced by the ubiquitous transmission control protocol~(\caps{TCP})~\cite{Hernandez06:dissertation}. Recently, the high-level statistical properties of wireless \caps{LAN} traffic have been rigorously modeled with a variety of parametric distributions~\cite{Hernandez06:wlan-traffic}.
 
 Despite great breakthroughs in understanding and methodology, the networking community remains without a ``cookbook'' for generating realistic \caps{LAN} workloads. By ``cookbook,'' we mean an explicit method for generating network traffic---down to the size and transmission time of each application data unit. This lack is particularly relevant to wireless research, since the medium is fundamentally resource-limited, and consequently local traffic patterns can have a huge impact on overall network performance~\cite{Karpinski07:realism,Karpinski07:cbr-failure}.
 
@@ -301,7 +315,7 @@ Having defined our representation of network behavior, we turn to deriving usefu
 \subsection{Communication Topology}
 \label{sec:communication-topology}
 
-The number of flows between each pair of nodes in the network is expressed by the matrix product $\trans{\mat{SD}}\in\R^{n \times n}$ ($\trans{*}$~denotes transpose). That is $(\trans{\mat{SD}})_{ij}$ is the number of flows from node $i$ to node $j$. The total number of source flows for each node is given by the vector $\trans{\mat{S}}\ones{f}$, and the total number of destination flows is given by $\trans{\mat{D}}\ones{f}$. ($\ones{f}$ is the $f$-dimensional column vector consisting of all ones.)
+The number of flows between each pair of nodes in the network is expressed by the matrix product $\trans{\mat{SD}}\in\R^{n \times n}$ ($\trans{\,\cdot\,}$~denotes transpose). That is $(\trans{\mat{SD}})_{ij}$ is the number of flows from node $i$ to node $j$. The total number of source flows for each node is given by the vector $\trans{\mat{S}}\ones{f}$, and the total number of destination flows is given by $\trans{\mat{D}}\ones{f}$. ($\ones{f}$ is the $f$-dimensional column vector consisting of all ones.)
 
 \subsection{Expected Average Packet Size \& Intervals}
 \label{sec:flow-totals}
