@@ -321,7 +321,7 @@ respectively, where $\inner{\vec{x}}{\vec{y}}$ denotes the standard inner produc
 \section{Expression of Common Modeling Concepts}
 \label{sec:modeling-concepts}
 
-The simplifying assumptions made by most traffic models can be classified into three categories. We use the terms \textit{uniformity}, \textit{marginality}, and \textit{regularity} do describe these classes of assumptions. They are all assumptions about the ``sameness'' of aspects of network behaviors; they differ, however, in whether the make stipulations about uniformity within each flow, across all flows, or within groups of flows. In the following sections, we explore how various modeling concepts can be expressed in the framework of the General Matrix Model. Models are expressed as transformations that will convert arbitrary traffic matrix instances into similar ones that satisfy the model's assumptions. These transformations will later allow us to evaluate the effect of each model's simplifications on the realism of generated workloads.
+The simplifying assumptions made by most traffic models can be classified into three categories. We use the terms \textit{uniformity}, \textit{marginality}, and \textit{regularity} to describe these classes of assumptions. They are all assumptions about the ``sameness'' of aspects of network behaviors; they differ, however, in whether the make stipulations about uniformity within each flow, across all flows, or within groups of flows. In the following sections, we explore how various modeling concepts can be expressed in the framework of the General Matrix Model. Models are expressed as transformations that will convert arbitrary traffic matrix instances into similar ones that satisfy the model's assumptions. These transformations will later allow us to evaluate the effect of each model's simplifications on the realism of generated workloads.
 
 \subsection{Uniform Behavior}
 
@@ -396,7 +396,7 @@ The parameter $\alpha$ allows us to smoothly vary the weighting of the source an
 {\footnotesize{GMM}} & --- & the general matrix model \\\hline\hline
 time uniform & $\mat{A}'=\mat{A}(\ones{d_t \times d_t}/d_t)$ & all start times are equally likely \\\hline
 node uniform & $\mat{S}'=\mat{S}(\ones{n \times n}/n)$~~~~$\mat{D}'=\mat{D}(\ones{n \times n}/n)$ & nodes behave stochastically identically with respect to flows \\\hline
-full uniform & \textit{all uniform transformations} & applies all the uniformity assumptions of the above three models \\\hline\hline
+full uniform & \textit{all uniform transformations} & applies all the uniformity assumptions of the above models \\\hline\hline
 time marginal & $\mat{A}'=(\ones{f \times f}/f)\mat{A}$ & start times chosen from marginal distribution of start times \\\hline
 size marginal & $\mat{B}'=(\ones{f \times f}/f)\mat{B}$ & flow size (bytes) is chosen independently of other properties \\\hline
 node marginal & $\mat{S}'=(\ones{f \times f}/f)\mat{S}$~~~~$\mat{D}'=(\ones{f \times f}/f)\mat{D}$ & nodes behave distinctly, but behavior is independent of flows \\\hline
@@ -475,7 +475,7 @@ In addition to the active nodes corresponding to trace \caps{IP}s, half as many 
 
 There are a number of potential objections to this approach. We use single-hop trace data to drive multi-hop simulations; the physical environment, node mobility, handover behavior, and closed-loop dynamics of the original wireless setting are not faithfully reproduced. One must keep in mind, however, that the goal of this research is \textit{not} to understand the conditions of the original network. Rather, we are using the traffic behaviors observed as examples to help us better understand how different types of workload can affect performance metrics. In particular, we aim to understand how real workload compares with common synthetic traffic models. Of course, the reason for such objections is that networking researchers understand that the many aspects of behavior interact with each other in a complex and nearly inextricable manner. However, before we can hope to understand the interaction between workload and other features affecting network behavior, we must study traffic patterns alone, and learn to model them with reasonable accuracy in the absence of additional complicating factors. Accordingly, in this study, we detach application level traffic patterns from the other factors influencing network conditions, and study them in isolation.
 
-The 24-hour trace is split into 144 10-minute segments, each of which serves as the basis for a set of simulations using different traffic models. The traffic models range from a completely realistic trace-driven model, to a standard \caps{CBR} traffic model. Various partially synthetic intermediate models, described in \Section{traffic-models}, are simulated to study the impact of different aspects of traffic behavior on network performance. To preserve the fairness of the performance comparison, we keep as many features as possible constant across different traffic models. The traffic generated by each synthetic model preserves as many characteristics from the original trace as possible, within the constraints of the model. Moreover, the following features are preserved across all models: the numbers of wireless nodes, the number of flows, the number of application-initiated data units sent, the total bytes of application data sent, and the average flow duration (and therefore the average data rate).
+The 24-hour trace is split into 144 10-minute segments, each of which serves as the basis for a set of simulations using different traffic models. The traffic models range from a completely realistic trace-driven model, to a standard \caps{CBR} traffic model. Various partially synthetic intermediate models, described in \Section{traffic-models}, are simulated to study the impact of different aspects of traffic behavior on network performance. To preserve the fairness of the performance comparison, we keep as many features as possible constant across different traffic models. The traffic generated by each synthetic model preserves as many characteristics from the original trace as possible, within the constraints of the model. Moreover, the following features are preserved across all models: the number of wireless nodes, the number of flows, the number of application-initiated data units sent, the total bytes of application data sent, and the average flow duration (and therefore the average data rate).
 
 In our previous work, we approximated \caps{TCP} with a pair of half-duplex \caps{UDP} flows~\cite{Karpinski07:realism,Karpinski07:cbr-failure}. For this work, we have implemented a new Qualnet application driver that allows trace-driven full-duplex \caps{TCP} flows. This allows us to accurately reproduce the full dynamics of \caps{TCP} feedback. Moreover, raw \caps{IP}, \caps{UDP} and \caps{TCP} flows are implemented using the same code, guaranteeing that all traffic is simulated uniformly and that all performance metrics are aggregated in the same manner. We have also instrumented Qualnet to collect \caps{IP} performance metrics in strict adherence to the recommendations of the \caps{IETF} working group on \caps{IP} performance metrics~\cite{rfc:ip-metrics}.
 
@@ -496,7 +496,7 @@ These metrics are commonly used to evaluate wireless protocols. We have examined
 \subsection{Measures of Error}
 \label{sec:measures-of-error}
 
-The simulations described in \Section{simulations} provide us with the raw data to compare performance metrics for synthetic traffic models with those for real traffic traces. To assess the realism of these models, however, we need a measure of how inaccurate the synthetic performance values are when compared to the real values. Let $x$ be the value of a performance metric using real traffic, and $y$ the value of the same metric using an alternate traffic model, $\M$. Some common measures of error are the difference [$y-x$], the ratio [$y/x$], and the standard error [$(y-x)/x$]. These are all reasonable measures of error; but which is most appropriate for assessing the realism of performance metrics? Instead of picking one arbitrarily, we will first consider the properties that an ideal error function should have, and then use those properties to determine the best measure of error. Moreover, we will show that the unique measure of error that exhibits these ideal properties is the  \textit{log-ratio} of metric values:
+The simulations described in \Section{simulations} provide us with the raw data to compare performance metrics for synthetic traffic models with those for real traffic traces. To assess the realism of these models, however, we need a measure of how inaccurate the synthetic performance values are when compared to the real values. Let $x$ be the value of a performance metric using real traffic, and $y$ the value of the same metric using an alternate traffic model. Some common measures of error are the difference [$y-x$], the ratio [$y/x$], and the relative error [$(y-x)/x$], also commonly called the ``standard error.'' These are all reasonable measures of error; but which is most appropriate for assessing the realism of performance metrics? Instead of picking one arbitrarily, we will first consider the properties that an ideal error function should have, and then use those properties to determine the best measure of error. Moreover, we will show that the unique measure of error that exhibits these ideal properties is the  \textit{log-ratio} of metric values:
 \begin{align}
 \log(y/x)=\log(y)-\log(x).
 \end{align}
@@ -519,7 +519,7 @@ E(t_{\text{trc}},t_{\text{mod}})
 	= E\left({\frac{r_{\text{trc}}}{fd},\frac{r_{\text{mod}}}{fd}}\right)
 	= E(r_{\text{trc}},r_{\text{mod}}).
 \end{align}
-The difference measure does not satisfy Equation~\ref{eqn:normalization-invariance}, but the ratio, standard error, and log-ratio error measures all do.
+The difference measure does not satisfy Equation~\ref{eqn:normalization-invariance}, but the ratio, relative error, and log-ratio error measures all do.
 
 The second property that an ideal error function should have is  \textit{additivity of compounded errors}. If two independent causes of error each induce some factor of misrepresentation, then the combined error should be the sum of the errors caused by each factor separately:
 \begin{align}
@@ -539,7 +539,7 @@ Additivity of compounded errors also implies two desirable properties that are e
 E(x,x/c) = - E(x,xc).
 \end{align}
 
-It is easily verified that the difference, ratio, and standard error measures do not satisfy \Equation{linear-compounding}, and the difference, as noted, does not satisfy \Equation{normalization-invariance}. The log-ratio is the only metric presented that satisfies both conditions. Moreover, it can be proved that $\log(y/x)$ is the \textit{only} differentiable function that satisfies both (up to a constant). In the Appendix, we present a proof of this claim. Throughout the rest of the paper, we use the log-ratio to measure the error of performance metrics.
+It is easily verified that the difference, ratio, and relative error measures do not satisfy \Equation{linear-compounding}, and the difference, as noted, does not satisfy \Equation{normalization-invariance}. The log-ratio is the only metric presented that satisfies both conditions. Moreover, it can be proved that $\log(y/x)$ is the \textit{only} differentiable function that satisfies both (up to a constant). In the Appendix, we present a proof of this claim. Throughout the rest of the paper, we use the log-ratio to measure the error of performance metrics.
 % TODO: should Appendix be capitalized?
 % TODO: hyperref the Appendix for PDF.
 
@@ -548,17 +548,17 @@ It is easily verified that the difference, ratio, and standard error measures do
 
 \begin{sidewaysfigure*}
 \subfloat[\textbf{Application:} Average End-to-End Delay]%
-{\includegraphics[width=4.45in]{plots/Application/delay.pdf}}%
+{\includegraphics[width=4.45in]{plots/Application/delay.pdf}}\hfill
 \subfloat[\textbf{Application:} Packet Delivery Ratio]%
 {\includegraphics[width=4.45in]{plots/Application/delivery_ratio.pdf}}
 %
 \subfloat[\textbf{Application:} Average Received Throughput]%
-{\includegraphics[width=4.45in]{plots/Application/throughput.pdf}}%
+{\includegraphics[width=4.45in]{plots/Application/throughput.pdf}}\hfill
 \subfloat[\textbf{Network:} AODV Control Overhead]%
 {\includegraphics[width=4.45in]{plots/Network/control_packets.pdf}}
 %
 \subfloat[\textbf{Network:} Packets Dropped in Routing Queue]%
-{\includegraphics[width=4.45in]{plots/Network/dropped.pdf}}%
+{\includegraphics[width=4.45in]{plots/Network/dropped.pdf}}\hfill
 \subfloat[\textbf{Link:} 802.11 Control Overhead]%
 {\includegraphics[width=4.45in]{plots/Link/overhead.pdf}}%
 %
