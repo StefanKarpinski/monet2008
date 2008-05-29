@@ -12,11 +12,11 @@
 %\usepackage[pdftex]{graphicx}
 \usepackage[labelfont=bf,small]{caption}
 \usepackage[font=small,labelfont=bf,position=top,nearskip=0em]{subfig}
-\usepackage{cite,amsmath,amssymb,rotating,multirow,bigstrut,url,wrapfig}
+\usepackage{cite,amsmath,amssymb,rotating,multirow,bigstrut,url,wrapfig,relsize}
 \usepackage[hyperfigures,bookmarks,bookmarksopen,bookmarksnumbered,colorlinks,linkcolor=black,citecolor=black,filecolor=blue,menucolor=black,pagecolor=blue,frenchlinks=true,pdftitle={\thetitle}]{hyperref}
 \usepackage{array}
 
-\newcommand{\caps}[1]{{\small{#1}}}
+\newcommand{\caps}[1]{{\smaller{#1}}}
 
 \title{\thetitle}
 \author{\theauthors}
@@ -33,8 +33,8 @@
 \newcommand{\Table}[1]{\hyperref[tab:#1]{Table~\ref*{tab:#1}}}
 
 \newcommand{\FHC}{Hern\'andez-Campos~\textit{et~al.}}
-\newcommand{\class}[1]{\textsc{\small{#1}}}
-\newcommand{\model}[1]{\textsf{\small{#1}}}
+\newcommand{\class}[1]{\textsc{\smaller{#1}}}
+\newcommand{\model}[1]{\textsf{\smaller{#1}}}
 \newcommand{\RFC}[1]{\caps{RFC}~{#1}}
 
 \DeclareMathOperator{\var}{Var}
@@ -116,11 +116,23 @@ One of the major challenges of modeling full-network traffic is the manifest mul
 % Because of the lack of adequate techniques for modeling this complex multilevel interdependence,
 Three types of simplifying assumptions are commonly applied to both analysis and generation of traffic:
 \begin{enumerate}
-\item \textbf{Uniformity:} that certain aspects of traffic behavior are uniformly distributed. For example, that  all nodes in a network have equal probability of being the source or destination of packets or flows.
-\item \textbf{Independence:} that traffic properties share a single marginal distribution across the entire network, and individual values are independently drawn from this marginal distribution. For example, assuming that a single distribution describes an entire network, as opposed to modeling each flow with its own distribution of packet sizes.
-\item \textbf{Subdivided Independence:} that traffic properties behave independently, but only within certain groupings. The assumption, for example, that all flows emanating from each single node share the same distribution of packet sizes.
+\item \textbf{Uniformity:} that certain aspects of traffic behavior are uniformly distributed. For example, that  all nodes in a network have equal probability of being the source or destination of packets or flows.%
+\footnote{We use the common definition of a \textit{flow}: a sequence of packets sharing the same \caps{IP} protocol type, source and destination nodes, and \caps{TCP/UDP} port numbers.}
+\item \textbf{Independence:} that traffic properties share a single marginal%
+\footnote{The term ``marginal'' refers to the margins of actuarial tables formerly used for statistical computations. The rows and columns of the table are disjoint classes of two metrics. Each entry in a table contains a count of the number of events falling into the joint category for that row and column. The margins contain sums of the rows or columns, thus giving the distribution of classes along each dimension \emph{independent} of each other.}
+distribution across the entire network, and individual values are independently drawn from this marginal distribution. For example, assuming that a single distribution describes an entire network, as opposed to modeling each flow with its own distribution of packet sizes.
+\item \textbf{Subdivided Independence:} that traffic properties behave independently, but only within certain groupings. The assumption, for example, that all flows emanating from a node share the same distribution of packet sizes.
 \end{enumerate}
-We would clearly be setting up a straw man if we implied that researchers who use these assumptions actually believe them to be true. They clearly are not: flows do not all share a single packet size distribution; nodes are not uniformly likely sources. These assumptions are applied because the drastically simplify both analysis and workload generation. The question remains, however, whether these assumptions are benign. Is the analysis and generation of network traffic drastically distorted by such assumptions? This is the first fundamental question that this paper addresses.
+We would clearly be arguing against a straw man if we implied that researchers who apply these assumptions actually believe them to be true.
+They clearly are not: flows do not all share a single packet size distribution; nodes are not uniformly likely sources.
+These assumptions are applied because they drastically simplify both analysis and workload generation.
+There is no accepted, proven technique to represent or analyze the statistical interdependence of traffic patterns other than assuming that these interdependencies do not exist. Worse still, such assumptions are often made implicitly and never stated outright.
+
+The question remains whether assumptions of uniformity and independence are benign or whether they severely distort the properties of network behavior we are trying to analyze or replicate experimentally.
+%Is the analysis and generation of network traffic significantly distorted by such assumptions?
+This is the first fundamental question that this paper addresses. The that uniformity assumptions has already been made in earlier papers~\cite{Karpinski07:cbr-failure}.
+Therefore, we focus here on addressing assumptions of independence or subdivided independence. We find that assuming independent behaviors across entire networks is also extremely distorting of important measures of network performance.
+%This research has shown that assumptions of constant bit-rate (\caps{CBR}) flow behavior, as well as assumptions of uniformity at the flow and node levels of behavior drastically distort important performance metrics when used to generate wireless workload traffic for experiments.
 
 While these assumptions certainly simplify both analysis and workload generation, they are quite certainly not true: flows do not all share a single packet size distribution; every node is not equally likely to be the source or destination of each packet or flow.
 
@@ -305,7 +317,7 @@ The packet stream ends when the number of bytes allocated to the flow have been 
 {\includegraphics[width=1.335in]{flow_behavior_uniform}\label{fig:flow-behavior-uniform}}
 \subfloat[packet]
 {\includegraphics[width=1.335in]{flow_packet_behavior}\label{fig:packet-behavior}}
-\caption{Examples illustrating trace (real) versus uniform (na\"ive synthetic) behaviors at the node, flow and packet levels. Figures \ref{fig:flow-topology-trace} and \ref{fig:flow-topology-uniform} show example node behaviors. The width of each line is proportional to the logarithm of the number of flows between the nodes it connects (zero is the Internet gateway). Uniform and trace flow behavior examples are plotted in Figures \ref{fig:flow-behavior-trace} and \ref{fig:flow-behavior-uniform}. The time axis indicates when flows start and end; the width of each flow line is proportional to the logarithm of its data rate. Figure \ref{fig:packet-behavior} compares uniform (i.e. {\footnotesize{CBR}}) packet behavior with the trace of an actual flow. In the uniform model, the cumulative data sent increases smoothly over time, whereas in the actual packet trace, the transmissions are variable both in size and in inter-packet interval, leading to a ``lumpy'' cumulative data plot.}
+\caption{Examples illustrating trace (real) versus uniform (na\"ive synthetic) behaviors at the node, flow and packet levels. Figures \ref{fig:flow-topology-trace} and \ref{fig:flow-topology-uniform} show example node behaviors. The width of each line is proportional to the logarithm of the number of flows between the nodes it connects (zero is the Internet gateway). Uniform and trace flow behavior examples are plotted in Figures \ref{fig:flow-behavior-trace} and \ref{fig:flow-behavior-uniform}. The time axis indicates when flows start and end; the width of each flow line is proportional to the logarithm of its data rate. Figure \ref{fig:packet-behavior} compares uniform (i.e. \caps{CBR}) packet behavior with the trace of an actual flow. In the uniform model, the cumulative data sent increases smoothly over time, whereas in the actual packet trace, the transmissions are variable both in size and in inter-packet interval, leading to a ``lumpy'' cumulative data plot.}
 \label{fig:trace-vs-uniform}
 \end{center}
 \vspace{-1.25em}
@@ -411,7 +423,7 @@ The parameter $\alpha$ allows us to smoothly vary the weighting of the source an
 \multicolumn{1}{c}{\textbf{transformation}} &
 \multicolumn{1}{c}{\textbf{description}} \\
 \hline
-{\footnotesize{GMM}} & --- & the general matrix model \\\hline\hline
+\caps{GMM} & --- & the general matrix model \\\hline\hline
 time uniform & $\mat{A}'=\mat{A}(\ones{d_t \times d_t}/d_t)$ & all start times are equally likely \\\hline
 node uniform & $\mat{S}'=\mat{S}(\ones{n \times n}/n)$~~~~$\mat{D}'=\mat{D}(\ones{n \times n}/n)$ & nodes behave stochastically identically with respect to flows \\\hline
 full uniform & \textit{all uniform transformations} & applies all the uniformity assumptions of the above models \\\hline\hline
@@ -580,7 +592,7 @@ It is easily verified that the difference, ratio, and relative error measures do
 \subfloat[\textbf{Link:} 802.11 Control Overhead]%
 {\includegraphics[width=4.45in]{plots/Link/overhead.pdf}}%
 %
-\caption{\footnotesize%
+\caption{%
 Box-and-whisker plots of log-ratio error values for all metrics and traffic models. The lower axis indicates the log-ratio, while the upper axis shows raw ratio values. Each box contains the central majority of log-ratio values: the left and right bounds are at the $25^\text{th}$ and $75^\text{th}$ percentiles. The dark middle line indicates the median value, while the diamond marks the mean. The whiskers (dotted lines) extend to the furthest non-outlier values, while the points beyond that are outliers. The notch in the middle of each bar indicates a $95\%$ confidence interval for the true underlying median value; if two notches do not overlap, they are very unlikely to have the same median.
 }
 \label{fig:box-plots}
