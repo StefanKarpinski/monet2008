@@ -85,6 +85,8 @@
 \renewcommand{\bullet}{\raisebox{2pt}{$\centerdot$}}
 %\renewcommand{\labelitemi}{\bullet}
 
+\newcommand{\newfootnote}[2]{\newcommand{#1}{\footnote{#2} }}
+
 \graphicspath{{graphs/}}
 
 \begin{document}
@@ -103,59 +105,38 @@ We propose a representation of wireless workload patterns as large, sparse matri
   workload generation \and
   network simulation \and
   linear algebra \and
-  matrices
+  matrix analysis
 }
 
 \section{Introduction}\label{sec:intro}
 
-%Most of what are called traffic models are only partial descriptions of one or a handful of aspects of a total pattern of traffic in a network. The ubiquitous constant bit-rate (\caps{CBR}) model, for example, merely describes the nature of the packets in each flow in a workload: in a given flow, the sizes of packets and the intervals between them are are all uniform. Hence, the transmitted bit-rate is constant.
+\newfootnote{\flownote}{We use the common definition of a \textit{flow} as a sequence of packets sharing the same  ``5-tuple'': \caps{IP} protocol type, source and destination nodes, and \caps{TCP/UDP} port numbers.}
 
-%Two things are require for the direct empirical comparison of traffic models:
-%\begin{itemize}
-%\item An objective standard for comparing quality of models.
-%% WinMee/Broadnets provide this
-%\item A common framework in which different models can be implemented and compared.
-%% this paper provides this
-%\end{itemize}
+\newfootnote{\marginalnote}{The term ``marginal'' refers to the margins of actuarial tables formerly used for statistical computations. The rows and columns of the table represent possible values of two properties. Each entry in a table contains a count of the number of events falling into the joint category for that row and column. The margins contain sums of the rows or columns, thus giving the distribution of properties along each dimension \emph{independent} of each other.}
 
 More than twenty years of research in analysis and modeling of network traffic have yielded tremendous advances in our understanding of the complex behaviors that emerge from the interaction of millions of humans and computers on the Internet and in local area networks~(\caps{LAN}s).
 Both traffic analysis and realistic workload generation, however, remain active areas of research with many unanswered questions.
-One of the major challenges of modeling full-network traffic is the multilevel interdependence of behaviors.
-% The packet is the fundamental unit of traffic in any packet-switched network, including \caps{IP} networks.
-% Packets are aggregated at a variety of logical levels: by protocol type, by source and destination nodes, by flows sequences between communicating applications.
-% The behaviors of packets are specific to each aggregated group: the distribution of packet sizes is specific to each node as both source and destination, and to each flow as well.
-% Because of the lack of adequate techniques for modeling this complex multilevel interdependence,
-Three types of simplifying assumptions are commonly applied to both analysis and generation of traffic:
+One of the major challenges of modeling full-network traffic is the multilevel interdependence of packet, flow\flownote and node behaviors.
+Three types of simplifying assumptions are commonly applied for both analysis and generation:
 \begin{enumerate}
-\item \textbf{Uniformity:} that certain aspects of traffic behavior are uniformly distributed. For example, that  all nodes in a network have equal probability of being the source or destination of packets or flows.%
-\footnote{We use the common definition of a \textit{flow}: a sequence of packets sharing the same \caps{IP} protocol type, source and destination nodes, and \caps{TCP/UDP} port numbers.}
-\item \textbf{Independence:} that traffic properties share a single marginal%
-\footnote{The term ``marginal'' refers to the margins of actuarial tables formerly used for statistical computations. The rows and columns of the table represent possible values of two properties. Each entry in a table contains a count of the number of events falling into the joint category for that row and column. The margins contain sums of the rows or columns, thus giving the distribution of properties along each dimension \emph{independent} of each other.}
-distribution across the entire network, and individual values are independently drawn from this marginal distribution. For example, assuming that a single distribution describes an entire network, as opposed to modeling each flow with its own distribution of packet sizes.
+\item \textbf{Uniformity:} that certain aspects of traffic behavior are uniformly distributed. For example, that  all nodes in a network have equal probability of being the source or destination of packets or flows.
+\item \textbf{Independence:} that traffic properties share a single marginal\marginalnote distribution across the entire network, and individual values are independently drawn from this marginal distribution. For example, assuming that a single distribution describes an entire network, as opposed to modeling each flow with its own distribution of packet sizes.
 \item \textbf{Subdivided Independence:} that traffic properties behave independently, but only within certain groupings. The assumption, for example, that all flows emanating from a node share the same distribution of packet sizes.
 \end{enumerate}
 We would be arguing against a straw man if we implied that researchers who apply these assumptions actually believe them to be true.
 They clearly are not: flows have drastically different packet size distributions; different nodes initiate and receive drastically different numbers of packets and flows. Consider downloading a large file vs. typing in an \caps{SSH} session, and BitTorrent users vs. occasional email checkers.
 
 If no one actually believes that assumptions of uniformity and independence accurately describe network behavior, then why are these assumptions so common? The first reason is simply that these assumptions drastically simplify both traffic analysis and workload generation. If we ignore the interdependencies that make analysis difficult, the difficulties simply evaporate. 
-% The answer is twofold:
-% \begin{inparaenum}[1)]
-% \item they drastically simplify both analysis and workload generation;
-% \item there is no generally accepted alternative for traffic analysis.
-% \end{inparaenum}
-% The first point is clear: if we ignore the interdependencies that make analysis difficult, the difficulties evaporate.
 This immediately begs the question of whether these assumptions are benign.
-% The question remains making these assumptions is benign.
 Does ignoring the non-uniformity and non-independence of network behavior distort the properties and metrics we are trying to analyze and replicate?
 The first contribution of this paper is to answer this question in the negative: we cannot stick our heads in the sand and pretend that network properties are uniform or independent without severely distorting crucial network performance metrics.
 
+\newfootnote{\realismnote}{It is realistic in the sense that traffic generated using this model accurately reproduces performance metrics of real traffic.}
+
 The second reason why uniformity and independence assumptions are so commonly used is that there is no generally accepted alternative for analyzing traffic.
-%There is no proven, generally accepted approach to representing or analyzing the multilayered statistical interdependence of traffic patterns other than simply assuming that these interdependencies do not exist.
-%(Worse still, such assumptions are often made implicitly and their limitation never stated outright.)
 The difficulty lies in the high dimensional and stochastic nature of network behaviors.
 Suppose that we assume that packet sizes and inter-packet intervals are drawn from some distribution for each flow.
-Prior research has indicated that, given accurate per-flow distributions, this is a realistic generative model of network behavior~\cite{Karpinski07:realism}.%
-\footnote{It is realistic in the sense that traffic generated using this model accurately reproduces performance metrics of real traffic.}
+Prior research has indicated that, given accurate per-flow distributions, this is a realistic generative model of network behavior~\cite{Karpinski07:realism}.\realismnote
 However, such empirical distributions are complex entities unto themselves---and worse still, each flow has its own distribution.
 Modeling the entire network's behavior thus entails producing a distribution of distributions---with only one sample value from each distribution.
 % How can we know if two flows' observed behaviors differ because they were fundamentally different or because the stochastic processes driving them happened to produce different-looking results?
@@ -166,7 +147,19 @@ This observation yields two immediate questions:
 \item How can we represent the original ``uncollapsed'' network behavior?
 \item Is there a better way than assuming independence or uniformity to reduce dimensionality?
 \end{enumerate}
-It is already common practice in network modeling to think of and represent flow behaviors as vectors: the \caps{IP} protocol number, source and destination \caps{IP} addresses, and \caps{UDP/TCP} source and port numbers that define a packet flow are commonly referred to as a 5-tuple---i.e., a five-dimensional vector. The empirical distributions of packet sizes and inter-packet intervals that describe each flow's packet behavior are also naturally represented as histogram vectors: each dimension represents a bin and corresponding coordinate represents the number of packets falling into that bin. We argue that the natural generalization of this vectorial representation of flow behaviors to a collection of flows is to represent the entire collection as a matrix.
+It is already common practice in network modeling to think of flow behaviors as vectors.
+The \caps{IP} protocol number, source and destination \caps{IP} addresses, and \caps{UDP/TCP} source and port numbers that define a packet flow are commonly referred to as a 5-tuple---i.e., a vector in five dimensions.
+Other aspects of a flow's behavior can be represented vectorially as well, but there is a one subtlety that may not be immediately obvious.
+
+By definition, vectors can be composed via addition, yielding a new vector representing the aggregate of the two constituent vectors.
+If we are to represent flow behaviors as vectors, then we must ensure that our representation respects addition of vectors: the sum of two flow representations should represent the aggregated behavior of the two flows.
+We demonstrate how this can be accomplished and argue that the natural generalization of this approach is to represent an entire network's behavior as a large matrix, with each row representing a single flow.
+We call such a representation of flow behavior a \emph{linear representation} since it possesses the fundamental characteristic of linearity:
+\begin{align}
+  f(x + y) = f(x) + f(y).
+\end{align}
+
+The matrix representation gives an uncollapsed representation of network behavior that preserves the non-uniformity and non-independence of flow behaviors.
 
 The rest of the paper is organized as follows. In \Section{motivation} we discuss motivation and related work. The General Matrix Model is presented in \Section{general-matrix-model}. In Sections~\ref{sec:common-properties}~and~\ref{sec:modeling-concepts} we explore how common network properties and modeling concepts can be expressed in the the \caps{GMM} framework. Our experimental and analytical methodology for evaluating traffic models is presented in \Section{methodology}, while the results of our experiments are explained and analyzed in \Section{results}. The ramifications of these results are discussed in \Section{discussion}. Finally, in \Section{conclusions}, we conclude with a discussion of how this research may be applied to current wireless studies, and how it points the way to better traffic models for the future.
 
