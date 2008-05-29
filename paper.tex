@@ -1,29 +1,31 @@
 \documentclass[twocolumn,final]{svjour3}
 
-\newcommand{\thetitle}{Linear Representation of Wireless Workload}
-\newcommand{\theauthors}{%
+\newcommand{\thetitle}{Linear Representation of Network Traffic}
+\newcommand{\theauthors}{
   Stefan~Karpinski \and
   Elizabeth~M.~Belding \and
   Kevin~C.~Almeroth \and
-  John~R.~Gilbert%
+  John~R.~Gilbert
 }
 
 %\usepackage{type1cm}
 %\usepackage[pdftex]{graphicx}
 \usepackage[labelfont=bf,small]{caption}
 \usepackage[font=small,labelfont=bf,position=top,nearskip=0em]{subfig}
-\usepackage{cite,amsmath,amssymb,rotating,multirow,bigstrut,url,wrapfig,relsize}
+\usepackage{cite,amsmath,amssymb,rotating,multirow,bigstrut,url,wrapfig,relsize,paralist,array}
 \usepackage[hyperfigures,bookmarks,bookmarksopen,bookmarksnumbered,colorlinks,linkcolor=black,citecolor=black,filecolor=blue,menucolor=black,pagecolor=blue,frenchlinks=true,pdftitle={\thetitle}]{hyperref}
-\usepackage{array}
 
 \newcommand{\caps}[1]{{\smaller{#1}}}
 
 \title{\thetitle}
 \author{\theauthors}
 \institute{
-  \theauthors \\
+  S.~Karpinski \and
+  E.~Belding \and
+  K.~Almeroth \and
+  J.~Gilbert \\
   Department of Computer Science \\
-  University of California, Santa Barbara \\
+  University of California, Santa Barbara (USA) \\
   Email: \texttt{\{sgk,ebelding,almeroth,gilbert\}@cs.ucsb.edu}
 }
 
@@ -95,6 +97,15 @@ We propose a representation of wireless workload patterns as large, sparse matri
 %We demonstrate how linear algebra can be effectively used to represent and perform computations with traffic behaviors in wireless networks. Moreover, we map common concepts and techniques from traffic modeling into this new algebraic domain, showing how they can be expressed with mathematical precision and succinctness, while simultaneously being made clearer and more general. We demonstrate experimentally that the general matrix model accurately reproduces network performance metrics, using the differential simulation methodology introduced in~\cite{Karpinski07:realism} and applied in~\cite{Karpinski07:cbr-failure} to discredit the common constant bit-rate model. A range of common modeling approaches are implemented in the general matrix model and evaluated experimentally. We conclude with future directions for modeling research based on the new algebraic framework.
 \end{abstract}
 
+\keywords{
+  traffic modeling \and
+  traffic analysis \and
+  workload generation \and
+  network simulation \and
+  linear algebra \and
+  matrices
+}
+
 \section{Introduction}\label{sec:intro}
 
 %Most of what are called traffic models are only partial descriptions of one or a handful of aspects of a total pattern of traffic in a network. The ubiquitous constant bit-rate (\caps{CBR}) model, for example, merely describes the nature of the packets in each flow in a workload: in a given flow, the sizes of packets and the intervals between them are are all uniform. Hence, the transmitted bit-rate is constant.
@@ -109,7 +120,7 @@ We propose a representation of wireless workload patterns as large, sparse matri
 
 More than twenty years of research in analysis and modeling of network traffic have yielded tremendous advances in our understanding of the complex behaviors that emerge from the interaction of millions of humans and computers on the Internet and in local area networks~(\caps{LAN}s).
 Both traffic analysis and realistic workload generation, however, remain active areas of research with many unanswered questions.
-One of the major challenges of modeling full-network traffic is the manifest multilevel interdependence of behaviors.
+One of the major challenges of modeling full-network traffic is the multilevel interdependence of behaviors.
 % The packet is the fundamental unit of traffic in any packet-switched network, including \caps{IP} networks.
 % Packets are aggregated at a variety of logical levels: by protocol type, by source and destination nodes, by flows sequences between communicating applications.
 % The behaviors of packets are specific to each aggregated group: the distribution of packet sizes is specific to each node as both source and destination, and to each flow as well.
@@ -119,36 +130,68 @@ Three types of simplifying assumptions are commonly applied to both analysis and
 \item \textbf{Uniformity:} that certain aspects of traffic behavior are uniformly distributed. For example, that  all nodes in a network have equal probability of being the source or destination of packets or flows.%
 \footnote{We use the common definition of a \textit{flow}: a sequence of packets sharing the same \caps{IP} protocol type, source and destination nodes, and \caps{TCP/UDP} port numbers.}
 \item \textbf{Independence:} that traffic properties share a single marginal%
-\footnote{The term ``marginal'' refers to the margins of actuarial tables formerly used for statistical computations. The rows and columns of the table are disjoint classes of two metrics. Each entry in a table contains a count of the number of events falling into the joint category for that row and column. The margins contain sums of the rows or columns, thus giving the distribution of classes along each dimension \emph{independent} of each other.}
+\footnote{The term ``marginal'' refers to the margins of actuarial tables formerly used for statistical computations. The rows and columns of the table represent possible values of two properties. Each entry in a table contains a count of the number of events falling into the joint category for that row and column. The margins contain sums of the rows or columns, thus giving the distribution of properties along each dimension \emph{independent} of each other.}
 distribution across the entire network, and individual values are independently drawn from this marginal distribution. For example, assuming that a single distribution describes an entire network, as opposed to modeling each flow with its own distribution of packet sizes.
 \item \textbf{Subdivided Independence:} that traffic properties behave independently, but only within certain groupings. The assumption, for example, that all flows emanating from a node share the same distribution of packet sizes.
 \end{enumerate}
-We would clearly be arguing against a straw man if we implied that researchers who apply these assumptions actually believe them to be true.
-They clearly are not: flows do not all share a single packet size distribution; nodes are not uniformly likely sources.
-These assumptions are applied because they drastically simplify both analysis and workload generation.
-There is no accepted, proven technique to represent or analyze the statistical interdependence of traffic patterns other than assuming that these interdependencies do not exist. Worse still, such assumptions are often made implicitly and never stated outright.
+We would be arguing against a straw man if we implied that researchers who apply these assumptions actually believe them to be true.
+They clearly are not: flows have drastically different packet size distributions; different nodes initiate and receive drastically different numbers of packets and flows. Consider downloading a large file vs. typing in an \caps{SSH} session, and BitTorrent users vs. occasional email checkers.
 
-The question remains whether assumptions of uniformity and independence are benign or whether they severely distort the properties of network behavior we are trying to analyze or replicate experimentally.
-%Is the analysis and generation of network traffic significantly distorted by such assumptions?
-This is the first fundamental question that this paper addresses. The that uniformity assumptions has already been made in earlier papers~\cite{Karpinski07:cbr-failure}.
-Therefore, we focus here on addressing assumptions of independence or subdivided independence. We find that assuming independent behaviors across entire networks is also extremely distorting of important measures of network performance.
-%This research has shown that assumptions of constant bit-rate (\caps{CBR}) flow behavior, as well as assumptions of uniformity at the flow and node levels of behavior drastically distort important performance metrics when used to generate wireless workload traffic for experiments.
+If no one actually believes that assumptions of uniformity and independence accurately describe network behavior, then why are these assumptions so common? The first reason is simply that these assumptions drastically simplify both traffic analysis and workload generation. If we ignore the interdependencies that make analysis difficult, the difficulties simply evaporate. 
+% The answer is twofold:
+% \begin{inparaenum}[1)]
+% \item they drastically simplify both analysis and workload generation;
+% \item there is no generally accepted alternative for traffic analysis.
+% \end{inparaenum}
+% The first point is clear: if we ignore the interdependencies that make analysis difficult, the difficulties evaporate.
+This immediately begs the question of whether these assumptions are benign.
+% The question remains making these assumptions is benign.
+Does ignoring the non-uniformity and non-independence of network behavior distort the properties and metrics we are trying to analyze and replicate?
+The first contribution of this paper is to answer this question in the negative: we cannot stick our heads in the sand and pretend that network properties are uniform or independent without severely distorting crucial network performance metrics.
 
-While these assumptions certainly simplify both analysis and workload generation, they are quite certainly not true: flows do not all share a single packet size distribution; every node is not equally likely to be the source or destination of each packet or flow.
+The second reason why uniformity and independence assumptions are so commonly used is that there is no generally accepted alternative for analyzing traffic.
+%There is no proven, generally accepted approach to representing or analyzing the multilayered statistical interdependence of traffic patterns other than simply assuming that these interdependencies do not exist.
+%(Worse still, such assumptions are often made implicitly and their limitation never stated outright.)
+The difficulty lies in the high dimensional and stochastic nature of network behaviors.
+Suppose that we assume that packet sizes and inter-packet intervals are drawn from some distribution for each flow.
+Prior research has indicated that, given accurate per-flow distributions, this is a realistic generative model of network behavior~\cite{Karpinski07:realism}.%
+\footnote{It is realistic in the sense that traffic generated using this model accurately reproduces performance metrics of real traffic.}
+However, such empirical distributions are complex entities unto themselves---and worse still, each flow has its own distribution.
+Modeling the entire network's behavior thus entails producing a distribution of distributions---with only one sample value from each distribution.
+% How can we know if two flows' observed behaviors differ because they were fundamentally different or because the stochastic processes driving them happened to produce different-looking results?
 
-% The rate of packet arrivals at routers on the Internet backbone is known to exhibit complex, self-similar patterns with long-range dependence~\cite{Paxson95,Paxson96,Willinger98}. Other research has demonstrated how to accurately model the behavior of a single flow of packets between two application endpoints, including ``closed-loop'' feedback induced by the ubiquitous transmission control protocol~(\caps{TCP})~\cite{Hernandez06:dissertation}. Recently, the high-level statistical properties of wireless \caps{LAN} traffic have been rigorously modeled with a variety of parametric distributions~\cite{Hernandez06:wlan-traffic}.
+Uniform and independent modeling collapses network behavior (in a way that we will make precise later) to drastically reduce the dimensionality of the representation.
+This observation yields two immediate questions:
+\begin{enumerate}
+\item How can we represent the original ``uncollapsed'' network behavior?
+\item Is there a better way than assuming independence or uniformity to reduce dimensionality?
+\end{enumerate}
+It is already common practice in network modeling to think of and represent flow behaviors as vectors: the \caps{IP} protocol number, source and destination \caps{IP} addresses, and \caps{UDP/TCP} source and port numbers that define a packet flow are commonly referred to as a 5-tuple---i.e., a five-dimensional vector. The empirical distributions of packet sizes and inter-packet intervals that describe each flow's packet behavior are also naturally represented as histogram vectors: each dimension represents a bin and corresponding coordinate represents the number of packets falling into that bin. We argue that the natural generalization of this vectorial representation of flow behaviors to a collection of flows is to represent the entire collection as a matrix.
 
-Despite great breakthroughs in understanding and methodology, the networking community remains without a ``cookbook'' for generating realistic \caps{LAN} workloads. By ``cookbook,'' we mean an explicit method for generating network traffic---down to the size and transmission time of each application data unit. This lack is particularly relevant to wireless research, since the medium is fundamentally resource-limited, and consequently local traffic patterns can have a huge impact on overall network performance~\cite{Karpinski07:realism,Karpinski07:cbr-failure}.
+The rest of the paper is organized as follows. In \Section{motivation} we discuss motivation and related work. The General Matrix Model is presented in \Section{general-matrix-model}. In Sections~\ref{sec:common-properties}~and~\ref{sec:modeling-concepts} we explore how common network properties and modeling concepts can be expressed in the the \caps{GMM} framework. Our experimental and analytical methodology for evaluating traffic models is presented in \Section{methodology}, while the results of our experiments are explained and analyzed in \Section{results}. The ramifications of these results are discussed in \Section{discussion}. Finally, in \Section{conclusions}, we conclude with a discussion of how this research may be applied to current wireless studies, and how it points the way to better traffic models for the future.
 
-In the current standard practice for experimental workload generation, drastic assumptions of uniformity abound. Flows are commonly modeled as constant bit-rate (\caps{CBR}) streams of identical packets sent at an invariant rate. The flows in an experiment are commonly given the same duration and data rate. Nodes in the network are often selected as flow endpoints randomly or arbitrarily. While more complex approaches have been proposed~\cite{Sommers04,Avallone04,Avallone06}, % TODO: better references here.
-the simplest, most na\"ive models remain standard because no objective criterion exists by which to compellingly argue that any one model is better than the rest. It is simply unclear that simplistic models do any harm, or how, if at all, complex models provide benefit.
+% The question remains whether assumptions of uniformity and independence are benign or whether they severely distort the properties of network behavior we are trying to analyze or replicate experimentally.
+% %Is the analysis and generation of network traffic significantly distorted by such assumptions?
+% This is the first fundamental question that this paper addresses. The that uniformity assumptions has already been made in earlier papers~\cite{Karpinski07:cbr-failure}.
+% Therefore, we focus here on addressing assumptions of independence or subdivided independence. We find that assuming independent behaviors across entire networks is also extremely distorting of important measures of network performance.
+% %This research has shown that assumptions of constant bit-rate (\caps{CBR}) flow behavior, as well as assumptions of uniformity at the flow and node levels of behavior drastically distort important performance metrics when used to generate wireless workload traffic for experiments.
+% 
+% While these assumptions certainly simplify both analysis and workload generation, they are quite certainly not true: flows do not all share a single packet size distribution; every node is not equally likely to be the source or destination of each packet or flow.
+% 
+% % The rate of packet arrivals at routers on the Internet backbone is known to exhibit complex, self-similar patterns with long-range dependence~\cite{Paxson95,Paxson96,Willinger98}. Other research has demonstrated how to accurately model the behavior of a single flow of packets between two application endpoints, including ``closed-loop'' feedback induced by the ubiquitous transmission control protocol~(\caps{TCP})~\cite{Hernandez06:dissertation}. Recently, the high-level statistical properties of wireless \caps{LAN} traffic have been rigorously modeled with a variety of parametric distributions~\cite{Hernandez06:wlan-traffic}.
+% 
+% Despite great breakthroughs in understanding and methodology, the networking community remains without a ``cookbook'' for generating realistic \caps{LAN} workloads. By ``cookbook,'' we mean an explicit method for generating network traffic---down to the size and transmission time of each application data unit. This lack is particularly relevant to wireless research, since the medium is fundamentally resource-limited, and consequently local traffic patterns can have a huge impact on overall network performance~\cite{Karpinski07:realism,Karpinski07:cbr-failure}.
+% 
+% In the current standard practice for experimental workload generation, drastic assumptions of uniformity abound. Flows are commonly modeled as constant bit-rate (\caps{CBR}) streams of identical packets sent at an invariant rate. The flows in an experiment are commonly given the same duration and data rate. Nodes in the network are often selected as flow endpoints randomly or arbitrarily. While more complex approaches have been proposed~\cite{Sommers04,Avallone04,Avallone06}, % TODO: better references here.
+% the simplest, most na\"ive models remain standard because no objective criterion exists by which to compellingly argue that any one model is better than the rest. It is simply unclear that simplistic models do any harm, or how, if at all, complex models provide benefit.
+% 
+% We believe that two major breakthroughs are needed to improve traffic modeling. The first requirement is an objective standard of realism by which to compare traffic models. Such a standard has already been introduced and used to demonstrate that uniform traffic modeling, including the ubiquitous \caps{CBR} model, drastically distort performance metrics at all levels of the network protocol stack~\cite{Karpinski07:realism,Karpinski07:cbr-failure}. This standard serves to demonstrate the harm of overly simplistic models, such as \caps{CBR}, and provides the means to test whether more complex models deliver the desired improvements.
+% The second breakthrough that is needed to improve modeling is a unified framework for expressing a broad variety of traffic models, that allows researchers to systematically express and reason about the assumptions and simplifications entailed in each model.
+% 
+% The major contribution of this paper is addressing this second requirement. We propose the General Matrix Model (\caps{GMM}) for local network traffic.  In this model, the traffic pattern of an entire network is represented as a large, sparse matrix. Each row vector represents a single flow of packets in the network, with components representing the \caps{IP} protocol type, source and destination nodes, flow size, start time, and packet behavior.  The crucial property of this representation is that it respects vector space operations: summation of behavior vectors gives an accurate description of the aggregate behavior of the flows represented by those vectors. One benefit of this representation is that it makes it immediately possible to express a broad variety of assumptions and conditions on traffic patterns in terms of simple matrix operations. It also provides vital mathematical clarity and allows us to apply the theoretical and computational tools of modern linear algebra to the problems of traffic analysis and modeling.
+% 
+% After presenting \caps{GMM} and discussing how common concepts in traffic modeling can be expressed in precise mathematical terms within this framework, we proceed with experimental validation of \caps{GMM}. We use the technique of \textit{paired differential simulation} that the authors proposed and used in previous work~\cite{Karpinski07:realism,Karpinski07:cbr-failure}. This technique uses real wireless trace traffic as an experimental control and conducts paired experiments comparing network performance from simulations using control traffic against others using synthetically generated traffic. The results are very positive: \caps{GMM} accurately reproduces network performance characteristics at all levels of the protocol stack.
 
-We believe that two major breakthroughs are needed to improve traffic modeling. The first requirement is an objective standard of realism by which to compare traffic models. Such a standard has already been introduced and used to demonstrate that uniform traffic modeling, including the ubiquitous \caps{CBR} model, drastically distort performance metrics at all levels of the network protocol stack~\cite{Karpinski07:realism,Karpinski07:cbr-failure}. This standard serves to demonstrate the harm of overly simplistic models, such as \caps{CBR}, and provides the means to test whether more complex models deliver the desired improvements.
-The second breakthrough that is needed to improve modeling is a unified framework for expressing a broad variety of traffic models, that allows researchers to systematically express and reason about the assumptions and simplifications entailed in each model.
-
-The major contribution of this paper is addressing this second requirement. We propose the General Matrix Model (\caps{GMM}) for local network traffic.  In this model, the traffic pattern of an entire network is represented as a large, sparse matrix. Each row vector represents a single flow of packets in the network, with components representing the \caps{IP} protocol type, source and destination nodes, flow size, start time, and packet behavior.  The crucial property of this representation is that it respects vector space operations: summation of behavior vectors gives an accurate description of the aggregate behavior of the flows represented by those vectors. One benefit of this representation is that it makes it immediately possible to express a broad variety of assumptions and conditions on traffic patterns in terms of simple matrix operations. It also provides vital mathematical clarity and allows us to apply the theoretical and computational tools of modern linear algebra to the problems of traffic analysis and modeling.
-
-After presenting \caps{GMM} and discussing how common concepts in traffic modeling can be expressed in precise mathematical terms within this framework, we proceed with experimental validation of \caps{GMM}. We use the technique of \textit{paired differential simulation} that the authors proposed and used in previous work~\cite{Karpinski07:realism,Karpinski07:cbr-failure}. This technique uses real wireless trace traffic as an experimental control and conducts paired experiments comparing network performance from simulations using control traffic against others using synthetically generated traffic. The results are very positive: \caps{GMM} accurately reproduces network performance characteristics at all levels of the protocol stack.
 %This does not solve the ``cookbook'' problem, however, because the \caps{GMM} must still be based on real traffic in order to reproduce its behavioral characteristics. It does however, reduce the problem of general traffic modeling to a more constrained problem of matrix modeling.
 
 %Our experiments with various common assumptions of uniformity and regularity in network behavior yield mixed conclusions: most straightforward assumptions of homogenous behavior distort performance results significantly, but there are notable exceptions. The clearest exception is the time domain: traffic models appear to be relatively insensitive to local perturbation of the start time of flows---so long as the overall distribution remains approximately correct. Our conclusion is that traffic modeling needs to discard its assumptions of uniformity, regularity and independence. Instead we need to move ahead trying to understand the complex dependencies between the many aspects of traffic behaviors. By reducing traffic modeling to the well-understood domain of numerical linear analysis, the General Matrix Model brings us significantly closer to the ultimate goal of having a ``cookbook'' model for generating arbitrary, realistic experimental workload patterns.
@@ -184,8 +227,6 @@ After presenting \caps{GMM} and discussing how common concepts in traffic modeli
 %Our analysis shows that the standard constant bit-rate (\caps{CBR}) traffic model, with uniformly chosen nodes and uniform flows of traffic, significantly misrepresents important performance metrics at every level of the network. To qualify these results in more depth, we also investigate partially synthetic variants of this standard model, allowing us to reason about which aspects of workload models have the most impact. For the most commonly used model, the delay of application data traversing the network from sender to receiver is underestimated by more than a factor of 5, \textit{on average}, and by more than a factor of 11 in a quarter of usage scenarios. Network control overhead is overestimated, on average, by a factor of about 2.5, while link control overhead is underestimated by almost a factor of 2. Even for metrics where the average and median misrepresentations are not so extreme, the statistical characteristics of error values often indicate that something is fundamentally unrealistic. None of the partially synthetic models manage to accurately represent more than one or two performance characteristics. We further use the \caps{AODV}~\cite{rfc:aodv} and \caps{OLSR}~\cite{rfc:olsr} ad~hoc routing protocols to show that the relative performance of protocols can be inverted when changing from using a simplistic traffic model to using real traffic: using random endpoint, uniform \caps{CBR} traffic, \caps{AODV} appears to induce less link-layer overhead than \caps{OLSR}, whereas using real traffic, it in fact induces more.
 
 %The first major contribution of this work is the definition of ``sufficient realism,'' together with the analytical and statistical methodology to rigorously test whether synthetic traffic models meet this definition. The second contribution is the conclusion that the most commonly used model of wireless traffic drastically and consistently misrepresents some of the most important metrics for performance evaluation of wireless protocols. Many performance comparisons based on this model may need revisiting. The last and most important contribution is the collection of ideas and analytical tools necessary to create more realistic synthetic traffic models in the future. By applying the methods developed in this work, it will be possible to discover precisely which aspects of network usage affect the realism of performance results. Once this is known, it will become feasible to create models that accurately reproduce those aspects of real wireless usage.
-
-The rest of the paper is organized as follows. In \Section{motivation} we discuss motivation and related work. The General Matrix Model is presented in \Section{general-matrix-model}. In Sections~\ref{sec:common-properties}~and~\ref{sec:modeling-concepts} we explore how common network properties and modeling concepts can be expressed in the the \caps{GMM} framework. Our experimental and analytical methodology for evaluating traffic models is presented in \Section{methodology}, while the results of our experiments are explained and analyzed in \Section{results}. The ramifications of these results are discussed in \Section{discussion}. Finally, in \Section{conclusions}, we conclude with a discussion of how this research may be applied to current wireless studies, and how it points the way to better traffic models for the future.
 
 \section{Motivation \& Related Work}
 \label{sec:related-work}
