@@ -8,7 +8,7 @@
   John~R.~Gilbert%
 }
 
-\usepackage{type1cm}
+%\usepackage{type1cm}
 %\usepackage[pdftex]{graphicx}
 \usepackage[labelfont=bf,small]{caption}
 \usepackage[font=small,labelfont=bf,position=top,nearskip=0em]{subfig}
@@ -56,6 +56,8 @@
 \newcommand{\Di}{Q^{-1}_{\text{ival}}}
 \newcommand{\ones}[1]{\mathbf{1}_{#1}}
 \newcommand{\zeros}[1]{\mathbf{0}_{#1}}
+\newcommand{\mat}[1]{\mathbf{#1}}
+\newcommand{\mean}[1]{\bar{#1}}
 
 \newcommand{\abs}[1]{\left|#1\right|}
 \newcommand{\absx}[1]{|#1|}
@@ -206,18 +208,18 @@ When mapping flow behaviors into a vector space, it is important that the mappin
 The {packets-bytes-duration} representation is clearly overly simplistic and very incomplete. It captures nothing about variability of packet sizes, nor about the ``burstiness'' of packet transmissions; it leaves start time and flow size unspecified; it says nothing about the source or destination of the flow. At the opposite extreme, it is possible to embed the exact start time of each flow, and the exact size and transmission times of its packets, etc. into a vector space. The difficulty comes in doing so in a manner that makes the summation of vectors correspond naturally and meaningfully to the aggregate behavior of flows. We take a highly detailed but intermediate approach, suggested by the results of~\cite{Karpinski07:realism}: to reproduce network performance accurately, it suffices to know, for each flow, the flow type, source node, destination node, start time, flow size, and empirical distributions of packet sizes and inter-packet intervals. If there are $f$ flows in the entire workload pattern, then the collective behavior can be described with six matrices; the rows of each matrix are the behavior vectors of the flows, indexed in some chosen order. We use the following notation for the behavior matrices and their constituent vectors:\vspace{-0.25em}
 \begin{tabbing}
 \hspace{1em}\=\bullet\hspace{0.5em}\=\hspace{9.75em}\=
-$D\:$\=$=\parensx{\vec{d}_i}\:$\=$=\parensx{d_{ij}}\:$\=\kill
-\>\bullet\> type: \>$T$\>$=\parensx{\vec{t}_i}$\>$=\parensx{t_{ij}}$\>$\in\R^{f \times 255}$,\\
-\>\bullet\> sources: \>$S$\>$=\parensx{\vec{s}_i}$\>$=\parensx{s_{ij}}$\>$\in\R^{f \times n}$,\\
-\>\bullet\> destinations: \>$D$\>$=\parensx{\vec{d}_i}$\>$=\parensx{d_{ij}}$\>$\in\R^{f \times n}$,\\
-\>\bullet\> start times: \>$A$\>$=\parensx{\vec{a}_i}$\>$=\parensx{a_{ij}}$\>$\in\R^{f \times d_t}$,\\
-\>\bullet\> sizes in bytes: \>$B$\>$=\parensx{\vec{b}_i}$\>$=\parensx{b_{ij}}$\>$\in\R^{f \times d_b}$,\\
-\>\bullet\> packet sizes: \>$Z$\>$=\parensx{\vec{z}_i}$\>$=\parensx{z_{ij}}$\>$\in\R^{f \times d_z}$,\\
-\>\bullet\> inter-packet intervals: \>$V$\>$=\parensx{\vec{v}_i}$\>$=\parensx{v_{ij}}$\>$\in\R^{f \times d_v}$.
+$\mat{D}\:$\=$=\parensx{\vec{d}_i}\:$\=$=\parensx{d_{ij}}\:$\=\kill
+\>\bullet\> type: \>$\mat{T}$\>$=\parensx{\vec{t}_i}$\>$=\parensx{t_{ij}}$\>$\in\R^{f \times 255}$,\\
+\>\bullet\> sources: \>$\mat{S}$\>$=\parensx{\vec{s}_i}$\>$=\parensx{s_{ij}}$\>$\in\R^{f \times n}$,\\
+\>\bullet\> destinations: \>$\mat{D}$\>$=\parensx{\vec{d}_i}$\>$=\parensx{d_{ij}}$\>$\in\R^{f \times n}$,\\
+\>\bullet\> start times: \>$\mat{A}$\>$=\parensx{\vec{a}_i}$\>$=\parensx{a_{ij}}$\>$\in\R^{f \times d_t}$,\\
+\>\bullet\> sizes in bytes: \>$\mat{B}$\>$=\parensx{\vec{b}_i}$\>$=\parensx{b_{ij}}$\>$\in\R^{f \times d_b}$,\\
+\>\bullet\> packet sizes: \>$\mat{Z}$\>$=\parensx{\vec{z}_i}$\>$=\parensx{z_{ij}}$\>$\in\R^{f \times d_z}$,\\
+\>\bullet\> inter-packet intervals: \>$\mat{V}$\>$=\parensx{\vec{v}_i}$\>$=\parensx{v_{ij}}$\>$\in\R^{f \times d_v}$.
 \end{tabbing}
 The total behavior is the horizontal concatenation of these component matrices:
 \begin{align}
-F = \seq{T,S,D,A,B,Z,V} \in \R^{f \times \Sigma}
+\mat{F} = \seq{\mat{T},\mat{S},\mat{D},\mat{A},\mat{B},\mat{Z},\mat{V}} \in \R^{f \times \Sigma},
 \end{align}
 where $\Sigma=255+2n+d_t+d_b+d_z+d_v$. Many common traffic models can be expressed succinctly and precisely in terms of transformations or conditions on this behavior matrix and its constituents. In the following sections, we explain in detail how each flow's behavior is represented in these matrices. Finally, we describe how a model instance stochastically generates network traffic.
 
@@ -262,7 +264,7 @@ The parameter values defining $\Qi$ must be chosen by the experimenter. In our c
 \label{sec:traffic-generation}
 
 Given an instance of the general matrix model, how do we produce an actual workload from it? Each row of the model is used to randomly generate the behavior of a single flow. The type, source, and destination nodes of the flow are randomly chosen, using histogram vectors $\vec{t}$, $\vec{s}$, and $\vec{d}$ as the proportional probabilities of each type or node being chosen.\footnote{Since a flow must have distinct source and destination nodes, the sampling of endpoints must be done jointly, avoiding the collisions. The simplest technique is the rejection method: if the same node is chosen for both source and destination, reject that pair and begin the selection process again.}
-Next we use the flow size vector, $\vec{b}$ to randomly sample the number of bytes in the flow. The packet size and inter-packet interval vectors, $\vec{z}$ and $\vec{v}$, allow us to compute the expected average packet size and inter-packet intervals for the flow (see~\Section{flow-totals}), call them $\dot{z}$ and $\dot{v}$. From these, together with the flow size in bytes, we estimate the expected duration of the flow: $\dot{d} = \fracx{b\dot{v}}{\dot{z}}$. We finally choose a start time for the flow, using $\vec{a}$ as a vector of relative probabilities for each bin of start times, but ensuring that the start time plus the expected duration, $\dot{d}$, does not exceed the maximum simulation time for the workflow. From the range of possible values mapping to the chosen start bin, we choose a random time uniformly.
+Next we use the flow size vector, $\vec{b}$ to randomly sample the number of bytes in the flow. The packet size and inter-packet interval vectors, $\vec{z}$ and $\vec{v}$, allow us to compute the expected average packet size and inter-packet intervals for the flow (see~\Section{flow-totals}), call them $\mean{z}$ and $\mean{v}$. From these, together with the flow size in bytes, we estimate the expected duration of the flow: $\mean{d} = \fracx{b\mean{v}}{\mean{z}}$. We finally choose a start time for the flow, using $\vec{a}$ as a vector of relative probabilities for each bin of start times, but ensuring that the start time plus the expected duration, $\mean{d}$, does not exceed the maximum simulation time for the workflow. From the range of possible values mapping to the chosen start bin, we choose a random time uniformly.
 
 Having determined the overall parameters of the flow, we generate the actual packets of the flow. The first packet is sent at the chosen start time; the size of each packet is sampled from the histogram of packet sizes, $\vec{z}$; the interval until the next packet is determined from the interval vector, $\vec{v}$. Specifically, an interval index, $k$, is chosen with probability proportional to $\vec{v}(k)$; a second value, $u$, is chosen uniformly from $(0,1]$; the pair $\seq{k,u}$ is transformed back into a continuous time value using the ``dequantization'' function:
 \begin{align}
@@ -297,17 +299,17 @@ Having defined our representation of network behavior, we turn to deriving usefu
 \subsection{Communication Topology}
 \label{sec:communication-topology}
 
-The number of flows between each pair of nodes in the network is expressed by the matrix product $SD^t\in\R^{n \times n}$ ($*^t$~denotes transpose). That is $(SD^t)_{ij}$ is the number of flows from node $i$ to node $j$. The total number of source flows for each node is given by the vector $S^t\ones{f}$, and the total number of destination flows is given by $D^t\ones{f}$. ($\ones{f}$ is the $f$-dimensional column vector consisting of all ones.)
+The number of flows between each pair of nodes in the network is expressed by the matrix product $\mat{SD}^t\in\R^{n \times n}$ ($*^t$~denotes transpose). That is $(\mat{SD}^t)_{ij}$ is the number of flows from node $i$ to node $j$. The total number of source flows for each node is given by the vector $\mat{S}^t\ones{f}$, and the total number of destination flows is given by $\mat{D}^t\ones{f}$. ($\ones{f}$ is the $f$-dimensional column vector consisting of all ones.)
 
 \subsection{Expected Average Packet Size \& Intervals}
 \label{sec:flow-totals}
 
-From the matrices $Z$ and $V$, we can compute the expected average packet size, $\dot{z}$, and average inter-packet interval, $\dot{v}$, for each flow. The computations require knowing the values that each matrix column represents. The computed duration is only approximate because information is irrecoverably lost in the quantization process (see \Equation{interval-quantization}). The vectors of representative values for $Z$ and $V$ are:
+From the matrices $\mat{Z}$ and $\mat{V}$, we can compute the expected average packet size, $\mean{z}$, and average inter-packet interval, $\mean{v}$, for each flow. The computations require knowing the values that each matrix column represents. The computed duration is only approximate because information is irrecoverably lost in the quantization process (see \Equation{interval-quantization}). The vectors of representative values for $\mat{Z}$ and $\mat{V}$ are:
 \begin{align}
 \vec{\sigma}&=\seq{1,2,3,\dots,d_z},\\
 \vec{\tau}&=\seq{\Di\left(k,\fracx{1}{2}\right)}_{k=1}^{d_v}.
 \end{align}
-Using these representative values, the expected average packet size for a flow may be computed as $\dot{z}=\fracx{\vec{z}\cdot\vec{\sigma}}{\vec{z}\cdot\ones{d_z}}$, and the expected average inter-packet interval size as $\dot{v}=\fracx{\vec{v}\cdot\vec{\tau}}{\vec{v}\cdot\ones{d_v}}$.
+Using these representative values, the expected average packet size for a flow may be computed as $\mean{z}=\fracx{\vec{z}\cdot\vec{\sigma}}{\vec{z}\cdot\ones{d_z}}$, and the expected average inter-packet interval size as $\mean{v}=\fracx{\vec{v}\cdot\vec{\tau}}{\vec{v}\cdot\ones{d_v}}$.
 
 \section{Expression of Common Modeling Concepts}
 \label{sec:modeling-concepts}
@@ -318,11 +320,11 @@ The simplifying assumptions made by most traffic models can be classified into t
 
 The concept of uniformity, as used here, entails that certain properties of each flow are assumed to be statistically or deterministically uniform. Examples include: assuming that each flow's packets have the same size and inter-packet interval (i.e. the \caps{CBR} flow model); assuming that each node is equally likely to be the source of a given flow; assuming that all start times for a flow are equally likely.
 
-Since uniform behaviors entail homogeneity of properties with respect to each flow individually, a trace matrix can be transformed to a matrix satisfying the model's assumptions via right matrix multiplication. Right multiplication mixes the elements within each row, and if the mixing weights are uniform, the result is uniform behavior. For example, to make the roles of the nodes with respect to each flow statistically identical, we transform $S$ and $D$:
+Since uniform behaviors entail homogeneity of properties with respect to each flow individually, a trace matrix can be transformed to a matrix satisfying the model's assumptions via right matrix multiplication. Right multiplication mixes the elements within each row, and if the mixing weights are uniform, the result is uniform behavior. For example, to make the roles of the nodes with respect to each flow statistically identical, we transform $\mat{S}$ and $\mat{D}$:
 \begin{align*}
-S' &= S\ones{n \times n}/n, & D' &= D\ones{n \times n}/n.
+\mat{S}' &= \mat{S}\ones{n \times n}/n, & \mat{D}' &= \mat{D}\ones{n \times n}/n.
 \end{align*}
-This makes all the values in each flow's row identically the average of the original $n$ values. As another example, the constant bit-rate (\caps{CBR}) flow model, in its strictest sense, is an intra-flow model, which stipulates that all the packets in each flow behave identically, having identical sizes and intervals; thus each flow's bit-rate is constant, as the name implies. The strict \caps{CBR} model can be easily expressed with the packets-bytes-duration (\caps{PBD}) model used as an example in \Section{representations}. The pair of matrices $\seq{Z,V}$ is transformed to \caps{PBD} form using the vectors defined in \Section{flow-totals}: $\seq{Z,V}\Gamma\in\R^{f \times 3}$, where
+This makes all the values in each flow's row identically the average of the original $n$ values. As another example, the constant bit-rate (\caps{CBR}) flow model, in its strictest sense, is an intra-flow model, which stipulates that all the packets in each flow behave identically, having identical sizes and intervals; thus each flow's bit-rate is constant, as the name implies. The strict \caps{CBR} model can be easily expressed with the packets-bytes-duration (\caps{PBD}) model used as an example in \Section{representations}. The pair of matrices $\seq{\mat{Z},\mat{V}}$ is transformed to \caps{PBD} form using the vectors defined in \Section{flow-totals}: $\seq{\mat{Z},\mat{V}}\Gamma\in\R^{f \times 3}$, where
 \begin{align}
 \Gamma=\begin{pmatrix}
 \ones{} & \vec{\sigma} & \zeros{} \\
@@ -330,11 +332,11 @@ This makes all the values in each flow's row identically the average of the orig
 \end{pmatrix} \in \R^{(d_v+d_z)\times{3}}.
 \end{align}
 \Figure{trace-vs-uniform} graphically depicts examples of uniform behaviors as compared to realistic behaviors from traces.
-%By replacing $S'$ with $S$, this can also be viewed as a set of linear constraints on the matrix $S$, providing a proscriptive definition 
+%By replacing $\mat{S}'$ with $\mat{S}$, this can also be viewed as a set of linear constraints on the matrix $\mat{S}$, providing a proscriptive definition 
 
 %We use the term \textit{uniformity} do describe assumptions made about the ``sameness'' of various properties of flows. The constant bit-rate (\caps{CBR}) model, for example, is an assumption about the uniformity of all of a flow's packets: i.e. that they have the same size and are evenly spaced in time. While this is the strictest sense of the \caps{CBR} model, it is rare for this assumption to be made in isolation. Another common simplification is to make the sizes of flows identical, or chose them randomly from a uniform distribution; similarly for the starting time of each flow. Finally, when choosing endpoints for a given flow, lacking a better model, it is not unusual to treat all nodes identically, making each an equally likely source or destination for a given flow.
 
-%It is common in generating traffic behaviors for experiments to treat packets, nodes, and flows uniformly to varying degrees. This is largely because of the high complexity of doing otherwise and the lack of compelling alternatives. Here we examine how various notions of uniformity are expressed in the matrix model. In general, \textit{intra-flow uniformity} is effected by right multiplication, which mixes the elements in each row, whereas \textit{inter-flow uniformity} is effected by left multiplication, which mixes elements across rows. The constant bit-rate (\caps{CBR}) flow model, for example, in its strictest sense, is an intra-flow model, which stipulates that all the packets in each flow behave identically, having identical sizes and intervals; thus each flow's bit-rate is constant, as the name implies. The strict \caps{CBR} model can be easily expressed with the packets-bytes-duration (\caps{PBD}) model used as an example in \Section{representations}. The pair of matrices $\seq{Z,V}$ is transformed to \caps{PBD} form using the vectors defined in \Section{flow-totals}: $\seq{Z,V}\Gamma\in\R^{f \times 3}$, where
+%It is common in generating traffic behaviors for experiments to treat packets, nodes, and flows uniformly to varying degrees. This is largely because of the high complexity of doing otherwise and the lack of compelling alternatives. Here we examine how various notions of uniformity are expressed in the matrix model. In general, \textit{intra-flow uniformity} is effected by right multiplication, which mixes the elements in each row, whereas \textit{inter-flow uniformity} is effected by left multiplication, which mixes elements across rows. The constant bit-rate (\caps{CBR}) flow model, for example, in its strictest sense, is an intra-flow model, which stipulates that all the packets in each flow behave identically, having identical sizes and intervals; thus each flow's bit-rate is constant, as the name implies. The strict \caps{CBR} model can be easily expressed with the packets-bytes-duration (\caps{PBD}) model used as an example in \Section{representations}. The pair of matrices $\seq{\mat{Z},\mat{V}}$ is transformed to \caps{PBD} form using the vectors defined in \Section{flow-totals}: $\seq{\mat{Z},\mat{V}}\Gamma\in\R^{f \times 3}$, where
 %\begin{align}
 %\Gamma=\begin{pmatrix}
 %\ones{} & \vec{\sigma} & \zeros{} \\
@@ -344,16 +346,16 @@ This makes all the values in each flow's row identically the average of the orig
 
 \subsection{Marginal Behavior}
 
-Marginality is an orthogonal concept to uniformity: the distribution of some property is identical \textit{across} all flows. For example, if we determine a distribution of flow sizes across the entire network and assume that this distribution applies \textit{independent of other flow properties}, this is a marginal model for flow size. Marginal behavior is effected by left multiplication by a matrix with uniform columns. This specific example is generated by left-uniformizing the flow size matrix: $B' = (\ones{f \times f}/f)B$.
+Marginality is an orthogonal concept to uniformity: the distribution of some property is identical \textit{across} all flows. For example, if we determine a distribution of flow sizes across the entire network and assume that this distribution applies \textit{independent of other flow properties}, this is a marginal model for flow size. Marginal behavior is effected by left multiplication by a matrix with uniform columns. This specific example is generated by left-uniformizing the flow size matrix: $\mat{B}' = (\ones{f \times f}/f)\mat{B}$.
 The traffic models proposed by {\FHC} are all marginal: they propose certain network-wide parametric distributions for start times, flow sizes and the number of flows per node. These models do not account for non-independence between these and other flow properties. We will discuss this limitation and its implications when we analyze our experimental results.
 
 \subsection{Regularized Behavior}
 
-The final form of homogenization we consider, is regularization. This is a restricted form of marginality: we may assume that marginal distributions apply to all the flows in certain groupings. For example, we can provide a distribution of flow sizes on a per-source basis. That is, each source node can have its \textit{own} distribution, and the sizes of its flows are drawn from that distribution, independent of their other properties. This is simply accomplished by left-multiplication by a non-uniform matrix. For example, to make flow behavior uniform on a per source basis, we left-multiply by the ``source-uniformizing'' matrix: $F'=(SS^t/f)F$. Per destination uniformity can be achieved similarly, with left-multiplication by a corresponding destination-uniformizing matrix: $F'=(DD^t/f)F$.
+The final form of homogenization we consider, is regularization. This is a restricted form of marginality: we may assume that marginal distributions apply to all the flows in certain groupings. For example, we can provide a distribution of flow sizes on a per-source basis. That is, each source node can have its \textit{own} distribution, and the sizes of its flows are drawn from that distribution, independent of their other properties. This is simply accomplished by left-multiplication by a non-uniform matrix. For example, to make flow behavior uniform on a per source basis, we left-multiply by the ``source-uniformizing'' matrix: $\mat{F}'=(\mat{SS}^t/f)\mat{F}$. Per destination uniformity can be achieved similarly, with left-multiplication by a corresponding destination-uniformizing matrix: $F'=(\mat{DD}^t/f)\mat{F}$.
 %Although assumptions about uniformity across flows are common, there is little agreement about which notion of uniformity is most appropriate; often it is simply left unspecified. The confusion arises due to the lack of a unique way of associating flows with nodes. Each node can equally viably be associated with its source or its destination. Which association is more valid? Consider a web request: should the behavior of the request be determined by what the client typically does? Or should the requests that the server typically receives determine behavior? There is no armchair answer: only analysis of real data can give us the answer. The matrix model provides an analytical framework for doing so.
 The matrix model has the benefit of making the uniformization of behaviors completely explicit. It also allows us to easily define intermediate choices. If we wish make the behavior of each flow a weighted average of the aggregate behaviors of its source and destination nodes, we can express this easily:
 \begin{align}
-F' = \frac{1}{f}((1-\alpha)(SS^t)+\alpha(DD^t))F.
+\mat{F}' = \frac{1}{f}((1-\alpha)(\mat{SS}^t)+\alpha(\mat{DD}^t))\mat{F}.
 \end{align}
 The parameter $\alpha$ allows us to smoothly vary the weighting of the source and destination behaviors. Source-only behavior is given by $\alpha=0$; destination-only by $\alpha=1$; to weight source and destination equally, take $\alpha=\frac{1}{2}$.
 
@@ -385,17 +387,17 @@ The parameter $\alpha$ allows us to smoothly vary the weighting of the source an
 \multicolumn{1}{c}{\textbf{description}} \\
 \hline
 {\footnotesize{GMM}} & --- & the general matrix model \\\hline\hline
-time uniform & $A'=A(\ones{d_t \times d_t}/d_t)$ & all start times are equally likely \\\hline
-node uniform & $S'=S(\ones{n \times n}/n)$~~~~$D'=D(\ones{n \times n}/n)$ & nodes behave stochastically identically with respect to flows \\\hline
+time uniform & $\mat{A}'=\mat{A}(\ones{d_t \times d_t}/d_t)$ & all start times are equally likely \\\hline
+node uniform & $\mat{S}'=\mat{S}(\ones{n \times n}/n)$~~~~$\mat{D}'=\mat{D}(\ones{n \times n}/n)$ & nodes behave stochastically identically with respect to flows \\\hline
 full uniform & \textit{all uniform transformations} & applies all the uniformity assumptions of the above three models \\\hline\hline
-time marginal & $A'=(\ones{f \times f}/f)A$ & start times chosen from marginal distribution of start times \\\hline
-size marginal & $B'=(\ones{f \times f}/f)B$ & flow size (bytes) is chosen independently of other properties \\\hline
-node marginal & $S'=(\ones{f \times f}/f)S$~~~~$D'=(\ones{f \times f}/f)D$ & nodes behave distinctly, but behavior is independent of flows \\\hline
-packet marginal & $Z'=(\ones{f \times f}/f)Z$~~~~$V'=(\ones{f \times f}/f)V$ & packet behavior is variable bit-rate, aggregated across all flows \\\hline
+time marginal & $\mat{A}'=(\ones{f \times f}/f)\mat{A}$ & start times chosen from marginal distribution of start times \\\hline
+size marginal & $\mat{B}'=(\ones{f \times f}/f)\mat{B}$ & flow size (bytes) is chosen independently of other properties \\\hline
+node marginal & $\mat{S}'=(\ones{f \times f}/f)\mat{S}$~~~~$\mat{D}'=(\ones{f \times f}/f)\mat{D}$ & nodes behave distinctly, but behavior is independent of flows \\\hline
+packet marginal & $\mat{Z}'=(\ones{f \times f}/f)\mat{Z}$~~~~$\mat{V}'=(\ones{f \times f}/f)\mat{V}$ & packet behavior is variable bit-rate, aggregated across all flows \\\hline
 full marginal & \textit{all marginal transformations} & applies all the marginality assumptions of the above four models \\\hline\hline
-source regular & $F'=(SS^t/f)F$ & flow behaviors are aggregated on a per source-node basis \\\hline
-dest regular & $F'=(DD^t/f)F$ & flow behaviors are aggregated on a per destination-node basis \\\hline
-mixed regular & $F'=\frac{1}{2f}(SS^t+DD^t)F$ & flow behaviors are aggregated on a mixed source/destination basis \\\hline
+source regular & $\mat{F}'=(\mat{SS}^t/f)\mat{F}$ & flow behaviors are aggregated on a per source-node basis \\\hline
+dest regular & $\mat{F}'=(\mat{DD}^t/f)\mat{F}$ & flow behaviors are aggregated on a per destination-node basis \\\hline
+mixed regular & $\mat{F}'=\frac{1}{2f}(\mat{SS}^t+\mat{DD}^t)\mat{F}$ & flow behaviors are aggregated on a mixed source/destination basis \\\hline
 \end{tabular}
 \caption{Matrix-based traffic models evaluated by paired differential simulation.}
 \label{tab:traffic-models}
@@ -538,23 +540,25 @@ It is easily verified that the difference, ratio, and standard error measures do
 \label{sec:results}
 
 \begin{sidewaysfigure*}
-%\begin{figure*}[htb]
 \subfloat[\textbf{Application:} Average End-to-End Delay]%
-{\includegraphics[width=4.45in]{plots/Application/delay.pdf}}
+{\includegraphics[width=4.45in]{plots/Application/delay.pdf}}%
 \subfloat[\textbf{Application:} Packet Delivery Ratio]%
 {\includegraphics[width=4.45in]{plots/Application/delivery_ratio.pdf}}
+%
 \subfloat[\textbf{Application:} Average Received Throughput]%
-{\includegraphics[width=4.45in]{plots/Application/throughput.pdf}}
+{\includegraphics[width=4.45in]{plots/Application/throughput.pdf}}%
 \subfloat[\textbf{Network:} AODV Control Overhead]%
 {\includegraphics[width=4.45in]{plots/Network/control_packets.pdf}}
+%
 \subfloat[\textbf{Network:} Packets Dropped in Routing Queue]%
-{\includegraphics[width=4.45in]{plots/Network/dropped.pdf}}
+{\includegraphics[width=4.45in]{plots/Network/dropped.pdf}}%
 \subfloat[\textbf{Link:} 802.11 Control Overhead]%
 {\includegraphics[width=4.45in]{plots/Link/overhead.pdf}}%
-\caption{Box-and-whisker plots of log-ratio error values for all metrics and traffic models. The lower axis indicates the log-ratio, while the upper axis shows raw ratio values. Each box contains the central majority of log-ratio values: the left and right bounds are at the $25^\text{th}$ and $75^\text{th}$ percentiles. The dark middle line indicates the median value, while the diamond marks the mean. The whiskers (dotted lines) extend to the furthest non-outlier values, while the points beyond that are outliers. The notch in the middle of each bar indicates a $95\%$ confidence interval for the true underlying median value; if two notches do not overlap, they are very unlikely to have the same median.}
+%
+\caption{\footnotesize%
+Box-and-whisker plots of log-ratio error values for all metrics and traffic models. The lower axis indicates the log-ratio, while the upper axis shows raw ratio values. Each box contains the central majority of log-ratio values: the left and right bounds are at the $25^\text{th}$ and $75^\text{th}$ percentiles. The dark middle line indicates the median value, while the diamond marks the mean. The whiskers (dotted lines) extend to the furthest non-outlier values, while the points beyond that are outliers. The notch in the middle of each bar indicates a $95\%$ confidence interval for the true underlying median value; if two notches do not overlap, they are very unlikely to have the same median.
+}
 \label{fig:box-plots}
-%\vspace{-1.25em}
-%\end{figure*}
 \end{sidewaysfigure*}
 
 Our simulation results are summarized in \Figure{box-plots}. Each subfigure shows a single performance metric. The distribution of log-ratio error values for each traffic model is visualized with a box-and-whisker plot. The box indicates the range from the 25th to 75th percentiles of values, while the ``whiskers'' indicate the full range, excluding outliners (which are shown as isolated points). These plots allow immediate assessment of realism: a good traffic model should have error values that are tightly clustered around the center, with a small, evenly balanced box, and relatively small whiskers. Additionally, the mean and median markers should be close to the center. It should be noted that the error scale is logarithmic, so even a slight increase in spread or deviation from the center indicates a disproportionately large decrease in model quality. Non-logarithmic scale markers are shown above each plot; the values indicate the factor of over- or under-representation for the performance metric.
