@@ -35,8 +35,8 @@
 \newcommand{\Table}[1]{\hyperref[tab:#1]{Table~\ref*{tab:#1}}}
 
 \newcommand{\FHC}{Hern\'andez-Campos~\textit{et~al.}}
-\newcommand{\class}[1]{\textsc{\smaller{#1}}}
-\newcommand{\model}[1]{\textsf{\smaller{#1}}}
+\newcommand{\class}[1]{\textsc{#1}}
+\newcommand{\model}[1]{\textsf{#1}}
 \newcommand{\RFC}[1]{\caps{RFC}~{#1}}
 
 \DeclareMathOperator{\var}{Var}
@@ -59,7 +59,6 @@
 \newcommand{\ones}[1]{\mathbf{1}_{#1}}
 \newcommand{\zeros}[1]{\mathbf{0}_{#1}}
 \newcommand{\mat}[1]{\mathbf{#1}}
-\renewcommand{\vec}[1]{\mathbf{#1}}
 \newcommand{\mean}[1]{\bar{#1}}
 \newcommand{\trans}[1]{{#1}^T}
 \newcommand{\inner}[2]{{#1}\cdot{#2}}
@@ -162,9 +161,11 @@ Finally, we argue that the natural generalization of this approach is to represe
 The matrix representation gives a representation of network behavior that preserves the non-uniformity and non-independence of flow behaviors, but still is highly amenable to analysis using theoretical and numerical linear algebra.
 Moreover, we describe how to generate traffic from arbitrary traffic matrices, and demonstrate experimentally that the specific matrix representation we propose preserves the performance characteristics of real traffic.
 
+\input{trace_vs_uniform}
+
 % TODO: update roadmap paragraph.
 
-The rest of the paper is organized as follows. In \Section{motivation} we discuss motivation and related work. The General Matrix Model is presented in \Section{general-matrix-model}. In Sections~\ref{sec:common-properties}~and~\ref{sec:modeling-concepts} we explore how common network properties and modeling concepts can be expressed in the the \caps{GMM} framework. Our experimental and analytical methodology for evaluating traffic models is presented in \Section{methodology}, while the results of our experiments are explained and analyzed in \Section{results}. The ramifications of these results are discussed in \Section{discussion}. Finally, in \Section{conclusions}, we conclude with a discussion of how this research may be applied to current wireless studies, and how it points the way to better traffic models for the future.
+The rest of the paper is organized as follows. In \Section{motivation} we discuss motivation and related work. The General Matrix Model is presented in \Section{general-matrix-model}. In Sections~\ref{sec:common-properties}~and~\ref{sec:modeling-concepts} we explore how common network properties and modeling concepts can be expressed in the the \caps{GMM} framework. Our experimental and analytical methodology for evaluating traffic models is presented in \Section{methodology}, while the results of our experiments are explained and analyzed in \Section{results}. The ramifications of these results are discussed in \Section{discussion}. Finally, in \Section{conclusions}, we conclude with a discussion of how this research may be applied to current wireless studies. %, and how it points the way to better traffic models for the future.
 
 \section{Motivation \& Related Work}
 \label{sec:related-work}
@@ -174,7 +175,7 @@ The rest of the paper is organized as follows. In \Section{motivation} we discus
 
 \newfootnote{\QoSnote}{This is violated by some quality of service (QoS) schemes. However, we can simply add QoS metadata---such as traffic classes or urgency flags---to our models of user behavior and the rest of our arguments remain valid. The network is still disinterested in the exact content of the data being transported; only the QoS metadata is relevant.}
 
-The interaction of wireless users and application behavior with the lower layers of the networking stack is characterized by where, when, how much, and to whom data is transmitted. The joint pattern of traffic generation and mobility through time and space completely determines the effect of wireless usage on the lower levels of the network. This is due to the data-agnostic nature of the protocol stack: by design, \caps{IP} networks treat all data in the same manner~\cite{Clark88}.\QoSnote The credibility of conclusions derived from simulation or experimental deployment depends crucially on our confidence that the models used to generate traffic in experiments are sufficiently realistic.
+The interaction of network users and application behavior with the lower layers of the networking stack is characterized by where, when, how much, and to whom data is transmitted. The joint pattern of traffic generation and mobility through time and space completely determines the effect of wireless usage on the lower levels of the network. This is due to the data-agnostic nature of the protocol stack: by design, \caps{IP} networks treat all data in the same manner~\cite{Clark88}.\QoSnote The credibility of conclusions derived from simulation or experimental deployment depends crucially on our confidence that the models used to generate traffic in experiments are sufficiently realistic. \Figure{trace-vs-uniform} demonstrates how drastically different network traffic appears when assumptions of uniform behavior at various levels are imposed. Assumptions of independence are not as visually dramatic, but we will demonstrate that they distort the performance characteristics of networks almost as much---or more---than uniform models.
 
 Paxson and Floyd observed~\cite{Paxson95} that the interplay between endpoint behavior and the network conditions is inherently \textit{closed-loop} in the sense that it is potentially affected by complex feedback. Traffic models typically attempt to preserve the closed-loop behavior of network traffic~\cite{Avallone04,Hernandez06:dissertation}. This presents a fundamental difficulty, however, in that it presumes that we know the intent of endpoints: what \textit{would} they have done under different conditions? While we can speculate about what an individual node might hypothetically do, we currently hardly understand the impact of the full-network traffic pattern upon performance metrics at all---even without trying to account for hypothetical reactions to alternate situations. Especially in the wireless setting, a fuller understanding of total network behavior must be reached before we can sensibly tackle the complexities of multi-level behavioral feedback. Accordingly, in this paper we attempt to provide a first-order approximation of complete network behavior by studying the response of performance metrics to \textit{open-loop} traffic models without multi-level feedback. It is important to realize that while this does not provide a final picture, we currently lack even a first-order understanding of the effect of different workloads on performance. This first-order understanding is an essential initial step.
 
@@ -284,24 +285,6 @@ Having determined the overall parameters of the flow, we generate the actual pac
 \Di(k,u)=v_{\min}+(v_{\max}-v_{\min})\left(\frac{k-u}{d_v}\right)^{\frac{1}{\gamma}}.
 \end{align}
 The packet stream ends when the number of bytes allocated to the flow have been emitted. %The last packet is only the size of the remaining number of bytes.
-
-\begin{figure*}[tb]
-\begin{center}
-\subfloat[node trace]
-{\includegraphics[width=1.335in]{flow_topology_trace}\label{fig:flow-topology-trace}}
-\subfloat[node uniform]
-{\includegraphics[width=1.335in]{flow_topology_uniform}\label{fig:flow-topology-uniform}}
-\subfloat[flow trace]
-{\includegraphics[width=1.335in]{flow_behavior_trace}\label{fig:flow-behavior-trace}}
-\subfloat[flow uniform]
-{\includegraphics[width=1.335in]{flow_behavior_uniform}\label{fig:flow-behavior-uniform}}
-\subfloat[packet]
-{\includegraphics[width=1.335in]{flow_packet_behavior}\label{fig:packet-behavior}}
-\caption{Examples illustrating trace (real) versus uniform (na\"ive synthetic) behaviors at the node, flow and packet levels. Figures \ref{fig:flow-topology-trace} and \ref{fig:flow-topology-uniform} show example node behaviors. The width of each line is proportional to the logarithm of the number of flows between the nodes it connects (zero is the Internet gateway). Uniform and trace flow behavior examples are plotted in Figures \ref{fig:flow-behavior-trace} and \ref{fig:flow-behavior-uniform}. The time axis indicates when flows start and end; the width of each flow line is proportional to the logarithm of its data rate. Figure \ref{fig:packet-behavior} compares uniform (i.e. \caps{CBR}) packet behavior with the trace of an actual flow. In the uniform model, the cumulative data sent increases smoothly over time, whereas in the actual packet trace, the transmissions are variable both in size and in inter-packet interval, leading to a ``lumpy'' cumulative data plot.}
-\label{fig:trace-vs-uniform}
-\end{center}
-\vspace{-1.25em}
-\end{figure*}
 
 \section{Expression of Common Properties}
 \label{sec:common-properties}
