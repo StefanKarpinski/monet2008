@@ -99,13 +99,15 @@ We propose a representation of wireless workload patterns as large, sparse matri
 %We demonstrate how linear algebra can be effectively used to represent and perform computations with traffic behaviors in wireless networks. Moreover, we map common concepts and techniques from traffic modeling into this new algebraic domain, showing how they can be expressed with mathematical precision and succinctness, while simultaneously being made clearer and more general. We demonstrate experimentally that the general matrix model accurately reproduces network performance metrics, using the differential simulation methodology introduced in~\cite{Karpinski07:realism} and applied in~\cite{Karpinski07:cbr-failure} to discredit the common constant bit-rate model. A range of common modeling approaches are implemented in the general matrix model and evaluated experimentally. We conclude with future directions for modeling research based on the new algebraic framework.
 \end{abstract}
 
+% The model of flow behavior implicit in non-negative matrix factoriation technique is that flow behavior is a composite of some limited set of basic behaviors---and that fractions of each flow ``belong'' to each behavior. This is not an \latin{a priori} unreasonable hypothesis. Contrast that with the assumptions underlying uniform and marginal simplifications of traffic behavior, which can be seen to be intuitively unreasonable without ever conducting and actual experiment or calculation.
+
 \keywords{
   traffic modeling \and
   traffic analysis \and
   workload generation \and
   network simulation \and
   linear algebra \and
-  matrix analysis
+  non-negative matrix factorization
 }
 
 \section{Introduction}\label{sec:intro}
@@ -119,16 +121,16 @@ Both traffic analysis and realistic workload generation, however, remain active 
 One of the major challenges of modeling full-network traffic is the multilevel interdependence of packet, flow\flownote and node behaviors.
 Three types of simplifying assumptions are commonly applied in both analysis and generation:
 \begin{enumerate}
-\item \textbf{Uniform:} that traffic behaviors are uniformly distributed. For example, assuming that  all nodes in a network have equal probability of being the source or destination of each flows.
+\item \textbf{Uniform:} that traffic properties are uniformly distributed. For example, assuming that  all nodes in a network have equal probability of being the source or destination of each flows.
 Another common example is the assumption that all packet sizes and inter-packet intervals are the same; this is commonly known as the ``constant bit-rate'' (\caps{CBR}) model.
 \item \textbf{Marginal:} that traffic properties share a single, common \emph{marginal}\marginalnote distribution across the entire network, and individual values are drawn independently and unconditionally from this shared distribution.
 For example, assuming that a single distribution of packet sizes describes all flows in a network, as compared to equipping each flow in the network with its own specific distribution.
 \item \textbf{Conditional:} that traffic behaves marginally, but only within equivalence classes defined by certain conditions.
-The assumption, for example, that all flows emanating from a common source node share the same packet size distribution would be a conditional model, conditioned on source nodes.
+The assumption, for example, that all flows emanating from a common source node share the same packet size distribution is a conditional model, conditioned on source nodes.
 \end{enumerate}
 We would be arguing against a straw man if we implied that researchers who apply these assumptions actually believe them to be true.
 They clearly are not: flows have drastically different packet size distributions; different nodes initiate and receive drastically different numbers of packets and flows.
-Simply considering intuitive examples of common behavior illustrate this:
+Simply considering intuitive examples of common behavior illustrates this amply:
 downloading a large file \latin{vs.} typing in an \caps{SSH} session;
 BitTorrent users \latin{vs.} occasional email checkers.
 
@@ -147,43 +149,45 @@ Suppose, for example, that we assume that packet sizes and inter-packet interval
 In the terminology introduced above, this is a flow-conditional packet behavior model.
 Prior research has indicated that, given accurate per-flow distributions, this is a sufficiently realistic model of network behavior~\cite{Karpinski07:realism}.\realismnote
 In this model, however, each flow must have its own specific, realistic pair of distributions for packet size and inter-packet intervals.
-Moreover, the distribution of distributions across the entire network must simultaneously be realistic.
-Modeling such ``distributions of distributions'' realistically for entire networks is currently an unsolved problem, which we begin to address here.
+Moreover, the ``distribution of distributions'' across the entire network must simultaneously be realistic.
+Modeling such distributions of distributions realistically for entire networks is currently an unsolved problem; we provide the means to address it.
 % This paper provides the mathematical framework in which to address this problem and demonstrates the effectiveness of this framework by taking the first steps towards fully understanding the complex interdependencies of real network behavior.
 % make a major first step towards being able to model the distribution of flow behaviors across an entire network, by providing the framework in which to address this problem mathematically, and by demonstrating that this framework actually allows us to meaningfully analyze non-uniform, non-independent cross-network behavior.
 
-Fundamentally, uniform, marginal and conditional models are applied to reduce the dimensionality of network behavior drastically, making analysis and generation tractable problems.
+Fundamentally, uniform, marginal and conditional models are applied to reduce the dimensionality of network behaviors drastically, making analysis and generation tractable problems.
 From this perspective, two questions immediately present themselves:
 \begin{enumerate}
-\item Can we represent ``unreduced'' network behavior in such a way that analysis and generation are still tractable problems?
+\item Can we represent ``unreduced'' network behavior in such a manner that analysis and generation are still tractable problems?
 \item Is there a better way to reduce dimensionality than assuming independence or uniformity of behaviors?
 \end{enumerate}
 This paper answers both of these questions.
 To address the first question, we propose the concept of a \emph{linear representation} of network traffic.
-A linear representation of traffic represents each flow's behavior as a vector such that the following linearity condition is satisfied:
+A linear representation of traffic is a vector-valued function on flows such that the following linearity condition is satisfied:
 \begin{quote}
 The sum of the representations of two flows is a vector that represents the aggregate behavior of the two flows.
 \end{quote}
-A complete traffic sample is expressed as a matrix of such vectors.
+The complete behavior of a network is expressed as a matrix of such vectors, having one row per flow.
 Linear representations express full network behavior, without imposing assumptions of uniformity or marginality, yet allow effective traffic analysis and workload generation.
 We present a specific linear representation, called the general matrix model (\caps{GMM}), and demonstrate experimentally that in wireless networks this model generates workload that accurately reproduces the performance characteristics of real wireless network traffic.
 
-We address the second question in two parts.
-First, we observe that in linear representations of traffic, uniform, marginal and conditional assumptions are simply assertions about rows and columns of the representation matrix being identical to each other. 
-Moreover, real traffic matrices can be transformed into the closest uniform, marginal or conditional approximation through simple matrix multiplications.
-Viewed this way, the cost of these assumptions becomes immediately apparent: these transformations discard vast amounts of information from the original trace.
-It is this wholesale destruction information that causes uniform and marginal traffic models to drastically distort the performance characteristics of real traffic.
+\newfootnote{\ranknote}{For uniform and marginal assumptions, the multiplication matrix has rank 1  since all rows and columns are identical. In the conditional case, the rank of the matrix is the number of conditioning classes.}
+
+To address the question of whether there are better ways to reduce the dimensionality of network behaviors, we first make a simple observation.
+In linear representations of traffic, uniform, marginal and conditional assumptions are assertions about rows and columns of the representation matrix being identical. 
+Moreover, real traffic matrices can be transformed into uniform, marginal or conditional forms through  very simple matrix multiplications.
+These transformations, however, are extremely destructive: the matrices are degenerate with very low rank,\ranknote so multiplication destroys almost all information in the original traffic matrix.
 
 \input{trace_vs_uniform}
 
-To show how traffic can be modeled less destructively, 
+We argue that matrix factorization, which is nondestructive, is a far superior way to reduce the dimensionality of network traffic behaviors.
+% To show how traffic can be modeled less destructively, 
 % To demonstrate how linear representation allows drastically improved analysis and modeling of network traffic,
-we use non-negative matrix factorization to find an low-dimensional approximation of the packet size and inter-packet behavior matrices.
+To demonstrate this approach, we use non-negative matrix factorization (\caps{NMF}) to find a low-dimensional approximation of the packet size and inter-packet interval behavior matrices.
 % As an example of how the linear representation allows drastically improved analysis and modeling of network traffic, we apply non-negative matrix factorization to find an low-dimensional representation of packet size and inter-packet flow behaviors.
 % Each flow's behavior can be explained as a linear combination of only twelve ``basic behaviors.'' 
 % Although they are found purely algorithmically from packet size and inter-packet interval distributions, these behaviors correspond to intuitive mode of network activity.
-This factorization simultaneously extracts a small set of ``basic behaviors'' and explains each flow's observed behavior as a mixture of these basic behaviors.
-Although the basic behaviors are found algorithmically, they correspond very well with intuitive network activities such as file transfer, typing via \caps{SSH}, and pinging.
+This factorization extracts a small set of ``basic behaviors'' from a traffic matrix and simultaneously explains each flow's observed behavior as a mixture of these basic behaviors.
+Although the basic behaviors are found algorithmically, they correspond to intuitive network activities such as file transfer, typing via \caps{SSH}, web surfing, and ping traffic.
 
 % Via this factorization, each flow's behavior as a linear combination a handful of ``basic behaviors'' such as file transfer, typing via \caps{SSH}, ping traffic and other network activities. 
 % These intuitive behavior modes as well as the explanation of flows in terms of them are extracted from trace date purely algorithmically.
@@ -222,7 +226,7 @@ The rest of the paper is organized as follows. In \Section{motivation} we discus
 
 \newfootnote{\QoSnote}{This is violated by some quality of service (QoS) schemes. However, we can simply add QoS metadata---such as traffic classes or urgency flags---to our models of user behavior and the rest of our arguments remain valid. The network is still disinterested in the exact content of the data being transported; only the QoS metadata is relevant.}
 
-The interaction of network users and application behavior with the lower layers of the networking stack is characterized by where, when, how much, and to whom data is transmitted. The joint pattern of traffic generation and mobility through time and space completely determines the effect of wireless usage on the lower levels of the network. This is due to the data-agnostic nature of the protocol stack: by design, \caps{IP} networks treat all data in the same manner~\cite{Clark88}.\QoSnote The credibility of conclusions derived from simulation or experimental deployment depends crucially on our confidence that the models used to generate traffic in experiments are sufficiently realistic. \Figure{trace-vs-uniform} demonstrates how drastically different network traffic appears when assumptions of uniform behavior at various levels are imposed. Assumptions of independence are not as visually dramatic, but we will demonstrate that they distort the performance characteristics of networks almost as much---or more---than uniform models.
+The interaction of network users and application behavior with the lower layers of the networking stack is characterized by where, when, how much, and to whom data is transmitted. The joint pattern of traffic generation and mobility through time and space completely determines the effect of wireless usage on the lower levels of the network. This is due to the data-agnostic nature of the protocol stack: by design, \caps{IP} networks treat all data in the same manner~\cite{Clark88}.\QoSnote The credibility of conclusions derived from simulation or experimental deployment depends crucially on our confidence that the models used to generate traffic in experiments are sufficiently realistic. \Figure{trace-vs-uniform} demonstrates how drastically different network traffic appears when assumptions of uniform behavior at various levels are imposed. Assumptions of independence are not as visually dramatic, but we will demonstrate that they distort the performance characteristics of networks almost as much or more than uniform models.
 
 Paxson and Floyd observed~\cite{Paxson95} that the interplay between endpoint behavior and the network conditions is inherently \textit{closed-loop} in the sense that it is potentially affected by complex feedback. Traffic models typically attempt to preserve the closed-loop behavior of network traffic~\cite{Avallone04,Hernandez06:dissertation}. This presents a fundamental difficulty, however, in that it presumes that we know the intent of endpoints: what \textit{would} they have done under different conditions? While we can speculate about what an individual node might hypothetically do, we currently hardly understand the impact of the full-network traffic pattern upon performance metrics at all---even without trying to account for hypothetical reactions to alternate situations. A fuller understanding of total network behavior must be reached before we can sensibly tackle the complexities of multi-level behavioral feedback. Accordingly, in this paper we attempt to provide a first-order approximation of complete network behavior by studying the response of performance metrics to \textit{open-loop} traffic models without multi-level feedback. It is important to realize that while this does not provide a final picture, we currently lack even a first-order understanding of the effect of different workloads on performance. This first-order understanding is an essential initial step.
 
