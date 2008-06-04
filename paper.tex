@@ -83,6 +83,7 @@
 
 \renewcommand{\bullet}{\raisebox{2pt}{$\centerdot$}}
 %\renewcommand{\labelitemi}{\bullet}
+\newcommand{\latin}[1]{\textit{#1}}
 
 \newcommand{\newfootnote}[2]{\newcommand{#1}{\footnote{#2} }}
 
@@ -113,33 +114,43 @@ We propose a representation of wireless workload patterns as large, sparse matri
 
 \newfootnote{\marginalnote}{The term ``marginal'' refers to the margins of actuarial tables formerly used for statistical computations. The rows and columns of the table represent possible values of two properties. Each entry in a table contains a count of the number of events falling into the joint category for that row and column. The margins contain sums of the rows or columns, thus giving the distribution of properties along each dimension \emph{independent} of each other.}
 
-More than twenty years of research in analysis and modeling of network traffic have yielded tremendous advances in our understanding of the complex behaviors that emerge from the interaction of millions of humans and computers on the Internet and in packet-switched networks.
+More than twenty years of research in analysis and modeling of network traffic have yielded tremendous advances in our understanding of the complex behaviors that emerge from the interaction of millions of humans and computers on the Internet and in local-area networks (\caps{LAN}s).
 Both traffic analysis and realistic workload generation, however, remain active areas of research with many unanswered questions.
 One of the major challenges of modeling full-network traffic is the multilevel interdependence of packet, flow\flownote and node behaviors.
 Three types of simplifying assumptions are commonly applied in both analysis and generation:
 \begin{enumerate}
-\item \textbf{Uniformity:} that certain aspects of traffic behavior are uniformly distributed. For example, that  all nodes in a network have equal probability of being the source or destination of packets or flows.
-\item \textbf{Independence:} that traffic properties share a single marginal\marginalnote distribution across the entire network, and individual values are independently drawn from this marginal distribution. For example, assuming that a single distribution describes an entire network, as opposed to modeling each flow with its own distribution of packet sizes.
-\item \textbf{Subdivided Independence:} that traffic properties behave independently, but only within certain groupings. The assumption, for example, that all flows emanating from a node share the same distribution of packet sizes is of this type.
+\item \textbf{Uniform:} that traffic behaviors are uniformly distributed. For example, assuming that  all nodes in a network have equal probability of being the source or destination of each flows.
+Another common example is the assumption that all packet sizes and inter-packet intervals are the same; this is commonly known as the ``constant bit-rate'' (\caps{CBR}) model.
+\item \textbf{Marginal:} that traffic properties share a single, common \emph{marginal}\marginalnote distribution across the entire network, and individual values are drawn independently and unconditionally from this shared distribution.
+For example, assuming that a single distribution of packet sizes describes all flows in a network, as compared to equipping each flow in the network with its own specific distribution.
+\item \textbf{Conditional:} that traffic behaves marginally, but only within equivalence classes defined by certain conditions.
+The assumption, for example, that all flows emanating from a common source node share the same packet size distribution would be a conditional model, conditioned on source nodes.
 \end{enumerate}
 We would be arguing against a straw man if we implied that researchers who apply these assumptions actually believe them to be true.
 They clearly are not: flows have drastically different packet size distributions; different nodes initiate and receive drastically different numbers of packets and flows.
-Simple examples illustrate this: downloading a large file vs. typing in an \caps{SSH} session; BitTorrent users vs. occasional email checkers.
+Simply considering intuitive examples of common behavior illustrate this:
+downloading a large file \latin{vs.} typing in an \caps{SSH} session;
+BitTorrent users \latin{vs.} occasional email checkers.
 
-If no one actually believes that assumptions of uniformity and independence accurately describe network behavior, then why are these assumptions so common? The first reason is simply that these assumptions drastically simplify both traffic analysis and workload generation. If we ignore the interdependencies that make analysis difficult, the difficulties simply evaporate. 
+If no one actually believes that assumptions of uniformity and marginality accurately describe network behavior, then why are these assumptions so common?
+The first reason is simply that these assumptions drastically simplify both traffic analysis and workload generation.
+If we ignore the interdependencies that make analysis difficult, the difficulties simply evaporate. 
 This immediately begs the question of whether these assumptions are benign.
-Does ignoring the non-uniformity and non-independence of network behavior distort the properties and metrics we are trying to analyze and replicate?
-The first contribution of this paper is to answer this question in the negative: we cannot stick our heads in the sand and pretend that network properties are uniform or independent without severely distorting crucial network performance metrics.
+Does assuming uniformity or marginality of network behavior distort the properties and metrics we are trying to analyze and replicate?
+We answer this question definitively in the negative: we cannot stick our heads in the sand and pretend that network behaviors are uniform or marginal without severely distorting crucial network performance metrics.
 
 \newfootnote{\realismnote}{It is realistic in the sense that traffic generated using this model accurately reproduces performance metrics of real traffic.}
 
-The second reason why uniformity and independence assumptions are so commonly used is that there are no generally accepted alternatives for representing or analyzing traffic.
-The difficulty lies in the high dimensional and stochastic nature of network behaviors.
-Suppose that we assume that packet sizes and inter-packet intervals are drawn from some distribution for each flow.
-Prior research has indicated that, given accurate per-flow distributions, this is a fairly realistic model of network behavior~\cite{Karpinski07:realism}.\realismnote
-Such empirical distributions, however, are complex entities unto themselves---and worse still, each flow has its own distribution.
-Modeling the entire network's behavior thus entails producing a distribution of distributions.
-% How can we know if two flows' observed behaviors differ because they were fundamentally different or because the stochastic processes driving them happened to produce different-looking results?
+The second reason why uniformity and marginality assumptions are so commonly used is that there are no generally accepted alternatives for representing or analyzing traffic.
+The difficulty lies in the high-dimensional and stochastic nature of network behaviors.
+Suppose, for example, that we assume that packet sizes and inter-packet intervals are drawn independently from some given distribution for each flow.
+In the terminology introduced above, this is a flow-conditional packet behavior model.
+Prior research has indicated that, given accurate per-flow distributions, this is a sufficiently realistic model of network behavior~\cite{Karpinski07:realism}.\realismnote
+In this model, however, each flow must have its own specific, realistic pair of distributions for packet size and inter-packet intervals.
+Moreover, the distribution of distributions across the entire network must simultaneously be realistic.
+Modeling such ``distributions of distributions'' realistically for entire networks is currently an unsolved problem.
+This paper provides the mathematical framework in which to address this problem and demonstrates the effectiveness of this framework by taking the first steps towards fully understanding the complex interdependencies of real network behavior.
+% make a major first step towards being able to model the distribution of flow behaviors across an entire network, by providing the framework in which to address this problem mathematically, and by demonstrating that this framework actually allows us to meaningfully analyze non-uniform, non-independent cross-network behavior.
 
 Uniform and independent modeling reduce the dimensionality of network behavior drastically, making analysis and generation tractable problems.
 There are two immediate questions:
