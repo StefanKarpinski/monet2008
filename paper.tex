@@ -148,29 +148,65 @@ In the terminology introduced above, this is a flow-conditional packet behavior 
 Prior research has indicated that, given accurate per-flow distributions, this is a sufficiently realistic model of network behavior~\cite{Karpinski07:realism}.\realismnote
 In this model, however, each flow must have its own specific, realistic pair of distributions for packet size and inter-packet intervals.
 Moreover, the distribution of distributions across the entire network must simultaneously be realistic.
-Modeling such ``distributions of distributions'' realistically for entire networks is currently an unsolved problem.
-This paper provides the mathematical framework in which to address this problem and demonstrates the effectiveness of this framework by taking the first steps towards fully understanding the complex interdependencies of real network behavior.
+Modeling such ``distributions of distributions'' realistically for entire networks is currently an unsolved problem, which we begin to address here.
+% This paper provides the mathematical framework in which to address this problem and demonstrates the effectiveness of this framework by taking the first steps towards fully understanding the complex interdependencies of real network behavior.
 % make a major first step towards being able to model the distribution of flow behaviors across an entire network, by providing the framework in which to address this problem mathematically, and by demonstrating that this framework actually allows us to meaningfully analyze non-uniform, non-independent cross-network behavior.
 
-Uniform and independent modeling reduce the dimensionality of network behavior drastically, making analysis and generation tractable problems.
-There are two immediate questions:
+Fundamentally, uniform, marginal and conditional models are applied to reduce the dimensionality of network behavior drastically, making analysis and generation tractable problems.
+From this perspective, two questions immediately present themselves:
 \begin{enumerate}
-\item Can we represent the original ``unreduced'' network behavior in such a way that analysis and generation are still tractable problems?
+\item Can we represent ``unreduced'' network behavior in such a way that analysis and generation are still tractable problems?
 \item Is there a better way to reduce dimensionality than assuming independence or uniformity of behaviors?
 \end{enumerate}
-The second contribution of this paper is to answer these questions and to propose a mathematical representation of network traffic that preserves the non-uniformity and non-independence of flow behaviors in a network, but makes traffic analysis and workload generation from this representation tractable problems.
-Here we will briefly explain our approach.
-
-It is already common practice in network modeling to think of flow behaviors as vectors.
-The \caps{IP} protocol number, source and destination \caps{IP} addresses, and \caps{UDP/TCP} source and port numbers that define a packet flow are commonly referred to as a 5-tuple---i.e., a vector in five dimensions.
-Other aspects of a flow's behavior can be represented vectorially as well. We call such a mapping of flows into a vector space a \emph{linear representation} if it satisfies the following simple linearity criterion:
+This paper answers both of these questions.
+To address the first question, we propose the concept of a \emph{linear representation} of network traffic.
+A linear representation of traffic represents each flow's behavior as a vector such that the following linearity condition is satisfied:
 \begin{quote}
 The sum of the representations of two flows is a vector that represents the aggregate behavior of the two flows.
 \end{quote}
-We show that flows can be represented satisfying this criterion. This immediately allows us to perform useful computations on traffic patterns through simple vector addition and scaling.
-Finally, we argue that the natural generalization of this approach is to represent an entire network's behavior as a large matrix, with each row representing a single flow.
-The matrix representation gives a representation of network behavior that preserves the non-uniformity and non-independence of flow behaviors, but still is highly amenable to analysis using theoretical and numerical linear algebra.
-Moreover, we describe how to generate traffic from arbitrary traffic matrices, and demonstrate experimentally that the specific matrix representation we propose preserves the performance characteristics of real traffic.
+A complete traffic sample is expressed as a matrix of such vectors.
+Linear representations express full network behavior, without imposing assumptions of uniformity or marginality, yet allow effective traffic analysis and workload generation.
+We present a specific linear representation, called the general matrix model (\caps{GMM}), and demonstrate experimentally that in wireless networks this model generates workload that accurately reproduces the performance characteristics of real wireless network traffic.
+
+We address the second question in two parts.
+First, we observe that in linear representations of traffic, uniform, marginal and conditional assumptions are simply assertions about rows and columns of the representation matrix being identical to each other. 
+Moreover, real traffic matrices can be transformed into the closest uniform, marginal or conditional approximation through simple matrix multiplications.
+Viewed this way, the cost of these assumptions becomes immediately apparent: these transformations discard vast amounts of information from the original trace.
+It is this wholesale destruction information that causes uniform and marginal traffic models to drastically distort the performance characteristics of real traffic.
+
+To show how traffic can be modeled less destructively, 
+% To demonstrate how linear representation allows drastically improved analysis and modeling of network traffic,
+we use non-negative matrix factorization to find an low-dimensional approximation of the packet size and inter-packet behavior matrices.
+% As an example of how the linear representation allows drastically improved analysis and modeling of network traffic, we apply non-negative matrix factorization to find an low-dimensional representation of packet size and inter-packet flow behaviors.
+% Each flow's behavior can be explained as a linear combination of only twelve ``basic behaviors.'' 
+% Although they are found purely algorithmically from packet size and inter-packet interval distributions, these behaviors correspond to intuitive mode of network activity.
+This factorization simultaneously extracts a small set of ``basic behaviors'' and explains each flow's observed behavior as a mixture of these basic behaviors.
+Although the basic behaviors are found algorithmically, they correspond very well with intuitive network activities such as file transfer, typing via \caps{SSH}, and pinging.
+
+% Via this factorization, each flow's behavior as a linear combination a handful of ``basic behaviors'' such as file transfer, typing via \caps{SSH}, ping traffic and other network activities. 
+% These intuitive behavior modes as well as the explanation of flows in terms of them are extracted from trace date purely algorithmically.
+
+% First we observe that in any linear representation of traffic, the assumption of uniformity corresponds the criterion that the coefficients in each dimension be the same. 
+
+% To address the second question, we observe that in the general matrix model, 
+% 
+% Moreover, we apply state of the art matrix factorization techniques to this representation to explain cross-network flow behaviors as linear mixtures of only twelve basic behaviors.
+
+% To address the second question, 
+
+% The second contribution of this paper is to answer these questions and to propose a mathematical representation of network traffic that preserves the non-uniformity and non-independence of flow behaviors in a network, but makes traffic analysis and workload generation from this representation tractable problems.
+% Here we will briefly explain our approach.
+% 
+% It is already common practice in network modeling to think of flow behaviors as vectors.
+% The \caps{IP} protocol number, source and destination \caps{IP} addresses, and \caps{UDP/TCP} source and port numbers that define a packet flow are commonly referred to as a 5-tuple---i.e., a vector in five dimensions.
+% Other aspects of a flow's behavior can be represented vectorially as well. We call such a mapping of flows into a vector space a \emph{linear representation} if it satisfies the following simple linearity criterion:
+% \begin{quote}
+% The sum of the representations of two flows is a vector that represents the aggregate behavior of the two flows.
+% \end{quote}
+% We show that flows can be represented satisfying this criterion. This immediately allows us to perform useful computations on traffic patterns through simple vector addition and scaling.
+% Finally, we argue that the natural generalization of this approach is to represent an entire network's behavior as a large matrix, with each row representing a single flow.
+% The matrix representation gives a representation of network behavior that preserves the non-uniformity and non-independence of flow behaviors, but still is highly amenable to analysis using theoretical and numerical linear algebra.
+% Moreover, we describe how to generate traffic from arbitrary traffic matrices, and demonstrate experimentally that the specific matrix representation we propose preserves the performance characteristics of real traffic.
 
 \input{trace_vs_uniform}
 
@@ -317,8 +353,8 @@ From the matrices $\mat{Z}$ and $\mat{V}$, we can compute the expected average p
 \end{align}
 Using these representative values, the expected average packet size and expected average inter-packet interval size for a flow may be computed as
 \begin{align}
-  \mean{z}&=\fracx{\inner{\vec{z}}{\vec{\sigma}}}{\inner{\vec{z}}{\ones{d_z}}},\\
-  \mean{v}&=\fracx{\inner{\vec{v}}{\vec{\tau}}}{\inner{\vec{v}}{\ones{d_v}}},
+  \mean{z}&=\frac{\inner{\vec{z}}{\vec{\sigma}}}{\inner{\vec{z}}{\ones{}}}, &
+  \mean{v}&=\frac{\inner{\vec{v}}{\vec{\tau}}}{\inner{\vec{v}}{\ones{}}},
 \end{align}
 respectively, where $\inner{\vec{x}}{\vec{y}}$ denotes the standard inner product of vectors.
 
