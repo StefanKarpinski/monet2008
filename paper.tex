@@ -642,6 +642,13 @@ Box-and-whisker plots of log-ratio error values for all metrics and traffic mode
 \label{fig:box-plots}
 \end{sidewaysfigure*}
 
+\begin{sidewaysfigure*}
+{\includegraphics[height=6.25in]{plots/basic_behaviors_1.pdf}}\hfill%
+{\includegraphics[height=6.25in]{plots/basic_behaviors_2.pdf}}
+\caption{Basic behaviors.}
+\label{fig:basic-behaviors}
+\end{sidewaysfigure*}
+
 Our simulation results are summarized in \Figure{box-plots}. Each subfigure shows a single performance metric. The distribution of log-ratio error values for each traffic model is visualized with a box-and-whisker plot. The box indicates the range from the 25th to 75th percentiles of values, while the ``whiskers'' indicate the full range, excluding outliners (which are shown as isolated points). These plots allow immediate assessment of realism: a good traffic model should have error values that are tightly clustered around the center, with a small, evenly balanced box, and relatively small whiskers. Additionally, the mean and median markers should be close to the center. It should be noted that the error scale is logarithmic, so even a slight increase in spread or deviation from the center indicates a disproportionately large decrease in model quality. Non-logarithmic scale markers are shown above each plot; the values indicate the factor of over- or under-representation for the performance metric.
 
 The primary result is that the \caps{GMM} accurately reflects the performance of the trace data it is based on. It has small, centered error bars for every performance metric presented here, as well as for those we have looked at otherwise. This is an essential result, since otherwise, \caps{GMM} is at best a shaky foundation for further modeling work. With these results, we can be assured that if we can approximate the matrix for a given example of trace traffic, then we have also approximated the original trace behavior. In a sense, this result is a reduction of the general traffic modeling problem to a more tractable matrix modeling problem.
