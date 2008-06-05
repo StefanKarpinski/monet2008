@@ -232,7 +232,7 @@ Hern\'andez-Campos shows how to abstract an application's behavior from a \caps{
 This research has subsequently been turned into a \caps{TCP} flow generation tool called \tmix~\cite{Weigle06}.
 The acronym is somewhat misleading: {\tmix} does not provide models for application behaviors or for mixtures of applications in networks.
 Rather, it provides the ability to reproduce accurate closed-loop dynamics for a single \caps{TCP} flow \emph{given} an application behavior model as input.
-Our research complements this perfectly: we provide the means to analyze traffic and generate realistic whole-network application mixtures which can then serve as the necessary input to \tmix.
+Our research complements this perfectly: we provide the means to analyze traffic and generate realistic whole-network application mixtures which can then serve as the necessary input to {\tmix}.
 
 % This presents a fundamental difficulty, however, in that it presumes that we know the intent of endpoints: what \textit{would} they have done under different conditions? While we can speculate about what an individual node might hypothetically do, we currently hardly understand the impact of the full-network traffic pattern upon performance metrics at all---even without trying to account for hypothetical reactions to alternate situations. A fuller understanding of total network behavior must be reached before we can sensibly tackle the complexities of application and user feedback.
 
@@ -259,8 +259,7 @@ Source and destination nodes are treated marginally: empirically derived margina
 File sizes (\latin{i.e.} total flow sizes) are likewise treated marginally: each flow's total byte  count is sampled from a marginal distribution of flow sizes.
 \caps{UDP} flows are modeled as being constant bit-rate (\latin{i.e.} having uniform packet behavior), and \caps{TCP} flows are all treated as file transfers, making them effectively uniformly behaved with bit-rate determined by \caps{TCP} dynamics.
 Inter-connection times (\latin{i.e.} per node-pair inter-flow intervals) are sampled from a single empirically derived marginal distribution.
-While Harpoon may be sufficiently realistic for the intended purpose of generating Internet backbone traffic,\harpoonnote
-for the purpose of generating local-area traffic for wireless experiments, it is not sufficiently realistic.
+While Harpoon may be sufficiently realistic for the intended purpose of generating Internet backbone traffic,\harpoonnote for the purpose of generating local-area traffic for wireless experiments, it is not.
 Previous research~\cite{Karpinski07:cbr-failure} has shown that \caps{CBR} packet behavior models used in Harpoon drastically distort vital performance metrics at all levels of the protocol stack in wireless network simulations.
 This paper shows that marginal traffic models also severely misrepresent performance metrics.
 
@@ -270,6 +269,24 @@ Guidance is not provided, however, for choosing among these distributions, choos
 Moreover, the mechanism for choosing end-points and start and end times for flows is not described; presumably it is explicitly specified by the user. 
 The focus of this project is primarily on the engineering challenge of generating very large volumes of synthetic Internet-like backbone traffic and injecting this traffic into real networks in a distributed fashion.
 While \caps{D-ITG} provides the mechanism for generating large volumes of network traffic, it does not provide any real guidance as to what traffic to generate.
+
+\FHC~\cite{Hernandez06:wlan-traffic} have defined the state of the art in parametric modeling of wireless traffic patterns.
+They use rigorous statistical methods to fit parametric distributions to a number of properties of wireless traffic instances:
+% They propose the following models:
+flow arrival processes fit a non-stationary Poisson arrival model; flow inter-arrival intervals (per session) fit a Lognormal distribution;
+flows per session fit a BiPareto model; flow sizes fit a BiPareto model.
+However, all the proposed models are marginal:
+a single statistical model applies to all flows and nodes (packet behavior is not considered).
+% One intuitively obvious heterogeneous nature of network traffic:
+Each node has a different number of flows assigned to it, but otherwise nodes are identical. 
+The flows associated with each node are statistically identical:
+flow sizes are drawn from a single marginal distribution, and nothing else distinguishes them.
+%, unconditional of their associated node.
+% This is a classic example of the limits of marginal modeling.
+Yet, intuitively it is clear that different nodes in a network have different tendencies for flow size, flow initiation, and packet behavior.
+Such interdependent behaviors cannot be captured using marginal modeling.
+In this paper, we demonstrate that this inability is not harmless:
+treating all flows and nodes statistically identically severely misrepresents important wireless performance metrics in experiments.
 
 % The focus of this project, however, is on providing the infrastructure to generate very large volumes of synthetic Internet-like backbone traffic. No analysis is provided for determining the realism of traffic mixes, or for choosing flow endpoints realistically. In wireless networks, these factors are of crucial importance to performance, and cannot be overlooked. Both Harpoon and \caps{D-ITG} provide excellent traffic generation platforms, but do not provide a systematic framework for understanding or reproducing realistic whole-network workload in the wireless setting.
 
@@ -564,58 +581,6 @@ We have selected six performance metrics to present here. They are commonly used
 \item \textbf{Link:} 802.11 control overhead (\caps{RTS/CTS/ACK}).
 \end{enumerate}
 These metrics are commonly used to evaluate wireless protocols. We have examined a broad variety of other wireless network performance metrics, and although we do not have room to present or discuss them here, the results shown are representative of the overall realism of the traffic models.
-%For each of the 144 10-minute trace segments, we have run simulations using each of the nine traffic models, for a total of 1,296 simulations.
-%Unfortunately, not all of the simulations were able to run to completion. In some scenarios, the number of nodes and flows caused Qualnet to simply fail. We were, however, able to get complete results for 72.5\% of the simulations, providing a clear view of overall trends.\!\footnote{That 27.5\% of simulations did not finish may seem like a cause for concern, but it does not in fact invalidate our results. The simulations that did not finish are those for which the number of flows and nodes overwhelmed the capacity of the simulator. Qualnet cannot simulate more than circa 650 nodes sending 35,000 flows. While it would be of great interest to examine results for these large-scale scenarios, they are essentially useless for comparison to other simulations studies: other studies do not simulate this quantity of nodes and flows precisely because even the best existing simulators do not support it. Once the simulators become more scalable and robust, our analysis can be extended to these scenarios as well.}
-
-\subsection{Measures of Error}
-\label{sec:measures-of-error}
-
-The simulations described in \Section{simulations} provide us with the raw data to compare performance metrics for synthetic traffic models with those for real traffic traces. To assess the realism of these models, however, we need a measure of how inaccurate the synthetic performance values are when compared to the real values. Let $x$ be the value of a performance metric using real traffic, and $y$ the value of the same metric using an alternate traffic model. Some common measures of error are the difference [$y-x$], the ratio [$y/x$], and the relative error [$(y-x)/x$], also commonly called the ``standard error.'' These are all reasonable measures of error; but which is most appropriate for assessing the realism of performance metrics? Instead of picking one arbitrarily, we will first consider the properties that an ideal error function should have, and then use those properties to determine the best measure of error. Moreover, we will show that the unique measure of error that exhibits these ideal properties is the  \textit{log-ratio} of metric values:
-\begin{align}
-\log(y/x)=\log(y)-\log(x).
-\end{align}
-In this discussion, $E(x,y)$ is a generic error function applied to the synthetic value, $y$, with respect to the real value, $x$.
-
-The first property that an error function should have is  \textit{insensitivity to common factors}. That is, if both values are scaled by the same constant, the error should be unaffected:
-\begin{align}
-\label{eqn:normalization-invariance}
-\forall\: x,y,c: E(x c,y c) &= E(x,y)
-\end{align}
-There are three major motivations for this requirement:
-\begin{enumerate}
-\item Changing units should not affect error values.
-\item Error values for ``large'' and ``small'' scenarios should be directly comparable. Scenarios with large $x$ values will naturally have larger raw differences between $x$ and $y$. This requirement allows scenarios of different scales to be compared fairly and without bias.
-\item Changing between metrics that differ by a known constant for each scenario should not affect error values.
-\end{enumerate}
-The last point is best illustrated by an example. Consider two closely related performance metrics: average throughput, $t$, and total bytes received, $r$. Suppose that there are $f$ flows in a given scenario with average duration, $d$. Since $t =r/fd$, the metrics $t$ and $r$ contain the same information---they differ only by a known constant in each simulation scenario. Equation~\ref{eqn:normalization-invariance} ensures that the errors of these metrics are the same:
-\begin{align}
-E(t_{\text{trc}},t_{\text{mod}})
-	= E\left({\frac{r_{\text{trc}}}{fd},\frac{r_{\text{mod}}}{fd}}\right)
-	= E(r_{\text{trc}},r_{\text{mod}}).
-\end{align}
-The difference measure does not satisfy Equation~\ref{eqn:normalization-invariance}, but the ratio, relative error, and log-ratio error measures all do.
-
-The second property that an ideal error function should have is  \textit{additivity of compounded errors}. If two independent causes of error each induce some factor of misrepresentation, then the combined error should be the sum of the errors caused by each factor separately:
-\begin{align}
-\label{eqn:linear-compounding}
-\forall\: x,c_1,c_2:
-	E(x,x c_1 c_2) &= E(x,x c_1) + E(x,x c_2).
-\end{align}
-This property allows us to compare error values meaningfully across different traffic models.
-%For example, if flow topology and packet behavior affected some performance metric independently with no interaction effects, we would expect that
-%\begin{align}
-%E(x^\TTT,x^\UTU) \approx E(x^\TTT,x^\TTU) + E(x^\TTT,x^\UTT).
-%\end{align}
-%If these two values differ significantly, there must be some interaction between the two levels of behavior that introduces more error than can be explained by each separately. Without the property of additivity given in Equation~\ref{eqn:linear-compounding}, such a comparison would not be possible or meaningful.
-
-Additivity of compounded errors also implies two desirable properties that are easily derived from Equation~\ref{eqn:linear-compounding}. It forces the error of an accurate representation to be zero: $E(x,x) = 0$. It also forces underestimation and overestimation to be treated symmetrically. The error of underestimating by some factor is opposite but equal to overestimating by the same factor:
-\begin{align}
-E(x,x/c) = - E(x,xc).
-\end{align}
-
-It is easily verified that the difference, ratio, and relative error measures do not satisfy \Equation{linear-compounding}, and the difference, as noted, does not satisfy \Equation{normalization-invariance}. The log-ratio is the only metric presented that satisfies both conditions. Moreover, it can be proved that $\log(y/x)$ is the \textit{only} differentiable function that satisfies both (up to a constant). In the Appendix, we present a proof of this claim. Throughout the rest of the paper, we use the log-ratio to measure the error of performance metrics.
-% TODO: should Appendix be capitalized?
-% TODO: hyperref the Appendix for PDF.
 
 \section{Results}
 \label{sec:results}
@@ -730,23 +695,6 @@ We have presented a fundamentally new, algebraic way of representing traffic pat
 %\section{Acknowledgments}
 %This work was funded in part through NSF Career Award CNS-0347886.
 
-\section*{Appendix}
-\footnotesize
-
-\noindent
-\textbf{Theorem.} The unique differentiable function satisfying Eqs.~\ref{eqn:normalization-invariance} and \ref{eqn:linear-compounding} is $E(1,e) \ln(y/x)$. \textit{Proof:} Let $f(z) = E(1,z)$. Eq.~\ref{eqn:normalization-invariance} gives $E(x,y) = E(1,y/x) = f(y/x)$. Eq.~\ref{eqn:linear-compounding} gives: $f(z) = f(z/w) + f(w)$. Differentiation by $z$ yields $f'(z) = w^{-1} f'(z/w)$. In particular, if we choose $w=z$, we get $f'(z) = z^{-1} f'(1)$. Integration by $z$ gives:
-$f(z) = f'(1) \int z^{-1} dz + c = f'(1) \ln(z) + c$.
-By Eq.~\ref{eqn:linear-compounding}, $f(1)=0$, so $c=0$. Thus $f(e)=f'(1)\ln(e)=f'(1)$. We conclude that $f(z)=f(e)\ln(z)$, so $E(x,y) = f(y/x) = f(e)\ln(y/x) = E(1,e)\ln(y/x)$, as desired.\hfill%\QED
-
-%\vspace{1em}\noindent
-%\textbf{Theorem.}~[\textit{Lyapunov's Central Limit Theorem}] Let $\{R_k\}_{k=1}^{\infty}$ be a series of independent variables with $\E{R_k}=0$. Let $s_n^2 = \sum_{k=1}^n{\E{\abs{R_k^2}}}$ and $r_n^3 = \sum_{k=1}^n{\E{\abs{R_k^3}}}$. For each $n$, let $Z_n$ be the normalized mean of $\{R_k\}_{k=1}^n$: $Z_n = \sum_{k=1}^n{R_k/s_n}$. If $\lim_{n\to\infty} {r_n/s_n} = 0$, then $\lim_{n\to\infty}{Z_n} \sim \mathcal{N}(0,1)$ (the standard normal distribution). (See~\cite{Feller68} page 229.)
-
-%\vspace{1em}
-%To apply the LCLT to the series $R_k^\M=\log(X_k^\M/X_k^\TTT)$, we must show that under the null hypothesis, the assumptions of the theorem are satisfied by this series. First, the null hypothesis, implies that $\E{R_k}=0$. Variables from separate simulations are independent since they cannot influence each other's values. Formally, $\Pr\left(X_k\middle|X_j\right)=\Pr\left(X_k\right)$. Therefore the log-ratios are also independent for different $k$. The last requirement is that $\lim_{n\to\infty}{r_n/s_n}=0$. To verify this, we use the estimators $\hat{s}_n^2=\sum{\abs{R_k^2}}$, and $\hat{r}_n^3=\sum{\abs{R_k^3}}$. When $\hat{r}_n/\hat{s}_n$ are plotted on a log-log scatter plot, with $n$ increasing up to the number of simulations, they asymptotically approach a downwardly sloped line as $n$ grows. Thus $\lim_{n\to\infty}{\ln(\hat{r}_n/\hat{s}_n)/\ln(n)}=c<0$. This implies that $\lim_{n\to\infty}{\ln(\hat{r}_n/\hat{s}_n)}=-\infty$, and therefore $\lim_{n\to\infty}{r_n/s_n}=\lim_{n\to\infty}{\hat{r}_n/\hat{s}_n}=0$. This test for the convergence of $r_n/s_n$ is applied to each model and metric pair. %The asymptotic approach of the ratio $\hat{r}_n/\hat{s}_n$ to a downwardly sloped line is verified visually and by comparison to a fitted regression line.
-
-%\vfill
-
-%\pagebreak
 % Hernandez06:dissertation: ``complete methodology for reproducing the traffic observed on a network link in a closed-loop manner, and proposed a number of metrics for studying the realism of the generated traffic.''
 \bibliographystyle{plain}
 \bibliography{references}
