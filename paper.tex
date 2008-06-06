@@ -145,19 +145,18 @@ This immediately begs the question of whether these assumptions are benign.
 Does assuming uniformity or marginality of network behavior distort the properties and metrics we are trying to analyze and replicate?
 This paper answers that question: we cannot stick our heads in the sand and pretend that network behaviors are uniform or marginal without severely distorting crucial network performance metrics.
 
-\newfootnote{\realismnote}{It is realistic in the sense that traffic generated using this model accurately reproduces performance metrics of real traffic.}
-
+% TODO: is this paragraph necessary?
 The second reason why uniformity and marginality assumptions are so commonly used is that there are no generally accepted alternatives for representing or analyzing traffic.
 The difficulty lies in the high-dimensional and stochastic nature of network behaviors.
 Suppose, for example, that we assume that packet sizes and inter-packet intervals are drawn independently from some given distribution for each flow.
 In the terminology introduced above, this is a flow-conditional packet behavior model.
-Prior research has indicated that, given accurate per-flow distributions, this is a sufficiently realistic model of network behavior~\cite{Karpinski07:realism}.\realismnote
+Prior research has indicated that, given accurate per-flow distributions, and keeping all other aspects of network behavior fixed, this simplification does not distort experimental performance metrics~\cite{Karpinski07:realism}.
 In this model, however, each flow must have its own specific, realistic pair of distributions for packet size and inter-packet intervals.
 Moreover, the ``distribution of distributions'' across the entire network must simultaneously be realistic.
 Modeling such distributions of distributions realistically for entire networks is currently an unsolved problem; we begin to address it here.
 
-Fundamentally, uniform, marginal and conditional models are applied so that we can represent network traffic behavior using a few empirical or analytical statistical distributions.
-Reduction in representation size and complexity makes analysis and generation tractable problems.
+Fundamentally, uniform, marginal and conditional models are applied so that network traffic behavior can be represented using a manageable collection of empirical or analytical statistical distributions.
+Reduction in representation size and complexity makes analysis and generation problems tractable.
 From this perspective, two questions immediately present themselves:
 \begin{enumerate}
 \item Can we represent ``unreduced'' network behavior such that analysis and generation are tractable?
@@ -183,54 +182,33 @@ These transformations, however, are extremely destructive: the matrices are dege
 \input{trace_vs_uniform}
 
 We argue that matrix factorization, which is nondestructive, is far superior to multiplication for reducing the representation of network traffic behaviors.
-To demonstrate this approach, we use non-negative matrix factorization (\caps{NMF}) to find a low-dimensional approximation of the packet size and inter-packet interval matrices of a real traffic trace.
+To demonstrate this approach, we use non-negative matrix factorization (\caps{NMF})~\cite{Lee01} to find a low-dimensional approximation of the packet size and inter-packet interval matrices of a real traffic trace.
 This factorization extracts a small set of ``basic behaviors'' from the traffic matrix and simultaneously explains each flow's observed behavior as a mixture of these basic behaviors.
 Although basic behaviors are computed without examining port numbers, they nevertheless correspond to the intuitive behaviors expected for protocols.
 Basic behaviors are found corresponding to typical network activities, including file transfer, typing via \caps{SSH}, web surfing, ping traffic, peer-to-peer and others.
 
-% Via this factorization, each flow's behavior as a linear combination a handful of ``basic behaviors'' such as file transfer, typing via \caps{SSH}, ping traffic and other network activities. 
-% These intuitive behavior modes as well as the explanation of flows in terms of them are extracted from trace date purely algorithmically.
-
-% First we observe that in any linear representation of traffic, the assumption of uniformity corresponds the criterion that the coefficients in each dimension be the same. 
-
-% To address the second question, we observe that in the general matrix model, 
-% 
-% Moreover, we apply state of the art matrix factorization techniques to this representation to explain cross-network flow behaviors as linear mixtures of only twelve basic behaviors.
-
-% To address the second question, 
-
-% The second contribution of this paper is to answer these questions and to propose a mathematical representation of network traffic that preserves the non-uniformity and non-independence of flow behaviors in a network, but makes traffic analysis and workload generation from this representation tractable problems.
-% Here we will briefly explain our approach.
-% 
-% It is already common practice in network modeling to think of flow behaviors as vectors.
-% The \caps{IP} protocol number, source and destination \caps{IP} addresses, and \caps{UDP/TCP} source and port numbers that define a packet flow are commonly referred to as a 5-tuple---i.e., a vector in five dimensions.
-% Other aspects of a flow's behavior can be represented vectorially as well. We call such a mapping of flows into a vector space a \emph{linear representation} if it satisfies the following simple linearity criterion:
-% \begin{quote}
-% The sum of the representations of two flows is a vector that represents the aggregate behavior of the two flows.
-% \end{quote}
-% We show that flows can be represented satisfying this criterion. This immediately allows us to perform useful computations on traffic patterns through simple vector addition and scaling.
-% Finally, we argue that the natural generalization of this approach is to represent an entire network's behavior as a large matrix, with each row representing a single flow.
-% The matrix representation gives a representation of network behavior that preserves the non-uniformity and non-independence of flow behaviors, but still is highly amenable to analysis using theoretical and numerical linear algebra.
-% Moreover, we describe how to generate traffic from arbitrary traffic matrices, and demonstrate experimentally that the specific matrix representation we propose preserves the performance characteristics of real traffic.
-
 % TODO: update roadmap paragraph.
 
-The rest of the paper is organized as follows. In \Section{motivation} we discuss motivation and related work. The notion of linear representation and the general matrix model are presented in \Section{general-matrix-model}. In Sections~\ref{sec:common-properties}~and~\ref{sec:modeling-concepts} we explore how common network properties and modeling concepts can be expressed in the the \caps{GMM} framework. Our experimental and analytical methodology for evaluating traffic models is presented in \Section{methodology}, while the results of our experiments are explained and analyzed in \Section{results}. The ramifications of these results are discussed in \Section{discussion}. Finally, in \Section{conclusions}, we conclude with a discussion of how this research may be applied to current wireless studies. %, and how it points the way to better traffic models for the future.
+The rest of the paper is organized as follows. In \Section{motivation} we discuss motivation and related work. The notion of linear representation and the general matrix model are presented in \Section{general-matrix-model}. In Sections~\ref{sec:common-properties}~and~\ref{sec:modeling-concepts} we explore how common network properties and modeling concepts can be expressed in the the \caps{GMM} framework. Our experimental and analytical methodology for evaluating traffic models is presented in \Section{methodology}, while the results of our experiments are explained and analyzed in \Section{results}. The ramifications of these results are discussed in \Section{discussion}. Finally, in \Section{conclusions}, we conclude with a discussion of how this research may be applied to current wireless studies.
 
 \section{Motivation \& Related Work}
 \label{sec:related-work}
 \label{sec:motivation}
 
-%The history of networking research contains many examples of simplistic models that have proven not only to be inaccurate, but also to drastically skew important characteristics of network behavior. Paxson and Floyd showed that the Poisson packet arrival model, which had been standard for studying wide-area Internet traffic, failed to capture the burstiness and self-similarity of real traffic~\cite{Paxson95}. The equally common but simplistic Random Way-Point~(\caps{RWP}) mobility model was found to exhibit ``density waves'' and gradual slow-down of average node speed~\cite{Royer01,Yoon03:speed-decay}. In the worst cases, overly simplistic models can switch the relative performance of protocols, thereby invalidating the conclusions drawn from performance comparisons using those models.
-
 \newfootnote{\QoSnote}{This is violated by some quality of service (QoS) schemes. However, we can simply add QoS metadata---such as traffic classes or urgency flags---to our models of user behavior and the rest of our arguments remain valid. The network is still disinterested in the exact content of the data being transported; only the QoS metadata is relevant.}
 
-The interaction of network users and applications with the lower layers of the networking stack is characterized by where, when, how much, and to whom data is transmitted. The joint pattern of traffic generation and mobility through time and space completely determines the effect of network usage on the lower levels of the stack. This is due to the data-agnostic nature of the protocol stack: by design, \caps{IP} networks treat all data in the same manner~\cite{Clark88}.\QoSnote The credibility of conclusions derived from simulation or experimental deployment depends crucially on our confidence that the models used to generate traffic in experiments are sufficiently realistic. \Figure{trace-vs-uniform} illustrates through examples how drastically different network traffic appears under uniformity assumptions at different levels of behavior. Marginality assumptions are not as visually striking, but as we will demonstrate, they distort the performance characteristics of networks almost as much, and sometimes more, than uniform models.
+The interaction of network users and applications with the lower layers of the networking stack is characterized by where, when, how much, and to whom data is transmitted. The joint pattern of traffic generation and mobility through time and space completely determines the effect of network usage on the lower levels of the stack. This is due to the data-agnostic nature of the protocol stack: by design, \caps{IP} networks treat all data in the same manner~\cite{Clark88}.\QoSnote The credibility of conclusions derived from simulation or experimental deployment depends crucially on our confidence that the models used to generate traffic in experiments are sufficiently realistic. \Figure{trace-vs-uniform} illustrates through examples how drastically different network traffic appears under assumptions of uniformity at different levels of behavior. Marginality assumptions are not as visually striking, but as we will demonstrate, they distort the performance characteristics of networks almost as much, and sometimes more, than uniform models.
 
-While this work is not inherently specific to wireless networks, since the modeling techniques developed are equally applicable to traffic in wired networks, the results are of specific importance to wireless research. Realistic traffic models have a drastic impact on the experimental results in wireless networks~\cite{Karpinski07:realism,Karpinski07:cbr-failure}. This is primarily because wireless networks are locally resource constrained. Compare this with the typical situation in wired \caps{LAN}s, where gigabit Ethernet and modern routers and switches can easily handle all but the most intense levels of traffic. If a wired network operator expects larger volumes of traffic on a regular basis, the solution is to upgrade the hardware, not to change the network protocols. In wireless networks, on the other hand, the physical medium cannot be upgraded; protocols must be improved to make better usage of the medium. Being able to perform experiments with realistic workload is a vital part of the ongoing process of improving wireless protocols. Without realistic workload models for experiments, performance comparisons may be misleading or even completely wrong~\cite{Karpinski07:cbr-failure}.% Better traffic models are necessary to avoid stumbling in the dark while attempting to improve wireless technologies.
+While this work is not inherently specific to wireless networks, since the modeling techniques developed are equally applicable to traffic in wired networks, the results are of special importance to wireless research.
+Realistic traffic models have a drastic impact on experimental results in wireless networks~\cite{Karpinski07:realism,Karpinski07:cbr-failure}.
+This is primarily because wireless networks are locally resource constrained.
+Compare this with the typical situation in wired \caps{LAN}s, where gigabit Ethernet and modern routers  can easily handle all but the most intense levels of traffic.
+If a wired network operator expects larger volumes of traffic on a regular basis, the solution is to upgrade the hardware, not to change the network protocols.
+In wireless networks, on the other hand, the physical medium cannot be upgraded; protocols must be improved to make better usage of the medium.
+Being able to perform experiments with realistic workload is a vital part of the ongoing process of improving wireless protocols.
+Without realistic workload models for experiments, performance comparisons may be misleading or even completely wrong~\cite{Karpinski07:cbr-failure}.
 
 Paxson and Floyd observed~\cite{Paxson95} that the interaction between endpoint behavior and the network conditions is inherently \textit{closed-loop} in the sense that the emergent behavior is governed by a closed feedback loop.
-% Traffic models typically attempt to preserve the closed-loop behavior of network traffic.
 In the case of most non-\caps{TCP} applications, this feedback does not occur: an open-loop model suffices.
 Hern\'andez-Campos' dissertation~\cite{Hernandez06:dissertation} addresses in great depth how to model the feedback between the network and typical \caps{TCP} applications.
 He shows how to abstract an application's behavior from a \caps{TCP} trace and replay it in a manner that accurately reflects how typical applications react in response to different network conditions.
@@ -258,25 +236,24 @@ Our research complements this perfectly: we provide the means to analyze traffic
 \newfootnote{\harpoonnote}{Even this is unclear: generated traffic is only compared with trace traffic using the very same metrics that are explicitly specified as part of the model. Unsurprisingly, the distributions of sampled metrics closely match the distributions those metrics were sampled from. Realism is not double-checked using other statistical metrics or actual performance metrics.}
 
 The two most prominent general traffic generation frameworks are Harpoon and \caps{D-ITG}. Harpoon~\cite{Sommers04} uses a traffic trace for self-training, and can subsequently generate synthetic traffic with certain statistical properties based on the original trace.
-The properties reproduced are the empirical distributions of the following: ``file size, inter-connection time, source and destination IP ranges, number of active sessions.''
+The properties reproduced are the empirical distributions of the following: ``file size, inter-connection time, source and destination IP ranges, [and] number of active sessions.''
 Harpoon exemplifies the uniform and marginal modeling approaches.
 Source and destination nodes are treated marginally: empirically derived marginal frequencies of sources and destinations are used to choose endpoints independently for each flow.
-File sizes (\latin{i.e.} total flow sizes) are likewise treated marginally: each flow's total byte  count is sampled from a marginal distribution of flow sizes.
+Flow sizes (\latin{i.e.} file sizes) are likewise treated marginally: each flow's total byte  count is sampled from a marginal distribution of flow sizes.
 \caps{UDP} flows are modeled as being constant bit-rate; %(\latin{i.e.} having uniform packet behavior),
 \caps{TCP} flows are all treated as file transfers, making them effectively uniform with bit-rate determined by \caps{TCP} dynamics.
 Inter-connection times %(\latin{i.e.} per node-pair inter-flow intervals)
 are sampled from a single empirically derived marginal distribution.
-While Harpoon may be sufficiently realistic for the intended purpose of generating Internet backbone traffic,\harpoonnote for the purpose of generating local-area traffic for wireless experiments, it is not.
+While Harpoon may be sufficiently realistic for the intended purpose of generating Internet backbone traffic,\harpoonnote for generating local-area traffic in wireless experiments, it is not.
 Previous research has shown that uniform packet behavior models used in Harpoon drastically distort vital performance metrics at all levels of the protocol stack~\cite{Karpinski07:cbr-failure}. % in wireless network simulations.
 This paper shows, moreover, that marginal models, like those used in Harpoon, also severely misrepresent performance metrics in wireless networks.
 
 Like Harpoon, \caps{D-ITG}~\cite{Avallone04} exemplifies uniform and marginal modeling assumptions. However, unlike Harpoon, \caps{D-ITG} does not derive models from real traffic.
-Packet behavior can be modeled using standard statistical distributions (``constant, uniform, normal, cauchy, pareto, exponential, etc.''). % for packet size and inter-packet intervals.
+Packet behavior can be modeled using standard statistical distributions (``constant, uniform, normal, cauchy, pareto, exponential, etc.'').
 Guidance is not provided, however, for choosing among these distributions, choosing parameter values, or selecting a mixture of distributions across a network.
 Flow and node behaviors are not specified at all, but rather left to the user's discretion.
-% Moreover, the mechanism for choosing end-points and start and end times for flows is not described; presumably it is explicitly specified by the user. 
-The focus of this project is primarily on the engineering challenge of generating very large volumes of synthetic traffic and injecting it into real networks in a distributed fashion.
-While \caps{D-ITG} provides the mechanism for generating large volumes of network traffic, it does not provide any real guidance as to what traffic to generate.
+The focus of this project is primarily on the engineering challenge of generating very large volumes of synthetic traffic and injecting it into networks in a distributed fashion.
+While \caps{D-ITG} provides the mechanism for generating large volumes of traffic, it does not provide any real guidance as to what traffic to generate.
 
 \FHC~\cite{Hernandez06:spatio-temporal-modeling} have defined the state of the art in parametric modeling of wireless traffic patterns.
 They use rigorous statistical methods to fit parametric models to a number of properties of wireless traffic.
