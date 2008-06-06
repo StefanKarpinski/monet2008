@@ -138,32 +138,48 @@ Simply considering intuitive examples of common behavior illustrates this amply:
 BitTorrent users \latin{vs.} occasional email checkers;
 downloading a large file \latin{vs.} typing in an \caps{SSH} session.
 
-If no one actually believes that assumptions of uniformity and marginality accurately describe network behavior, then why are these assumptions so common?
-The first reason is simply that these assumptions drastically simplify both traffic analysis and workload generation.
-If we ignore the interdependencies that make analysis difficult, the difficulties simply evaporate. 
-This immediately begs the question of whether these assumptions are benign.
-Does assuming uniformity or marginality of network behavior distort the properties and metrics we are trying to analyze and replicate?
-This paper answers that question: we cannot stick our heads in the sand and pretend that network behaviors are uniform or marginal without severely distorting crucial network performance metrics.
+% In short, the reason is that these assumptions drastically simplify both traffic analysis and workload generation.
+% If we ignore the interdependencies that make analysis difficult, the difficulties simply evaporate. 
+% This immediately begs the question of whether these assumptions are benign.
+% Does assuming uniformity or marginality of network behavior distort the properties and metrics we are trying to analyze and replicate?
+% This paper answers that question: we cannot stick our heads in the sand and pretend that network behaviors are uniform or marginal without severely distorting crucial network performance metrics.
 
 % TODO: is this paragraph necessary?
-The second reason why uniformity and marginality assumptions are so commonly used is that there are no generally accepted alternatives for representing or analyzing traffic.
-The difficulty lies in the high-dimensional and stochastic nature of network behaviors.
-Suppose, for example, that we assume that packet sizes and inter-packet intervals are drawn independently from some given distribution for each flow.
-In the terminology introduced above, this is a flow-conditional packet behavior model.
-Prior research has indicated that, given accurate per-flow distributions, and keeping all other aspects of network behavior fixed, this simplification does not distort experimental performance metrics~\cite{Karpinski07:realism}.
-In this model, however, each flow must have its own specific, realistic pair of distributions for packet size and inter-packet intervals.
-Moreover, the ``distribution of distributions'' across the entire network must simultaneously be realistic.
-Modeling such distributions of distributions realistically for entire networks is currently an unsolved problem; we begin to address it here.
+% The second reason why uniformity and marginality assumptions are so commonly used is that there are no generally accepted alternatives for representing or analyzing traffic.
+% The difficulty lies in the high-dimensional and stochastic nature of network behaviors.
+% Suppose, for example, that we assume that packet sizes and inter-packet intervals are drawn independently from some given distribution for each flow.
+% In the terminology introduced above, this is a flow-conditional packet behavior model.
+% Prior research has indicated that, given accurate per-flow distributions, and keeping all other aspects of network behavior fixed, this simplification does not distort experimental performance metrics~\cite{Karpinski07:realism}.
+% In this model, however, each flow must have its own specific, realistic pair of distributions for packet size and inter-packet intervals.
+% Moreover, the ``distribution of distributions'' across the entire network must simultaneously be realistic.
+% Modeling such distributions of distributions realistically for entire networks is currently an unsolved problem; we begin to address it here.
+
+If no one actually believes that assumptions of uniformity and marginality accurately describe network behavior, then why are these assumptions so common?
+There are two reasons.
+The first is that these assumptions drastically simplify both traffic analysis and workload generation, making them tractable problems.
+% If we ignore the interdependencies that make analysis difficult, the difficulties simply evaporate. 
+% This immediately begs the question of whether these assumptions are benign.
+% Does assuming uniformity or marginality of network behavior distort the properties and metrics we are trying to understand?
+% This paper answers that question.
+The second is that there are no generally accepted alternatives for representing and simplifying traffic patterns that allow effective analysis and generation without assuming uniformity or marginality.
+% Representing complex multi-level network behaviors in a way that does not make these simplifying assumptions but allows effective traffic analysis and workload generation is currently an unsolved problem;
+% we begin to address it here.
+
+% This paper answers that question: we cannot stick our heads in the sand and pretend that network behaviors are uniform or marginal without severely distorting crucial network performance metrics.
 
 Fundamentally, uniform, marginal and conditional models are applied so that network traffic behavior can be represented using a manageable collection of empirical or analytical statistical distributions.
-Reduction in representation size and complexity makes analysis and generation problems tractable.
-From this perspective, two questions immediately present themselves:
+Reduction in representation size and complexity makes analysis and generation feasible.
+From this perspective, three questions immediately present themselves:
 \begin{enumerate}
-\item Can we represent ``unreduced'' network behavior such that analysis and generation are tractable?
-\item Are there better ways to reduce the representation of network behavior?
+\item Do these assumptions distort the metrics we are trying to analyze, replicate, and predict?
+\item Can we represent ``unreduced'' network behavior such that analysis and generation remain tractable?
+\item Are there better ways to simplify and reduce the representation of network behavior?
 \end{enumerate}
-This paper answers both of these questions.
-To address the first question, we propose the concept of a \emph{linear representation} of network traffic.
+This paper answers all three questions. We begin, however by answering the second problem and  
+using our solution to address the other two questions.
+% transforming the unreduced representation of traffic into it's uniform, marginal or conditional counterparts.
+
+To represent unreduced network behavior practically, we propose the concept of a \emph{linear representation} of network traffic.
 A linear representation of traffic maps each flow to a vector, such that the following linearity condition is satisfied:
 \begin{quote}
 The sum of the representations of two flows is a vector that represents the aggregate behavior of the two flows.
@@ -174,18 +190,21 @@ We present a specific linear representation, called the general matrix model (\c
 
 \newfootnote{\ranknote}{For uniform and marginal assumptions, the multiplication matrix has rank 1  since all rows and columns are identical. In the conditional case, the rank of the matrix is the number of conditioning classes.}
 
-To address the question of whether there are better ways to reduce the representation of network behaviors, we first make a simple observation.
+To address the the other two questions, we begin with a simple observation.
 In linear representations of traffic, uniform, marginal and conditional assumptions are assertions of equality between the rows and columns of the traffic matrix.
-Moreover, real traffic matrices can be transformed into uniform, marginal or conditional forms through  very simple matrix multiplications.
+Moreover, real traffic matrices can be transformed into uniform, marginal and conditional forms through very simple matrix multiplications.
 These transformations, however, are extremely destructive: the matrices are degenerate with very low rank, so multiplication destroys almost all information in the original traffic matrix.
+We demonstrate experimentally, that this loss of information is not benign:
+uniform and marginal traffic models severely distorting crucial network performance metrics.
 
 \input{trace_vs_uniform}
 
-We argue that matrix factorization, which is nondestructive, is far superior to multiplication for reducing the representation of network traffic behaviors.
+Once traffic is represented linearly, alternatives to assuming uniformity or marginality become apparent.
+We argue that matrix factorization, which is nondestructive and does not assume uniformity or marginality, is far superior to multiplication for this problem.
 To demonstrate this approach, we use non-negative matrix factorization (\caps{NMF})~\cite{Lee01} to find a low-dimensional approximation of the packet size and inter-packet interval matrices of a real traffic trace.
 This factorization extracts a small set of ``basic behaviors'' from the traffic matrix and simultaneously explains each flow's observed behavior as a mixture of these basic behaviors.
 Although basic behaviors are computed without examining port numbers, they nevertheless correspond to the intuitive behaviors expected for protocols.
-Basic behaviors are found corresponding to typical network activities, including file transfer, typing via \caps{SSH}, web surfing, ping traffic, peer-to-peer and others.
+We find basic behaviors corresponding to typical network activities, including file transfer, typing via \caps{SSH}, web surfing, ping traffic, peer-to-peer and others.
 
 % TODO: update roadmap paragraph.
 
