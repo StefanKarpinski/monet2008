@@ -203,7 +203,7 @@ Once traffic is represented linearly, alternatives to assuming uniformity or mar
 We argue that matrix factorization, which is nondestructive and does not assume uniformity or marginality, is far superior to multiplication for this problem.
 To demonstrate this approach, we use non-negative matrix factorization (\caps{NMF})~\cite{Lee01} to find a low-dimensional approximation of the packet size and inter-packet interval matrices of a real traffic trace.
 This factorization extracts a small set of ``basic behaviors'' from the traffic matrix and simultaneously explains each flow's observed behavior as a mixture of these basic behaviors.
-Although basic behaviors are computed without examining port numbers, they nevertheless correspond to the intuitive behaviors expected for protocols.
+Although the factorization is computed without examining port numbers, basic behaviors nevertheless correspond to intuitive expectations for protocols.
 We find basic behaviors corresponding to typical network activities, including file transfer, typing via \caps{SSH}, web surfing, ping traffic, peer-to-peer and others.
 
 % TODO: update roadmap paragraph.
