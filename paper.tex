@@ -278,7 +278,7 @@ Flow and node behaviors are not specified at all, but rather left to the user's 
 The focus of this project is primarily on the engineering challenge of generating very large volumes of synthetic traffic and injecting it into real networks in a distributed fashion.
 While \caps{D-ITG} provides the mechanism for generating large volumes of network traffic, it does not provide any real guidance as to what traffic to generate.
 
-\FHC~\cite{Hernandez06:wlan-traffic} have defined the state of the art in parametric modeling of wireless traffic patterns.
+\FHC~\cite{Hernandez06:spatio-temporal-modeling} have defined the state of the art in parametric modeling of wireless traffic patterns.
 They use rigorous statistical methods to fit parametric models to a number of properties of wireless traffic.
 % They propose the following models:
 Flow arrivals fit a non-stationary Poisson model;
@@ -482,7 +482,7 @@ The parameter $\alpha$ allows us to smoothly vary the weighting of the source an
 
 %\subsection{Marginality}
 
-%Most approaches to traffic modeling that go beyond uniformity assumptions, instead describe marginal properties of various aspects of traffic behavior. For example, {\FHC}~\cite{Hernandez06:wlan-traffic} provide highly convincing parametric models for six marginal properties of wireless network traffic: session (node) arrivals follow a time-varying Poisson process; per-session flow inter-arrival times are Lognormally distributed; flows per session (node) follow a BiPareto distribution; flow sizes follow a BiPareto distribution. This is certainly much greater detail than simply assuming that all nodes and flows are identical.
+%Most approaches to traffic modeling that go beyond uniformity assumptions, instead describe marginal properties of various aspects of traffic behavior. For example, {\FHC}~\cite{Hernandez06:spatio-temporal-modeling} provide highly convincing parametric models for six marginal properties of wireless network traffic: session (node) arrivals follow a time-varying Poisson process; per-session flow inter-arrival times are Lognormally distributed; flows per session (node) follow a BiPareto distribution; flow sizes follow a BiPareto distribution. This is certainly much greater detail than simply assuming that all nodes and flows are identical.
 
 %How do marginal models translate into the algebraic language of the general matrix model? Whereas uniformity assumptions for nodes, 
 
