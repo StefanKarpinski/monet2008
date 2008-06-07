@@ -236,22 +236,6 @@ The acronym is somewhat misleading: {\tmix} does not provide models for applicat
 Rather, it provides the ability to reproduce accurate closed-loop dynamics for a single \caps{TCP} flow \emph{given} an application behavior model as input.
 Our research complements this perfectly: we provide the means to analyze traffic and generate realistic whole-network application mixtures which can then serve as the necessary inputs to {\tmix}.
 
-% This presents a fundamental difficulty, however, in that it presumes that we know the intent of endpoints: what \textit{would} they have done under different conditions? While we can speculate about what an individual node might hypothetically do, we currently hardly understand the impact of the full-network traffic pattern upon performance metrics at all---even without trying to account for hypothetical reactions to alternate situations. A fuller understanding of total network behavior must be reached before we can sensibly tackle the complexities of application and user feedback.
-
-% Although we do not attempt to model application and user feedback, we do simulate the effect of the network layer and below on the dynamics of \caps{TCP} for flows that were originally transmitted using \caps{TCP}. Hern\'andez-Campos~\cite{Hernandez06:dissertation} addresses in great depth how to abstract an application's behavior from a \caps{TCP} trace and replay it in a manner that accurately reflects how many common applications would react in response to network conditions. This research has subsequently been turned into a \caps{TCP} flow generation tool for \caps{NS-2}, called \tmix~\cite{Weigle06}. This work is complementary to ours: {\tmix} does not provide a model for application behaviors; it only provides the ability to reproduce accurate closed-loop dynamics given an accurate application behavior model. Our work our work provides the means to analyze traffic and generate realistic application workloads which can then serve as the required inputs to \tmix.
-
-% This paper attempts to provide a first-order approximation of complete network behavior by studying the response of performance metrics to \textit{open-loop} traffic models without feedback from the network to applications and users. It is important to realize that while this does not provide a final picture, we currently lack even a first-order understanding of the effect of different workloads on performance. This first-order understanding is an essential initial step.
-
-% There have been many studies of large wireless network deployments~\cite{Tang99,Balachandran02,Balazinska03,Kotz02,Henderson04,Schwab04,Chinchilla04,Jardosh05:ewind}. These analyses have described a wide variety of aspects of wireless network behavior, and provide much insight into the workings of real, deployed wireless networks. These studies present a broad analysis of general system features and trends of specific corporate wireless local-area networks (\caps{WLAN}s)~\cite{Tang99,Balazinska03}, university campus \caps{WLAN}s~\cite{Tang00,Kotz02,Chinchilla04,Schwab04,Henderson04,Tuduce05}, and temporary \caps{WLAN}s at conference venues~\cite{Balachandran02,Jardosh05:ewind}. They also provide a large body of raw data for subsequent analysis and modeling research. Our work provides the methodology for turning this rich foundation of field data into usable, realistic models of workload for a wide variety of networking situations.
-% 
-% The choice of mobility models for mobile wireless simulations can have a drastic impact on important performance metrics~\cite{Camp02,Yoon03:speed-decay,Yoon03:sound-models,Jardosh03,Zheng04}. Moreover, commonly used but simplistic mobility models, such as \caps{RWP}, exhibit characteristics, including density waves and speed decay, that are categorically dissimilar from any known real-world behavior~\cite{Royer01,Yoon03:speed-decay,Yoon03:sound-models}. In response to this evidence, more realistic mobility models have been proposed~\cite{Jardosh03,Tuduce05,Jardosh05:voronoi}. While much of this work focuses on making models that are simply more intuitively appealing~\cite{Jardosh03,Jardosh05:voronoi}, some work has begun to capitalize on this newly created wealth of wireless field data by deriving models from observed usage behavior, rather than intuition alone~\cite{Balazinska03,Tuduce05}.
-%The analysis of Balazinska \textit{et al.}~\cite{Balazinska03} introduces the notions of the prevalence and persistence of an \caps{AP} with respect to mobile nodes.\footnote{These concepts are adapted from Paxson's work on Internet routing behavior: ``\textit{prevalence} meaning the overall likelihood that a particular route is encountered, and \textit{persistence}, the likelihood that a route remains unchanged over a long period of time''~\cite{Paxson96}.} Tuduce \textit{et al.}~\cite{Tuduce05} have based their mobility model on the persistence and prevalence characteristics of real trace data, which makes their work particularly relevant to our definition of sufficient realism. They do not, however, determine the impact of prevalence and persistence characteristics on performance metrics.
-
-% In this paper, instead of mobility, we examine an even more fundamental aspect of user behavior in wireless networks: the pattern of traffic generated by users and applications. This aspect of behavior is more fundamental because it applies to all types of wireless networks, not just mobile and ad~hoc networks. Moreover, the effect of traffic patterns applies not only to simulations, but also to experimental deployments, which have become the gold standard for wireless protocol evaluation.  Experimental deployments sidestep the problem of accurately modeling the lower layers of the network. Unless traffic and mobility are modeled realistically, however, the experimental results will still be unreliable.
-
-% There is a large and diverse body of work on traffic analysis, modeling, and generation~\cite{Paxson95,Paxson96,Sommers04,Avallone04,Hernandez06:dissertation}. We are only able to discuss a small, but hopefully representative sampling of this work. Almost all of the traffic generation work has focused on wide-area Internet backbone traffic.
-%Because of the comparatively unlimited capacity of wired networks, traffic workload generally does not offer interesting technical challenges at the edge of the network.
-
 \newfootnote{\harpoonnote}{Even this is unclear: generated traffic is only compared with trace traffic using the very same metrics that are explicitly specified as part of the model. Unsurprisingly, the distributions of sampled metrics closely match the distributions those metrics were sampled from. Realism is not double-checked using other statistical metrics or actual performance metrics.}
 
 The two most prominent general traffic generation frameworks are Harpoon and \caps{D-ITG}. Harpoon~\cite{Sommers04} uses a traffic trace for self-training, and can subsequently generate synthetic traffic with certain statistical properties based on the original trace.
@@ -259,12 +243,11 @@ The properties reproduced are the empirical distributions of the following: ``fi
 Harpoon exemplifies the uniform and marginal modeling approaches.
 Source and destination nodes are treated marginally: empirically derived marginal frequencies of sources and destinations are used to choose endpoints independently for each flow.
 Flow sizes (\latin{i.e.} file sizes) are likewise treated marginally: each flow's total byte  count is sampled from a marginal distribution of flow sizes.
-\caps{UDP} flows are modeled as being constant bit-rate; %(\latin{i.e.} having uniform packet behavior),
+\caps{UDP} flows are modeled as being constant bit-rate;
 \caps{TCP} flows are all treated as file transfers, making them effectively uniform with bit-rate determined by \caps{TCP} dynamics.
-Inter-connection times %(\latin{i.e.} per node-pair inter-flow intervals)
-are sampled from a single empirically derived marginal distribution.
+Inter-connection times are sampled from a single empirically derived marginal distribution.
 While Harpoon may be sufficiently realistic for the intended purpose of generating Internet backbone traffic,\harpoonnote for generating local-area traffic in wireless experiments, it is not.
-Previous research has shown that uniform packet behavior models used in Harpoon drastically distort vital performance metrics at all levels of the protocol stack~\cite{Karpinski07:cbr-failure}. % in wireless network simulations.
+Previous research has shown that uniform packet behavior models used in Harpoon drastically distort vital performance metrics at all levels of the protocol stack~\cite{Karpinski07:cbr-failure}.
 This paper shows, moreover, that marginal models, like those used in Harpoon, also severely misrepresent performance metrics in wireless networks.
 
 Like Harpoon, \caps{D-ITG}~\cite{Avallone04} exemplifies uniform and marginal modeling assumptions. However, unlike Harpoon, \caps{D-ITG} does not derive models from real traffic.
@@ -276,7 +259,6 @@ While \caps{D-ITG} provides the mechanism for generating large volumes of traffi
 
 \FHC~\cite{Hernandez06:spatio-temporal-modeling} have defined the state of the art in parametric modeling of wireless traffic patterns.
 They use rigorous statistical methods to fit parametric models to a number of properties of wireless traffic.
-% They propose the following models:
 Flow arrivals fit a non-stationary Poisson model;
 flow inter-arrival times fit a Lognormal distribution;
 the number of flows per session fits a BiPareto model;
@@ -284,30 +266,27 @@ flow sizes also fit a BiPareto model.
 The statistical analysis fitting these parametric models is thorough and convincing.
 The models, however, are marginal:
 a single statistical model applies to all flows and nodes; packet behavior is not considered.
-% One intuitively obvious heterogeneous nature of network traffic:
 Each node has a different number of flows assigned to it, but otherwise nodes are identical. 
 Moreover, all flows, regardless of source node, are statistically identical:
 flow sizes are drawn from a single marginal distribution, and nothing else distinguishes them.
-%, unconditional of their associated node.
-% This is a classic example of the limits of marginal modeling.
 Yet, intuitively it is clear that different nodes in real networks have drastically different tendencies for flow size, flow rates, and packet behavior.
 Such interdependent behaviors cannot be captured using marginal modeling.
 In this paper, we demonstrate that this inability is not harmless:
 treating all flows and nodes statistically identically severely distorts crucial wireless performance metrics in experiments.
 We also provide sorely needed methods of representing and analyzing traffic patterns without making uniform or marginal assumptions about network behavior.
 
-% The focus of this project, however, is on providing the infrastructure to generate very large volumes of synthetic Internet-like backbone traffic. No analysis is provided for determining the realism of traffic mixes, or for choosing flow endpoints realistically. In wireless networks, these factors are of crucial importance to performance, and cannot be overlooked. Both Harpoon and \caps{D-ITG} provide excellent traffic generation platforms, but do not provide a systematic framework for understanding or reproducing realistic whole-network workload in the wireless setting.
+This work uses the technique known as \emph{paired differential simulation} to evaluate the realism of modified or synthetically generated wireless workloads.
+This technique was proposed and subsequently refined by Karpinski~\latin{et~al.}~\cite{Karpinski07:realism,Karpinski07:cbr-failure}.
+They introduce the notion of \emph{sufficient realism}, and propose paired differential simulation as an experimental methodology based on the standard technique of pairing control and test subjects.
+We describe the technique in \Section{methodology}.
+In the first paper~\cite{Karpinski07:realism}, they explore various ways of modifying trace traffic patterns, as a form of sensitivity analysis to determine which aspects of network behavior are essential and must be preserved in realistic models, and which aspects can be discarded as inessential.
+Of particular interest is their conclusion that detailed time-series packet behavior for flows is inessential:
+it suffices, for each flow, to have accurate unconditional distributions of packet sizes and inter-packet intervals;
+sufficiently realistic flow behavior can be reconstructed from these distributions by repeated independent sampling.
+In the second paper~\cite{Karpinski07:cbr-failure}, Karpinski~\latin{et~al.} explore the impact of a broad variety of uniformity assumptions at the packet, flow and node levels of behavior.
+They find that all uniformity assumptions are detrimental, inducing significant and often extreme misrepresentation of a broad variety of wireless performance metrics at every level of the protocol stack.
+Moreover, they show, using \caps{OLSR} and \caps{AODV}, that uniform traffic models can completely invert the relative performance of network protocols.
 
-%This work extends that published in~\cite{Karpinski07:realism}~and~\cite{Karpinski07:cbr-failure}, using the same methodology for defining and quantifying the realism of synthetic traffic models. The Traffic Object Model builds on the combinatorial approach taken in~\cite{Karpinski07:cbr-failure}, while providing an flexible and general object-oriented framework for constructing generative traffic models. The traffic models evaluated here overlap and augment those evaluated in both prior works; comparison with the models proposed in {\FHC} is entirely new. The Qualnet simulation methodology has been enhanced by the implementation of full-duplex, client-server, trace-driven raw \caps{IP}, \caps{TCP}, and \caps{UDP} flows. We have also implemented performance metric aggregation based on the \caps{IETF} framework for \caps{IP} performance metrics~\cite{rfc:ip-metrics,rfc:jitter}.
-
-% TODO: add in the Hernandez-Cortes' dissertation.
-% TODO: concluding remarks about what's missing from traffic work in general.
-%   + there's no central goal or theme---because realism is ill-defined and subjective
-%   + there are no rigorous tests for whether realism is achieved since it's ill-defined
-%   + in wireless, where the impact is greater, there's been virtually no research of impact
-% TODO: cite a bunch of papers that use the CBR traffic model.
-
-%\section{Algebraic Representations \\of Network Behavior}
 \section{The General Matrix Model}
 \label{sec:general-matrix-model}
 \label{sec:representations}
