@@ -1,0 +1,52 @@
+%!TEX root = /Users/stefan/projects/papers/paper.4/paper.tex
+
+\begin{table*}
+\begin{center}
+\small
+\begin{tabular}{|c|c|c|c|}
+\multicolumn{1}{c}{\textbf{property}} &
+\multicolumn{1}{c}{\textbf{range}} &
+\multicolumn{1}{c}{\textbf{quantization}} &
+\multicolumn{1}{c}{\textbf{dequantization}} \\
+\hline
+\caps{IP} type &
+$\type \in \set{1,\dots,255}$ &
+identity &
+identity \\
+\hline
+source node &
+$\src \in \set{1,\dots,n}$ &
+identity &
+identity \\
+\hline
+destination node &
+$\dst \in \set{1,\dots,n}$ &
+identity &
+identity \\
+\hline
+start time &
+$\start \in [0,t_\text{max}] \subseteq \R$ &
+$t \mapsto \max\set{1,\ceil{d_t\fracp{t}{t_{\max}}}}$ &
+$\tuple{k,u} \mapsto (t_{\max})\parens{\frac{k-u}{d_t}}$ \\
+\hline
+flow size &
+$\bytes \in \set{1,\dots,b_{\max}} \subseteq \N$ &
+$b \mapsto \max\set{1,\ceil{d_b\fracp{b-1}{b_{\max}-1}^\beta}}$ &
+$\tuple{k,u} \mapsto 1+(b_{\max}-1)\parens{\frac{k-u}{d_b}}^\frac{1}{\beta}$ \\
+\hline
+packet size &
+$\size \in \set{1,\dots,\text{\caps{MTU}}} \subseteq \N$ &
+identity &
+identity \\
+\hline
+inter-packet interval &
+$\ival \in [0,v_\text{max}] \subseteq \R$ &
+$v \mapsto \max\set{1,\ceil{d_v\fracp{v-v_{\min}}{v_{\max}-v_{\min}}^\gamma}}$ &
+$\tuple{k,u} \mapsto v_{\min}+(v_{\max}-v_{\min})\parens{\frac{k-u}{d_v}}^{\frac{1}{\gamma}}$ \\
+\hline
+\end{tabular}
+\caption{Quantization and dequantization functions for properties of flows in \caps{GMM}.}
+\label{tab:quantization}
+\end{center}
+\vspace{-2em}
+\end{table*}
