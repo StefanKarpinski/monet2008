@@ -258,19 +258,20 @@ The number $n$ is simply the total number of nodes in the network being modeled.
 \caps{MTU} is the maximum transfer unit of the network (typically around 1500 bytes).
 We formalize the packet behavior of a flow as a pair of infinite sequences of packet sizes and inter-packet intervals:
 \begin{align}
-\sizes &= \seq{\size_1,\size_2,\dots} \in \SizeSeq, \\
+\sizes &= \seq{\size_1,\size_2,\dots} \in \SizeSeq \\
 \ivals &= \seq{\ival_1,\ival_2,\dots} \in \IvalSeq.
 \end{align}
 Since flows contain only a finite number of packets, there exists a number of packets, $\pkts \in \N$, for each flow. Thus, we require that the sequences $\sizes$ and $\ivals$ satisfy the following requirements:
 \begin{align}
-&\forall\: i > \pkts:   \quad \size_i = 0,      \eqn{zero-packets}\\
-&\forall\: i < \pkts:   \quad \ival_i < \infty, \eqn{finite-intervals}\\
-&\forall\: i \ge \pkts: \quad \ival_i = \infty. \eqn{infinite-intervals}
+&\forall\: k> \pkts:   \quad \size_k = 0      \eqn{zero-packets}\\
+&\forall\: k < \pkts:   \quad \ival_k < \infty \eqn{finite-intervals}\\
+&\forall\: k \ge \pkts: \quad \ival_k = \infty. \eqn{infinite-intervals}
 \end{align}
-% The send time of the $k$th packet can be calculated as
-% \begin{align}
-% \start + \sum_{i=1}^k \ival_i.
-% \end{align}
+The send time of the $k$th packet can be expressed as
+\begin{align}
+\time_k = \start + \sum_{i=1}^{k-1} \ival_i.
+\end{align}
+This is guaranteed to be finite if and only if $k \le \pkts$.
 Now we are ready to formalize the space of flows:
 \begin{align}
   \Flows =
@@ -326,16 +327,79 @@ In the next section, we clarify the concept and application of linear representa
 % we present and discuss specific examples of linear representations in order to clarify the concept and its application.
 
 \subsection{Examples of Linear Representations}
+\sec{linear-representation-examples}
+
+\newfootnote{\pbdnote}{There are many schemes to correct the discrepancy in bytes when $\pkts$ does not divide $\mathsym{bytes}$ evenly. The simplest is to ignore them; we leave leave more complex schemes to the reader.}
 
 Our first example is the packets-bytes-duration (\caps{PBD}) representation.
-The representation is $\pbd: \Traffic \to \R^3$, defined as
-$\pbd(\flow) = \tuple{\pkts,\mathsym{bytes},\mathsym{dur}}$, where
+The representation is $\pbd: \Traffic \to \R^3$, mapping
+$\flow \mapsto \tuple{p,b,d}$, where
 \begin{align}
-\mathsym{bytes} &= \sum_{i=1}^{\mathclap{\pkts}}{\size_i} &
-\mathsym{dur} &= \sum_{i=1}^{\mathclap{\pkts-1}}{\ival_i}.
+p &= \pkts, &
+b &= \sum_{i=1}^{\mathclap{p}}{\size_i}, &
+d &= \sum_{i=1}^{\mathclap{p-1}}{\ival_i}.
 \end{align}
-This representation encapsulates the information needed to reproduce a \caps{CBR} version of each flow:
-each packet should have a $\floor{\mathsym{bytes}/\pkts}$ byte payload, and intervals between packets should be $\mathsym{dur}/\pkts$ seconds.
+This representation encapsulates the information necessary to reproduce a \caps{CBR} version of each flow:
+packets have payloads of $\floor{\fracx{b}{p}}$ bytes, and are sent every $\fracx{d}{p}$ seconds.\pbdnote
+Given two flows with behavior vectors $\vec{x}_1$ and $\vec{x}_2$, their sum as vectors, 
+\begin{align}
+\vec{x}_1+\vec{x}_2=\tuple{p_1+p_2,b_1+b_2,d_1+d_2},
+\end{align}
+provides an appropriate description of the aggregate behavior of the two flows together.
+Similarly, their average, \latin{i.e.} $\frac{1}{2}(\vec{x}_1+\vec{x}_2)$, has the average number of packets, bytes, and duration, which is precisely what the ``average behavior'' of the two flows should intuitively be.
+In contrast, a ``packets-payload-interval'' representation, expressing the \caps{CBR} parameters directly does not have this property:
+the sum of average payloads is not the overall average of payloads;
+likewise with intervals.
+In the \caps{PBD} representation, the linearity property leads to ``natural'' descriptions of aggregate behavior through vector addition, whereas in the packets-payload-interval representation, vector addition is ``unnatural.''
+
+The \caps{PBD} representation is highly lossy: it discards most of the information detailing the behavior of each flow.
+At the other extreme, we can give a ``perfect'' representation of each flow, that allows us to completely reconstruct each flow from its representation.
+With care, the sum of representations of flows can still naturally describe the aggregate behavior of  flows.
+We will define the representation $\Phi: \Traffic \to \FlowVec$, where
+\begin{align}
+\FlowVec = \R^{255} \cross \R^n \cross \R^n \cross L^2[\R] \cross L^2[\R].
+\end{align}
+% Here $\R^X$ is the vector space of functions $f: X \to \R$, which is isomorphic to the standard Euclidean vector space, $\R^\card{X}$.
+Here $L^2[\R]$ is the usual vector space of real functions~\cite{Rudin87}: $\R^\R=\set{f: \R \to \R}$ equipped with the norm,
+\begin{align}
+\norm{f}_2 = \Big[ \int_{-\infty}^{\infty} \abs{f}^2 dx \Big]^{\frac{1}{2}}.
+\end{align}
+We define $\Phi(\flow) = \tuple{\e_\type,\e_\src,\e_\dst,f,g}$, where $\e_k$ is the $k$th standard basis vector, and $f,g \in L^2[\R]$ are
+\begin{align}
+f(t) &= \sum_{k=1}^{\pkts}
+  \begin{cases}
+    1 & \text{if $t \ge \time_k$} \\
+    0 & \text{if $t <   \time_k$}
+  \end{cases} \\
+g(t) &= \sum_{k=1}^{\pkts}
+  \begin{cases}
+    \size_k & \text{if $t \ge \time_k$} \\
+    0       & \text{if $t <   \time_k$}.
+  \end{cases}
+\end{align}
+Thus, $f$ and $g$ are both integer-valued, monotonically increasing step functions, giving the cumulative number of packets sent and total bytes sent, respectively, at time $t$.
+From the representation via $\Phi$ of a single flow, we can readily recover its type, source and destination, and the transmission times and sizes of packets.
+
+Why is $\Phi$ natural in the same sense that the \caps{PBD} representation is natural?
+Suppose we have a traffic sample, $T\in\Traffic$.
+The first component of $\Phi(T)$ is a 255-dimensional vector, whose coordinates are a histogram of the number of times each flow type occurs in $T$.
+Similarly, the second and third components of $\Phi(T)$ are $n$-dimensional histograms of the number of times each node occurs as source and destination.
+The last components are step functions, like $f$ and $g$.
+Vector addition in $L^2[\R]$ dictates that these functions give the total number of cumulative packets and bytes, respectively, over all flows in $T$.
+Thus, summation of vectors under the representation $\Phi$ yields a natural and useful description of the aggregate behavior of many flows.
+
+Consider, for contrast, if we had represented flow type simply by $\type \in \N$ instead of $\e_\type \in \R^{255}$.
+The natural numbers containing $\type$ can readily be embedded into $\R^1$, which is a vector space.
+However, the addition of vectors is highly unnatural.
+The sum of protocol numbers is meaningless:
+two \caps{TCP} flows plus five \caps{ICMP} flows does not equal a single \caps{UDP} flow, despite the fact that $2\cdot6+5\cdot1=17$.
+The summation of vectors in the representation $\Phi$, on the other hand is $5\,\e_1+2\,\e_6$, indicating the frequency with which each type occurred.
+
+Both of the example representations discussed here can be applied in practice.
+The \caps{PBD} representation naturally allows us to compute aggregate and average \caps{CBR} behaviors of collections of flows.
+With a suitable machine encoding of step-functions, $\Phi$ can be implemented and used in practice.
+Representations that preserve even more information about flows can be constructed.
+We turn now in a different direction, however, and introduce a linear representation that strikes a practical balance in fidelity between $\pbd$ and $\Phi$.
 
 \section{The General Matrix Model}
 \label{sec:general-matrix-model}

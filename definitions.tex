@@ -35,6 +35,8 @@
 \newcommand{\absx}[1]{{|#1|}}
 \newcommand{\card}[1]{{\left|#1\right|}}
 \newcommand{\cardx}[1]{{|#1|}}
+\newcommand{\norm}[1]{{\lVert#1\rVert}}
+\newcommand{\normx}[1]{{\Vert#1\Vert}}
 \newcommand{\set}[1]{{\left\{#1\right\}}}
 \newcommand{\setx}[1]{{\{#1\}}}
 \newcommand{\parens}[1]{{\left(#1\right)}}
@@ -79,14 +81,10 @@
 \newcommand{\zeros}[1]{\mathbf{0}_{#1}}
 \newcommand{\mat}[1]{\mathbf{#1}}
 \newcommand{\mean}[1]{\bar{#1}}
+\newcommand{\mathsym}[1]{\text{\textsf{#1}}}
+\newcommand{\e}{\vec{e}}
 
 % special symbols and such
-\newcommand{\Qf}{\mathcal{Q}}
-\newcommand{\Qt}{\Qf_{\text{time}}}
-\newcommand{\Qb}{\Qf_{\text{byte}}}
-\newcommand{\Qi}{\Qf_{\text{ival}}}
-\newcommand{\Di}{\Qf^{-1}_{\text{ival}}}
-
 \newcommand{\FlowSet}[1]{\mathcal{#1}}
 \newcommand{\Flows}{\FlowSet{F}}
 \newcommand{\Types}{\FlowSet{Y}}
@@ -97,9 +95,6 @@
 \newcommand{\SizeSeq}{\Sizes^\N}
 \newcommand{\IvalSeq}{\Ivals^\N}
 \newcommand{\Traffic}{\Flows^*}
-
-\newcommand{\mathsym}[1]{\text{\textsf{#1}}}
-\newcommand{\pbd}{\mathsym{pbd}}
 
 \newcommand{\FlowElt}[1]{\mathsym{#1}}
 \newcommand{\flow}{\FlowElt{flow}}
@@ -112,6 +107,16 @@
 \newcommand{\pkts}{\FlowElt{pkts}}
 \newcommand{\sizes}{\FlowElt{sizes}}
 \newcommand{\ivals}{\FlowElt{ivals}}
+\renewcommand{\time}{\FlowElt{time}}
+
+\newcommand{\Qf}{\mathcal{Q}}
+\newcommand{\Qt}{\Qf_{\text{time}}}
+\newcommand{\Qb}{\Qf_{\text{byte}}}
+\newcommand{\Qi}{\Qf_{\text{ival}}}
+\newcommand{\Di}{\Qf^{-1}_{\text{ival}}}
+
+\newcommand{\pbd}{\mathsym{pbd}}
+\newcommand{\FlowVec}{\mathcal{V}}
 
 %% FORMATTING BEHAVIORS
 \newcommand{\caps}[1]{{\smaller{#1}}}
