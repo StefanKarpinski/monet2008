@@ -25,28 +25,28 @@ identity &
 identity \\
 \hline
 start time &
-$\start \in [0,t_\text{max}] \subseteq \R$ &
+$\start \in [0,t_\text{max}]$ &
 $t \mapsto \max\set{1,\ceil{d_t\fracp{t}{t_{\max}}}}$ &
-$\tuple{k,u} \mapsto (t_{\max})\parens{\frac{k-u}{d_t}}$ \\
+$x \mapsto (t_{\max})\parens{\frac{x}{d_t}}$ \\
 \hline
 flow size &
-$\bytes \in \set{1,\dots,b_{\max}} \subseteq \N$ &
+$\bytes \in \set{1,\dots,b_{\max}}$ &
 $b \mapsto \max\set{1,\ceil{d_b\fracp{b-1}{b_{\max}-1}^\beta}}$ &
-$\tuple{k,u} \mapsto 1+(b_{\max}-1)\parens{\frac{k-u}{d_b}}^\frac{1}{\beta}$ \\
+$x \mapsto 1+(b_{\max}-1)\parens{\frac{x}{d_b}}^\frac{1}{\beta}$ \\
 \hline
 packet size &
-$\size \in \set{1,\dots,\text{\caps{MTU}}} \subseteq \N$ &
-identity &
-identity \\
+$\size \in \set{0,\dots,\text{\caps{MTU}}}$ &
+$z \mapsto z+1$ &
+$x \mapsto x-1$ \\
 \hline
 inter-packet interval &
-$\ival \in [0,v_\text{max}] \subseteq \R$ &
+$\ival \in [0,v_\text{max}]$ &
 $v \mapsto \max\set{1,\ceil{d_v\fracp{v-v_{\min}}{v_{\max}-v_{\min}}^\gamma}}$ &
-$\tuple{k,u} \mapsto v_{\min}+(v_{\max}-v_{\min})\parens{\frac{k-u}{d_v}}^{\frac{1}{\gamma}}$ \\
+$x \mapsto v_{\min}+(v_{\max}-v_{\min})\parens{\frac{x}{d_v}}^{\frac{1}{\gamma}}$ \\
 \hline
 \end{tabular}
 \caption{Quantization and dequantization functions for properties of flows in \caps{GMM}.}
 \label{tab:quantization}
 \end{center}
-\vspace{-2em}
+\vspace{-1em}
 \end{table*}
