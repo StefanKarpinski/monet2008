@@ -3,50 +3,63 @@
 \begin{table*}
 \begin{center}
 \small
-\begin{tabular}{|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|}
 \multicolumn{1}{c}{\textbf{property}} &
-\multicolumn{1}{c}{\textbf{range}} &
+\multicolumn{1}{c}{\textbf{domain}} &
 \multicolumn{1}{c}{\textbf{quantization}} &
+\multicolumn{1}{c}{\textbf{dim.}} &
 \multicolumn{1}{c}{\textbf{dequantization}} \\
 \hline
 \caps{IP} type &
 $\type \in \set{1,\dots,255}$ &
-identity &
-identity \\
+$y \mapsto y$ &
+255 &
+$x \mapsto \ceil{x}$ \\
 \hline
 source node &
 $\src \in \set{1,\dots,n}$ &
-identity &
-identity \\
+$s \mapsto s$ &
+n &
+$x \mapsto \ceil{x}$ \\
 \hline
 destination node &
 $\dst \in \set{1,\dots,n}$ &
-identity &
-identity \\
+$d \mapsto d$ &
+n &
+$x \mapsto \ceil{x}$ \\
 \hline
 start time &
 $\start \in [0,t_\text{max}]$ &
 $t \mapsto \max\set{1,\ceil{d_t\fracp{t}{t_{\max}}}}$ &
+$d_t$ &
 $x \mapsto (t_{\max})\parens{\frac{x}{d_t}}$ \\
 \hline
-flow size &
+bytes (flow size) &
 $\bytes \in \set{1,\dots,b_{\max}}$ &
-$b \mapsto \max\set{1,\ceil{d_b\fracp{b-1}{b_{\max}-1}^\beta}}$ &
-$x \mapsto 1+(b_{\max}-1)\parens{\frac{x}{d_b}}^\frac{1}{\beta}$ \\
+$b \mapsto 1 + \ceil{(d_b-1)\fracp{b-1}{b_{\max}-1}^\beta}$ &
+$d_b$ &
+$x \mapsto \max\set{1,\ceil{(b_{\max}-1)\parens{\frac{x}{d_b}}^\frac{1}{\beta}}}$ \\
 \hline
 packet size &
-$\size \in \set{0,\dots,\text{\caps{MTU}}}$ &
-$z \mapsto z+1$ &
-$x \mapsto x-1$ \\
+$\size \in \set{1,\dots,\text{\caps{MTU}}}$ &
+$z \mapsto z$ &
+$d_z$ &
+$x \mapsto \ceil{x}$ \\
 \hline
 inter-packet interval &
 $\ival \in [0,v_\text{max}]$ &
 $v \mapsto \max\set{1,\ceil{d_v\fracp{v-v_{\min}}{v_{\max}-v_{\min}}^\gamma}}$ &
+$d_v$ &
 $x \mapsto v_{\min}+(v_{\max}-v_{\min})\parens{\frac{x}{d_v}}^{\frac{1}{\gamma}}$ \\
 \hline
 \end{tabular}
-\caption{Quantization and dequantization functions for properties of flows in \caps{GMM}.}
-\label{tab:quantization}
+\caption{%
+Quantization and dequantization functions for properties of flows.
+The domain specifies the set of possible input values to the quantization function.
+Quantized values are elements of $\set{1,\dots,d}$, where $d$ is the dimension specified.
+The dequantization function maps a real value, $x \in [0,d]$, back into the original domain.
+}
+\tab{quantization}
 \end{center}
 \vspace{-1em}
 \end{table*}

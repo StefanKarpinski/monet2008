@@ -262,10 +262,13 @@ We formalize the packet behavior of a flow as a pair of infinite sequences of pa
 \end{align}
 Since flows contain only a finite number of packets, there exists a number of packets, $\pkts \in \N$, for each flow. Since flows are finite, we require that the sequences $\sizes$ and $\ivals$ satisfy the following requirements:
 \begin{align}
-&\forall\: k> \pkts:   \quad \size_k = 0      \eqn{zero-packets}\\
-&\forall\: k < \pkts:   \quad \ival_k < \infty \eqn{finite-intervals}\\
+&\forall\: k \le \pkts: \quad \size_k > 0       \eqn{positive-packets}  \\
+&\forall\: k >   \pkts: \quad \size_k = 0       \eqn{zero-packets}      \\
+&\forall\: k <   \pkts: \quad \ival_k < \infty  \eqn{finite-intervals}  \\
 &\forall\: k \ge \pkts: \quad \ival_k = \infty. \eqn{infinite-intervals}
 \end{align}
+Packet sizes are required to be positive because we are modeling application layer data transfer:
+an empty data transmission request is a non-event.
 The send time of the $k$th packet can be expressed as
 \begin{align}
 \time_k = \start + \sum_{i=1}^{k-1} \ival_i.
@@ -399,22 +402,50 @@ Representations that preserve even more information about traffic instances can 
 We turn now, however, in a different direction, and introduce a specific linear representation that strikes a practical balance in fidelity between $\pbd$ and $\Phi$.
 
 \section{The General Matrix Model}
-\label{sec:general-matrix-model}
+\sec{general-matrix-model}
 
 \input{gmm_properties}
 
 The \caps{PBD} representation of flows uses 3 dimensions to encode the behavior of each flow, while $\Phi$ uses $255+2n$ dimensions, plus the continuum of dimensions of two Banach spaces (\latin{i.e.} the two copies of $L^2[\R]$).
 In this section, we define a representation, $\phi$, that splits the difference and uses a large but finite number of dimensions to represent each flow.
 Once the vector representation of each flow is defined, we may construct matrices of representation vectors, with a row for each flow in a traffic sample.
-When network behavior is expresses as matrices, we can very simply and efficiently compute a broad variety of network behavior properties using standard matrix operations.
+We call the matrix representation of network traffic, the general matrix model~(\caps{GMM}).
+With network behavior is expresses as matrices, we can very simply and efficiently compute a broad variety of network behavior properties using standard matrix operations.
 Furthermore, we can express uniformity and marginality assumptions about behavior as equality constraints between the rows and columns of the traffic matrix.
 Moreover, we can transform unconstrained traffic instances into uniform, marginal, or conditional approximations via right or left multiplications by easily computed matrices.
 
-The general strategy for defining $\phi$ is to divide the descriptive properties of each flow into bins, and represented each bin by a standard basis element of $\R^m$, where $m$ is the number of bins for that property.
-Representation vectors are histograms counting items falling into each bin.
+The general strategy for defining $\phi$ is to divide the descriptive properties of each flow into bins, and represented each bin by a standard basis element of $\R^d$, where $d$ is the number of bins for that property.
+In this scheme, representation vectors are histograms counting items falling into each bin.
 The histograms for packet sizes and inter-packet intervals count packets, while other histograms count flows.
+\Table{quantization} lists the properties that are used to define $\phi$, together with the quantization and dequantization functions.
+Each quantization function takes a possible property value as input and maps it to an index value in $\set{1,\dots,d}$, where $d$ is the dimension for the property in question.
+The index assigned determines the histogram bin of the input property.
 
-If there are $f$ flows in the entire workload pattern, then the collective behavior can be described with seven matrices; the rows of each matrix are the behavior vectors of the flows, indexed in some chosen order. We use the following notation for the behavior matrices and their constituent vectors:\vspace{-0.25em}
+The histogram vector approach produces some representations of properties that are not immediately intuitive, and may seem to use an excessive number of representation dimensions.
+However, this approach automatically satisfies the ``naturalness'' criterion for linear representations.
+That is, the representation, $\phi(T)$, of some collections of flows, $T$, naturally describes the aggregate behavior of those flows.
+Perhaps even more importantly, arbitrary linear combinations of vectors can be meaningfully interpreted as describing some realizable traffic instance.
+In \Section{traffic-generation} we will describe how to choose, stochastically, a collection of flows matching the ``description'' of an arbitrary traffic matrix.
+% This is how we generate workload from transformed traffic matrices.
+
+The quantization functions specified in \Table{quantization} allow us to define the representation $\phi$: \begin{align}
+\phi(\flow) = \tuple{\vec{t},\vec{s},\vec{d},\vec{a},\vec{b},\vec{z},\vec{v}},
+\end{align}
+where the component vectors are defined as
+\begin{align*}
+\vec{t} &= \e_k & k &= \Qf^{\text{t}}(\type) \\
+\vec{s} &= \e_k & k &= \Qf^{\text{s}}(\src) \\
+\vec{d} &= \e_k & k &= \Qf^{\text{d}}(\dst) \\
+\vec{a} &= \e_k & k &= \Qf^{\text{a}}(\start) \\
+\vec{b} &= \e_k & k &= \Qf^{\text{b}}(\bytes) \\
+\vec{z} &= {\textstyle \sum \e_k} & k &\in \set{\Qf^{\text{z}}(\size_i) : i \le \pkts} \\
+\vec{v} &= {\textstyle \sum \e_k} & k &\in \set{\Qf^{\text{v}}(\ival_i) : i <   \pkts}.
+\end{align*}
+Here, the functions $\Qf^\text{x}$ are the respective quantization functions for each property.
+If there are $f$ flows in a traffic instance, then the collective behavior can be described with seven matrices---one for each property;
+the rows of each matrix are the behavior vectors of the flows, indexed in some chosen order.
+We use the following notations for the behavior matrices:
+\vspace{-0.25em}
 \begin{tabbing}
 \hspace{1em}\=\bullet\hspace{0.5em}\=\hspace{9.75em}\=
 $\mat{D}\:$\=$=\parensx{\vec{d}_i}\:$\=$=\parensx{d_{ij}}\:$\=\kill
@@ -426,48 +457,27 @@ $\mat{D}\:$\=$=\parensx{\vec{d}_i}\:$\=$=\parensx{d_{ij}}\:$\=\kill
 \>\bullet\> packet sizes: \>$\mat{Z}$\>$=\parensx{\vec{z}_i}$\>$=\parensx{z_{ij}}$\>$\in\R^{f \times d_z}$\\
 \>\bullet\> inter-packet intervals: \>$\mat{V}$\>$=\parensx{\vec{v}_i}$\>$=\parensx{v_{ij}}$\>$\in\R^{f \times d_v}$.
 \end{tabbing}
-The total behavior is the horizontal concatenation of these component matrices:
+The total behavior matrix is the horizontal concatenation of these component matrices:
 \begin{align}
-\mat{F} = \left[\,\mat{T}~\mat{S}~\mat{D}~\mat{A}~\mat{B}~\mat{Z}~\mat{V}\,\right] \in \R^{f \times \Sigma},
+\mat{F} = \left[\,\mat{T}~\mat{S}~\mat{D}~\mat{A}~\mat{B}~\mat{Z}~\mat{V}\,\right] \in \R^{f \times N},
 \end{align}
-where $\Sigma=255+2n+d_t+d_b+d_z+d_v$. Many common traffic models can be expressed succinctly and precisely in terms of transformations or conditions on this behavior matrix and its constituents. In the following sections, we explain in detail how each flow's behavior is represented in these matrices. Finally, we describe how a model instance stochastically generates network traffic.
+where $N=255+2n+d_t+d_b+d_z+d_v$.
+% Many common traffic modeling assumptions can be expressed succinctly and precisely in terms of transformations or conditions on this behavior matrix and its components.
 
-\subsection{Flow Type}
+Before continuing on to less mundane topics, we must briefly address our choices of constants appearing in \Table{quantization}.
+The externally predetermined constants are:
+$d_z=\text{\caps{MTU}}=1500$, determined by the wireless network medium;
+$b_{\max} \approx 109 \text{\caps{MB}}$, determined by the size of the largest flow in our trace data;
+$t_{\max}=v_{\max}=600$, determined by our experimental methodology which slices traces into 10-minute scenarios;
+and $v_{\min}=10^{-6}$, determined by the time resolution of our trace.
+For lack of a better choice, we have simply chosen to use the same number of quantization bins as packet size for the unfixed dimension constants:
+$d_t = d_b = d_v = 1500$.
+Arguments can certainly be made for other choices, but this choice appears to work adequately in practice.
 
-The type of a flow is its \caps{IP} protocol number. This ranges in possible values from 1 to 255 (0 is reserved for \caps{IPv6}). We represent the flow type as an indicator vector: a 255-dimensional vector consisting of all zeros except for the index which is the flow type. So a \caps{TCP} flow, having protocol type 6, would have the type vector $\vec{t}=\tuple{0,0,0,0,0,1,0,\dots,0}$. This representation may immediately strike one as unnecessarily expansive and inefficient since a single byte suffices to represent the protocol type. The necessity of this representation arises when we represent aggregations of flows as sums of vectors. The sum of protocol numbers is meaningless: two \caps{TCP} flows plus five \caps{ICMP} flows does not equal a single \caps{UDP} flow, despite the fact that $2\cdot6+5\cdot1=17$. The summation of the corresponding indicator vectors, however, is $\tuple{5,0,0,0,0,2,0,\dots}$. This vector is a histogram indicating the frequency with which each protocol type occurred in the collection of flows over which the sum was taken.
-
-\subsection{Source \& Destination Nodes}
-
-Let $n$ be the number of nodes in the traffic collection to be modeled. We let $s_{ij}=1$ if the $j$th node is the source of the $i$th flow, and zero otherwise; similarly, $d_{ik}=1$ if the destination of the $i$th flow is the $k$th node. This sparse matrix may again seem to be an overly expansive representation, given that start and end nodes can be represented simply as indices from $\set{1,\dots,n}$. The sum of a set of source vectors, $\set{\vec{s}_i}$, however, is an $n$-dimensional histogram indicating how often each source node occurs in the collection.
-
-\subsection{Start Time}
-
-We represent start time of each flow using an indicator vector. Unlike node indices, however, time is continuous, so we must first map times onto a range of time indices $\set{1,\dots,d_t}$. We transform the range $[0,t_{\max}]$ of possible start times using a simple quantization function:
-\begin{align}
-\label{eqn:time-quantization}
-\Qt(t) &= \max\set{1,\ceil{d_t\fracpx{t}{t_{\max}}}}.
-\end{align}
-%Suppose the $i$th flow has a quantized start index of $j$ and a end index of $k$. Then $b_{ij'}=\delta{jj'}$ and $e_{ik'}=\delta_{kk'}$.
-Let $k$ be the quantized start index of a flow. Then the start vectors for the flow is $\vec{a}=\vec{e}_k$ (the $k$th standard basis vector, having 1 at index $k$ and zeros elsewhere). The advantage of this representation becomes clear when we aggregate flows: the sum of start vectors over a collection of flows is a $d_t$-dimensional histogram indicating the frequency of start times occurring in each quantization bin. In practice, we use $d_t=1500$.
-
-\subsection{Flow Size}
-
-We represent flow size with another indicator vector. Although the set of possible flow sizes is discrete, for practical reasons we map the very large range of possible flow sizes down to a much smaller range of indices (some flows in our trace have 109\caps{MB} of data in a single ten-minute period, which would give an indicator vector of over 100 million entries). We use the following function to convert flow sizes to indexes:
-\begin{align*}
-%\label{eqn:byte-quantization}
-\Qb(b) &= \max\set{1,\ceil{d_b\fracp{b-1}{b_{\max}-1}^\beta}}.
-\end{align*}
-Here $b_{\max}$ is the maximum input flow size. The parameter $\beta$ is a non-linear scaling factor exponent that allows the quantization to smoothly shift from byte-sized resolution at the low end of the possible range of flow sizes to the a resolution of megabytes at the high end of the spectrum. In our example data, $b_{\max}\approx109\text{\caps{MB}}$ as we previously mentioned. We use a representation dimensionality of $d_b=1500$, to match our other quantized vectors, and $\beta=\fracx{1}{2.7}$ because it yields the desired dynamic range response of the possible flow sizes.
-
-\subsection{Packet Sizes \& Inter-Packet Intervals}
-
-The packet size behavior of a flow is represented by a histogram vector, $\vec{z}$, of packet sizes. Explicitly,  $z_{ij}$ is the number of packets in the $i$th flow with $j$ bytes of payload data. The dimension, $d_z$, is the largest possible packet size, which in practice is the maximum transfer unit of the wireless medium, typically 1500 bytes. The representation of inter-packet intervals as a vector, $\vec{v}$, is similar, but the domain of possible intervals is a continuum, so we must map this range onto the discrete index values $\left\{1,\dots,d_v\right\}$. We use similar non-linear quantization function as before:
-\begin{align}
-\label{eqn:interval-quantization}
-\Qi(v) &= \max\set{1,\ceil{d_v\fracp{v-v_{\min}}{v_{\max}-v_{\min}}^\gamma}}.
-\end{align}
-The element $v_{ij}$ is the number of intervals, $v$, for the $i$th flow such that $\Qi(v)=i$.
-The parameter values defining $\Qi$ must be chosen by the experimenter. In our case, the time measurements had microsecond precision, so $v_{\min}=10^{-6}$. The length of each simulated scenario is ten minutes, so the upper limit on intervals is $v_{\max}=600$. The number of dimensions was chosen to match the dimensions for packet size: $d_v=1500$. Finally, the parameter $\gamma\in(0,1)$ allows us to fine-tune how the resolution scales with interval size; we have chosen $\gamma=\frac{1}{3}$ because this choice provides resolution that scales smoothly from the microseconds for small intervals to seconds for large intervals.
+Two other unspecified constants appear in \Table{quantization}: $\beta$ and $\gamma$.
+These parameters are non-linear scaling exponents that allows the quantization to smoothly shift from fine-grained resolution at the low end of the spectrum to coarse-grained resolution at the high end.
+We have chosen $\beta=\fracx{1}{2.7}$ because it yields a desirable dynamic range response from bytes at the low end to megabytes at the high end.
+Similarly, we have chosen $\gamma=\fracx{1}{3}$ because this choice provides resolution that scales smoothly from microseconds for small intervals to seconds for large intervals.
 
 \subsection{Traffic Generation}
 \label{sec:traffic-generation}
