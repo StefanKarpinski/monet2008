@@ -230,8 +230,7 @@ They find that all uniformity assumptions are detrimental, inducing significant 
 Moreover, they show, using \caps{OLSR} and \caps{AODV}, that uniform traffic models can completely invert the relative performance of network protocols.
 
 \section{Linear Representation of Traffic}
-
-% In this section, we the concept of linear representation of network traffic. Before we introduce this concept, we discuss the characteristic features of network traffic from the traffic modeling perspective.
+\label{sec:representations}
 
 The traffic workload pattern in a network is a collection of \caps{IP} packets between hosts in the network sent at certain times.
 It is standard in network analysis, however, to aggregate sequences of packets sharing the same ``5-tuple'':
@@ -243,7 +242,7 @@ The behavior of a flow as it affects the network is characterized by the followi
 its \caps{IP} protocol type (\caps{TCP}, \caps{UDP}, \caps{ICMP}, etc.);
 its source and destination nodes;
 its start time;
-and the specific sizes of and intervals between its constituent packets.
+and the specific sizes packets of and intervals between their transmission.
 We begin our exposition of traffic representation by formalizing these properties mathematically as sets:
 \begin{tabbing}
 \hspace{1em}\=\bullet\hspace{0.5em}\=\hspace{5em}\=\hspace{4em}\=$\in\Nodes\,$\=\kill
@@ -261,7 +260,7 @@ We formalize the packet behavior of a flow as a pair of infinite sequences of pa
 \sizes &= \seq{\size_1,\size_2,\dots} \in \SizeSeq \\
 \ivals &= \seq{\ival_1,\ival_2,\dots} \in \IvalSeq.
 \end{align}
-Since flows contain only a finite number of packets, there exists a number of packets, $\pkts \in \N$, for each flow. Thus, we require that the sequences $\sizes$ and $\ivals$ satisfy the following requirements:
+Since flows contain only a finite number of packets, there exists a number of packets, $\pkts \in \N$, for each flow. Since flows are finite, we require that the sequences $\sizes$ and $\ivals$ satisfy the following requirements:
 \begin{align}
 &\forall\: k> \pkts:   \quad \size_k = 0      \eqn{zero-packets}\\
 &\forall\: k < \pkts:   \quad \ival_k < \infty \eqn{finite-intervals}\\
@@ -294,11 +293,6 @@ We write a generic element of $\Flows$ as
     \ivals
   } \in \Flows.
 \end{align}
-% We define the function $\pkts:\flow \to \N$ as
-% \begin{align}
-%   \pkts(\flow) \defeq \min\set{i \in \N : \ival_i = \infty}.
-% \end{align}
-% Intuitively, by Equations~\ref{eqn:finite-intervals}~and~\ref{eqn:infinite-intervals}, this gives the number of packets in the flow.
 Let $2^\Flows$ denote the power set of $\Flows$, and $\Traffic \subseteq 2^\Flows$ the set of all finite sets of flows:
 \begin{align}
   \Traffic = \set{X \in 2^\Flows : \card{X} < \infty}.
@@ -308,32 +302,31 @@ A traffic sample is simply an element of $\Traffic$. We will refer to elements o
 Having chosen a mathematical formalization of network traffic, we may now define the notion of a linear representation of network traffic.
 
 \begin{definition}\defn{linear-representation}
-A \defterm{linear representation} of network traffic is a pair, $\tuple{V,\psi}$, where $V$ is a vector space and $\psi$ is a function, $\psi: \Traffic \to V$, that maps each traffic sample to the sum of the representations its constituent flows:
+A \defterm{linear representation} of network traffic is a pair, $\tuple{V,\psi}$, where $V$ is a vector space and $\psi$ is a function, $\psi: \Traffic \to V$, such that
 \begin{align}\eqn{linearity}
 \forall~T \in \Traffic\!:\quad
   \psi(T) &= \sum_{\mathclap{\flow \in T}}{\psi(\flow)}.
 \end{align}
-% When $T=\emptyset$, the right-hand side is a sum of zero items, defined to be $\vec{0}$, the identity element of $V$.
 \end{definition}
 
 \noindent
 In plain words, every finite collection of flows is represented by a vector that is the sum of the elements representing the individual flows in the collection.
 % Representing traffic using vectors allows us to analyze, model, and understand traffic patterns in terms of the thoroughly studied and well understood subject of linear algebra.
 The careful reader will notice that \emph{any} function $\Flows \to V$ uniquely determines a linear representation:
-\Equation{linearity} defines the extension to all of $\Traffic$.
-Representing flows by arbitrary vectors, however, is not particularly interesting or useful.
-Therefore, we focus on the meaningful representation of collections of flows, that can be factored or explained in terms of their constituent individual flows.
-In the next section, we clarify the concept and application of linear representation through examples.
+\Equation{linearity} uniquely extends the function to all of $\Traffic$.
+Representing flows by arbitrary vectors, however, is not particularly useful or interesting.
+We focus instead on meaningful representations, where collections of flows are represented by vectors that naturally describe the aggregate behavior in some manner.
+In the next section, we clarify these concepts through examples.
 % we present and discuss specific examples of linear representations in order to clarify the concept and its application.
 
 \subsection{Examples of Linear Representations}
 \sec{linear-representation-examples}
 
-\newfootnote{\pbdnote}{There are many schemes to correct the discrepancy in bytes when $\pkts$ does not divide $\mathsym{bytes}$ evenly. The simplest is to ignore them; we leave leave more complex schemes to the reader.}
+\newfootnote{\pbdnote}{There are many schemes to correct the discrepancy in bytes when $\pkts$ does not divide $\mathsym{bytes}$ evenly. The simplest is to ignore it; we leave leave more complex schemes to the reader.}
 
 Our first example is the packets-bytes-duration (\caps{PBD}) representation.
 The representation is $\pbd: \Traffic \to \R^3$, mapping
-$\flow \mapsto \tuple{p,b,d}$, where
+$\flow \mapsto \tuple{p,b,d} \in \R^3$, where
 \begin{align}
 p &= \pkts, &
 b &= \sum_{i=1}^{\mathclap{p}}{\size_i}, &
@@ -347,29 +340,33 @@ Given two flows with behavior vectors $\vec{x}_1$ and $\vec{x}_2$, their sum as 
 \end{align}
 provides an appropriate description of the aggregate behavior of the two flows together.
 Similarly, their average, \latin{i.e.} $\frac{1}{2}(\vec{x}_1+\vec{x}_2)$, has the average number of packets, bytes, and duration, which is precisely what the ``average behavior'' of the two flows should intuitively be.
-In contrast, a ``packets-payload-interval'' representation, expressing the \caps{CBR} parameters directly does not have this property:
+In contrast, a ``packets-payload-interval'' representation, expressing the \caps{CBR} parameters directly, does not have this property:
 the sum of average payloads is not the overall average of payloads;
-likewise with intervals.
-In the \caps{PBD} representation, the linearity property leads to ``natural'' descriptions of aggregate behavior through vector addition, whereas in the packets-payload-interval representation, vector addition is ``unnatural.''
+likewise for intervals.
+In the \caps{PBD} representation, the linearity property leads to natural descriptions of aggregate behavior through vector addition, whereas in the packets-payload-interval representation, vector addition is ``unnatural.''
 
 The \caps{PBD} representation is highly lossy: it discards most of the information detailing the behavior of each flow.
 At the other extreme, we can give a ``perfect'' representation of each flow, that allows us to completely reconstruct each flow from its representation.
-With care, the sum of representations of flows can still naturally describe the aggregate behavior of  flows.
-We will define the representation $\Phi: \Traffic \to \FlowVec$, where
+With care, the sum of representations of flows can still naturally describe their aggregate behavior.
+Let the representation be $\Phi: \Traffic \to \FlowVec$, where
 \begin{align}
 \FlowVec = \R^{255} \cross \R^n \cross \R^n \cross L^2[\R] \cross L^2[\R].
 \end{align}
 % Here $\R^X$ is the vector space of functions $f: X \to \R$, which is isomorphic to the standard Euclidean vector space, $\R^\card{X}$.
-Here $L^2[\R]$ is the usual vector space of real functions~\cite{Rudin87}: $\R^\R=\set{f: \R \to \R}$ equipped with the norm,
+Here $L^2[\R]$ is the vector space of real functions, $\R^\R=\set{f: \R \to \R}$, with the usual norm~\cite{Rudin87}.
+% \begin{align}
+% \norm{f}_2 = \Big[ \int_{-\infty}^{\infty} \abs{f}^2 dx \Big]^{\frac{1}{2}}.
+% \end{align}
+We define
 \begin{align}
-\norm{f}_2 = \Big[ \int_{-\infty}^{\infty} \abs{f}^2 dx \Big]^{\frac{1}{2}}.
+\Phi(\flow) = \tuple{\e_\type,\e_\src,\e_\dst,f,g},
 \end{align}
-We define $\Phi(\flow) = \tuple{\e_\type,\e_\src,\e_\dst,f,g}$, where $\e_k$ is the $k$th standard basis vector, and $f,g \in L^2[\R]$ are
+where $\e_k$ is the $k$th standard basis vector, and $f,g \in L^2[\R]$ are functions defined by
 \begin{align}
 f(t) &= \sum_{k=1}^{\pkts}
   \begin{cases}
     1 & \text{if $t \ge \time_k$} \\
-    0 & \text{if $t <   \time_k$}
+    0 & \text{if $t <   \time_k$},
   \end{cases} \\
 g(t) &= \sum_{k=1}^{\pkts}
   \begin{cases}
@@ -377,16 +374,16 @@ g(t) &= \sum_{k=1}^{\pkts}
     0       & \text{if $t <   \time_k$}.
   \end{cases}
 \end{align}
-Thus, $f$ and $g$ are both integer-valued, monotonically increasing step functions, giving the cumulative number of packets sent and total bytes sent, respectively, at time $t$.
-From the representation via $\Phi$ of a single flow, we can readily recover its type, source and destination, and the transmission times and sizes of packets.
+Thus, $f$ and $g$ are both integer-valued, monotonically increasing step functions, giving the cumulative number of packets and total bytes sent, respectively, at time $t$.
+From the representation, $\Phi(\flow)$, of a single flow, we can readily recover its type, source, destination, and the transmission times and sizes of packets.
 
 Why is $\Phi$ natural in the same sense that the \caps{PBD} representation is natural?
 Suppose we have a traffic sample, $T\in\Traffic$.
 The first component of $\Phi(T)$ is a 255-dimensional vector, whose coordinates are a histogram of the number of times each flow type occurs in $T$.
 Similarly, the second and third components of $\Phi(T)$ are $n$-dimensional histograms of the number of times each node occurs as source and destination.
 The last components are step functions, like $f$ and $g$.
-Vector addition in $L^2[\R]$ dictates that these functions give the total number of cumulative packets and bytes, respectively, over all flows in $T$.
-Thus, summation of vectors under the representation $\Phi$ yields a natural and useful description of the aggregate behavior of many flows.
+Vector addition in $L^2[\R]$ dictates that these functions give the total number of cumulative packets and bytes sent, respectively, over all flows in $T$.
+Thus, summation of vectors under the representation $\Phi$ yields a natural and useful description of the aggregate behavior of flows.
 
 Consider, for contrast, if we had represented flow type simply by $\type \in \N$ instead of $\e_\type \in \R^{255}$.
 The natural numbers containing $\type$ can readily be embedded into $\R^1$, which is a vector space.
@@ -398,12 +395,12 @@ The summation of vectors in the representation $\Phi$, on the other hand is $5\,
 Both of the example representations discussed here can be applied in practice.
 The \caps{PBD} representation naturally allows us to compute aggregate and average \caps{CBR} behaviors of collections of flows.
 With a suitable machine encoding of step-functions, $\Phi$ can be implemented and used in practice.
-Representations that preserve even more information about flows can be constructed.
-We turn now in a different direction, however, and introduce a linear representation that strikes a practical balance in fidelity between $\pbd$ and $\Phi$.
+It provides complete information about individual flows and highly detailed (though not complete) information about collections of flows.
+Representations that preserve even more information about traffic instances can readily be constructed.
+We turn now, however, in a different direction, and introduce a specific linear representation that strikes a practical balance in fidelity between $\pbd$ and $\Phi$.
 
 \section{The General Matrix Model}
 \label{sec:general-matrix-model}
-\label{sec:representations}
 
 %The traffic workload pattern in a network is the collection of actions taken by hosts, on behalf of users and applications, that affect the behavior of the network itself. By design, Internet Protocol (\caps{IP}) networks treat all data in the same manner~\cite{Clark88}. Therefore, the actual information transmitted is irrelevant, only the manner of transmission matters. Although networks are packet-switched, packets are logically organized into sequences of packets sharing the same \caps{IP} protocol, source and destination \caps{IP} address, and source and destination  \caps{TCP} or \caps{UDP} port numbers. Such a sequence of packets is called a \textit{flow}. Although there are a vast multitude different application types which use \caps{IP}, there are two fundamentally different behaviors of flows which we distinguish here: \caps{TCP}, which delivers data reliably through feedback and retransmissions; and \caps{UDP}, which delivers data only on a best-effort basis. While it is possible to implement reliable transmission similar to \caps{TCP} over \caps{UDP}, it is uncommon, so we make the generalization that network events, such as packet drops, do not significantly feedback to the behavior of upper layers. With \caps{TCP}, on the other hand, network events are known to affect the transport layer
 
