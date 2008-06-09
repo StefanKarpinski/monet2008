@@ -1,0 +1,128 @@
+%!TEX root = /Users/stefan/projects/papers/paper.4/paper.tex
+
+%% LABELING COMMANDS
+\renewcommand{\sec}[1]{\label{sec:#1}}
+\newcommand{\eqn}[1]{\label{eqn:#1}}
+\newcommand{\fig}[1]{\label{fig:#1}}
+\newcommand{\tab}[1]{\label{tab:#1}}
+\newcommand{\thm}[1]{\label{thm:#1}}
+\newcommand{\defn}[1]{\label{def:#1}}
+
+%% REFERENCING COMMANDS
+\newcommand{\Appendix}[1]{\hyperref[sec:#1]{Appendix~\ref*{sec:#1}}}
+\newcommand{\Section}[1]{\hyperref[sec:#1]{Section~\ref*{sec:#1}}}
+\newcommand{\Equation}[1]{\hyperref[eqn:#1]{Equation~\ref*{eqn:#1}}}
+\newcommand{\Figure}[1]{\hyperref[fig:#1]{Figure~\ref*{fig:#1}}}
+\newcommand{\Table}[1]{\hyperref[tab:#1]{Table~\ref*{tab:#1}}}
+\newcommand{\Theorem}[1]{\hyperref[thm:#1]{Theorem~\ref*{thm:#1}}}
+\newcommand{\Definition}[1]{\hyperref[def:#1]{Definition~\ref*{def:#1}}}
+
+%% MATHEMATICAL NOTATIONS
+
+% common algebraic domains
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+
+% standard operators & functors
+\renewcommand{\Pr}{\mathrm{Pr}}
+\newcommand{\Image}{\text{Im}}
+\newcommand{\Kernel}{\text{Ker}}
+
+% common constructs
+\newcommand{\abs}[1]{{\left|#1\right|}}
+\newcommand{\absx}[1]{{|#1|}}
+\newcommand{\card}[1]{{\left|#1\right|}}
+\newcommand{\cardx}[1]{{|#1|}}
+\newcommand{\set}[1]{{\left\{#1\right\}}}
+\newcommand{\setx}[1]{{\{#1\}}}
+\newcommand{\parens}[1]{{\left(#1\right)}}
+\newcommand{\parensx}[1]{{(#1)}}
+\newcommand{\bracket}[1]{{\left[#1\right]}}
+\newcommand{\bracketx}[1]{{[#1]}}
+\newcommand{\seq}[1]{{\left<#1\right>}}
+\newcommand{\seqx}[1]{{\lvert#1\rvert}}
+\newcommand{\tuple}[1]{{\left<#1\right>}}
+\newcommand{\tuplex}[1]{{\lvert#1\rvert}}
+\newcommand{\floor}[1]{{\left\lfloor#1\right\rfloor}}
+\newcommand{\floorx}[1]{{\lfloor#1\rfloor}}
+\newcommand{\ceil}[1]{{\left\lceil#1\right\rceil}}
+\newcommand{\ceilx}[1]{{\lceil#1\rceil}}
+\newcommand{\round}[1]{{\left[#1\right]}}
+\newcommand{\roundx}[1]{{[#1]}}
+\newcommand{\fracx}[2]{{#1/#2}}
+\newcommand{\fracp}[2]{{\left(\frac{#1}{#2}\right)}}
+\newcommand{\fracpx}[2]{{(#1/#2)}}
+
+% standard notations
+\newcommand{\trans}[1]{{#1}^T}
+\newcommand{\inner}[2]{{#1}\cdot{#2}}
+\newcommand{\cross}{\times}
+\newcommand{\tensor}{\otimes}
+\newcommand{\directsum}{\oplus}
+\newcommand{\iso}{\cong}
+\newcommand{\union}{\cup}
+\newcommand{\inter}{\cap}
+\newcommand{\Union}{\bigcup}
+\newcommand{\Inter}{\bigcap}
+\newcommand{\conj}{\wedge}
+\newcommand{\disj}{\vee}
+\newcommand{\Conj}{\bigwedge}
+\newcommand{\Disj}{\bigvee}
+\newcommand{\defeq}{=}
+\renewcommand{\emptyset}{\varnothing}
+\renewcommand{\setminus}{\,\raisebox{1pt}{$\smallsetminus$}\,}
+
+% non-standard notations
+\newcommand{\ones}[1]{\mathbf{1}_{#1}}
+\newcommand{\zeros}[1]{\mathbf{0}_{#1}}
+\newcommand{\mat}[1]{\mathbf{#1}}
+\newcommand{\mean}[1]{\bar{#1}}
+
+% special symbols and such
+\newcommand{\Qf}{\mathcal{Q}}
+\newcommand{\Qt}{\Qf_{\text{time}}}
+\newcommand{\Qb}{\Qf_{\text{byte}}}
+\newcommand{\Qi}{\Qf_{\text{ival}}}
+\newcommand{\Di}{\Qf^{-1}_{\text{ival}}}
+
+\newcommand{\FlowSet}[1]{\mathcal{#1}}
+\newcommand{\Flows}{\FlowSet{F}}
+\newcommand{\Types}{\FlowSet{Y}}
+\newcommand{\Nodes}{\FlowSet{N}}
+\newcommand{\Times}{\FlowSet{T}}
+\newcommand{\Sizes}{\FlowSet{Z}}
+\newcommand{\Ivals}{\FlowSet{V}}
+\newcommand{\SizeSeq}{\Sizes^\N}
+\newcommand{\IvalSeq}{\Ivals^\N}
+\newcommand{\Traffic}{\Flows^*}
+
+\newcommand{\mathsym}[1]{\text{\textsf{#1}}}
+\newcommand{\pbd}{\mathsym{pbd}}
+
+\newcommand{\FlowElt}[1]{\mathsym{#1}}
+\newcommand{\flow}{\FlowElt{flow}}
+\newcommand{\type}{\FlowElt{type}}
+\newcommand{\src}{\FlowElt{src}}
+\newcommand{\dst}{\FlowElt{dst}}
+\newcommand{\start}{\FlowElt{start}}
+\newcommand{\size}{\FlowElt{size}}
+\newcommand{\ival}{\FlowElt{ival}}
+\newcommand{\pkts}{\FlowElt{pkts}}
+\newcommand{\sizes}{\FlowElt{sizes}}
+\newcommand{\ivals}{\FlowElt{ivals}}
+
+%% FORMATTING BEHAVIORS
+\newcommand{\caps}[1]{{\smaller{#1}}}
+\newcommand{\latin}[1]{\textit{#1}}
+\newcommand{\defterm}[1]{\textit{#1}}
+\newcommand{\newfootnote}[2]{\newcommand{#1}{\footnote{#2} }}
+\renewcommand{\bullet}{\raisebox{2pt}{$\centerdot$}}
+
+%% MISCELLANEOUS COMMANDS
+\newcommand{\FHC}{Hern\'andez-Campos~\textit{et~al.}}
+\newcommand{\class}[1]{\textsc{#1}}
+\newcommand{\model}[1]{\textsf{#1}}
+\newcommand{\RFC}[1]{\caps{RFC}~{#1}}
+\newcommand{\tmix}{T\caps{MIX}}
