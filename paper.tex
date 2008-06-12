@@ -409,29 +409,31 @@ We turn now, however, in a different direction, and introduce a specific linear 
 The \caps{PBD} representation of flows uses 3 dimensions to encode the behavior of each flow, while $\Phi$ uses $255+2n$ dimensions, plus the continuum of dimensions of two Banach spaces (\latin{i.e.} the two copies of $L^2[\R]$).
 In this section, we define a representation, $\phi$, that splits the difference and uses a large but finite number of dimensions to represent each flow.
 Once the vector representation of each flow is defined, we may construct matrices of representation vectors, with a row for each flow in a traffic sample.
-We call the matrix representation of network traffic, the general matrix model~(\caps{GMM}).
-With network behavior is expresses as matrices, we can very simply and efficiently compute a broad variety of network behavior properties using standard matrix operations.
+We call the matrix representation of network traffic the \emph{general matrix model}~(\caps{GMM}).
+Having expressed network behavior in terms of matrices, we can very simply and efficiently compute a broad variety of network behavior properties using standard matrix operations.
 Furthermore, we can express uniformity and marginality assumptions about behavior as equality constraints between the rows and columns of the traffic matrix.
 Moreover, we can transform unconstrained traffic instances into uniform, marginal, or conditional approximations via right or left multiplications by easily computed matrices.
 
-The general strategy for defining $\phi$ is to divide the descriptive properties of each flow into bins, and represented each bin by a standard basis element of $\R^d$, where $d$ is the number of bins for that property.
-In this scheme, representation vectors are histograms counting items falling into each bin.
-The histograms for packet sizes and inter-packet intervals count packets, while other histograms count flows.
+The general strategy for defining $\phi$ is to divide the descriptive properties of each flow into bins---%
+one per value for properties that are discrete already and require no compression---%
+and map values in each bin to a standard basis element of $\R^d$, where $d$ is the number of bins.
+In this scheme, representation vectors are effectively histograms, with coordinate values in each dimension counting items falling into the corresponding bin.
+% The histograms for packet sizes and inter-packet intervals count packets, while other histograms count flows.
 \Table{quantization} lists the properties that are used to define $\phi$, together with the quantization and dequantization functions.
-Each quantization function takes a possible property value as input and maps it to an index value in $\set{1,\dots,d}$, where $d$ is the dimension for the property in question.
-The index assigned determines the histogram bin of the input property.
+Each quantization function takes a possible property value as input and maps it to an index value in $\set{1,\dots,d}$, where $d$ is the number of bins, \latin{i.e.} dimension, for the property in question.
+% The index assigned determines the histogram bin of the input property.
 
-The histogram vector approach produces some representations of properties that are not immediately intuitive, and may seem to use an excessive number of representation dimensions.
+The histogram-vector approach produces some representations of properties that are not immediately intuitive, and may seem to use an excessive number of representation dimensions.
 However, this approach automatically satisfies the ``naturalness'' criterion for linear representations.
-That is, the representation, $\phi(T)$, of some collections of flows, $T$, naturally describes the aggregate behavior of those flows.
-Perhaps even more importantly, arbitrary linear combinations of vectors can be meaningfully interpreted as describing some realizable traffic instance.
-In \Section{traffic-generation} we will describe how to choose, stochastically, a collection of flows matching the ``description'' of an arbitrary traffic matrix.
+That is, the representation, $\phi(T)$, naturally describes the aggregate behavior of flows in $T$.
+Perhaps even more importantly, arbitrary linear combinations of vectors can be meaningfully interpreted as describing some realizable, hypothetical traffic instance.
+In \Section{traffic-generation} we will describe how to generate a flow for any sum of representation vectors.
 % This is how we generate workload from transformed traffic matrices.
 
-The quantization functions specified in \Table{quantization} allow us to define the representation $\phi$: \begin{align}
+The quantization functions specified in \Table{quantization} allow us to define the representation $\phi: \Traffic \to \R^N$: \begin{align}
 \phi(\flow) = \vec{f} = \tuple{\vec{t},\vec{s},\vec{d},\vec{a},\vec{b},\vec{z},\vec{v}},
 \end{align}
-where the component vectors are defined as
+where $N=255+2n+d_t+d_b+d_z+d_v$ and vectors are
 \begin{align*}
 \vec{t} &= \e_k & k &= \Qf^{\text{t}}(\type) \\
 \vec{s} &= \e_k & k &= \Qf^{\text{s}}(\src) \\
@@ -441,7 +443,7 @@ where the component vectors are defined as
 \vec{z} &= {\textstyle \sum \e_k} & k &\in \set{\Qf^{\text{z}}(\size_i) : i \le \pkts} \\
 \vec{v} &= {\textstyle \sum \e_k} & k &\in \set{\Qf^{\text{v}}(\ival_i) : i <   \pkts}.
 \end{align*}
-Here, the functions $\Qf^\text{x}$ are the respective quantization functions for each property.
+The functions $\Qf^\text{x}$ are the respective quantization functions for each property.
 If there are $f$ flows in a traffic instance, then the collective behavior can be described with seven matrices---one for each property;
 the rows of each matrix are the behavior vectors of the flows, indexed in some chosen order.
 We use the following notations for the behavior matrices:
@@ -459,12 +461,11 @@ $\mat{D}\:$\=$=\parensx{\vec{d}_i}\:$\=$=\parensx{d_{ij}}\:$\=\kill
 \end{tabbing}
 The total behavior matrix is the horizontal concatenation of these component matrices:
 \begin{align}
-\mat{F} = \left[\,\mat{T}~\mat{S}~\mat{D}~\mat{A}~\mat{B}~\mat{Z}~\mat{V}\,\right] \in \R^{f \times N},
+\mat{F} = \left[\,\mat{T}~\mat{S}~\mat{D}~\mat{A}~\mat{B}~\mat{Z}~\mat{V}\,\right] \in \R^{f \times N}.
 \end{align}
-where $N=255+2n+d_t+d_b+d_z+d_v$.
-We call the representation of whole-network traffic instances as such a matrix, the general matrix model.
-While it is by no means the only possible representation of traffic in terms of matrices, many common traffic modeling assumptions can be expressed succinctly and precisely in terms of transformations or conditions of the \caps{GMM} and its components.
-Furthermore, realistic traffic can be generated from trace-derived matrix instances.
+We call this total representation the general matrix model.
+While it is by no means the only possible representation of traffic in terms of matrices, as demonstrate in the following sections, many common traffic modeling assumptions can be expressed succinctly and precisely in terms of transformations or conditions of the \caps{GMM} and its components.
+Furthermore, realistic workload can be generated from matrix instances.
 
 \subsection{Choosing Constants}
 
