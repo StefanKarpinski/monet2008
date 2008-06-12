@@ -30,7 +30,7 @@
 
 \input{definitions}
 
-\graphicspath{{graphs/}}
+\graphicspath{{graphics/}}
 
 \begin{document}
 \maketitle
@@ -139,7 +139,7 @@ These transformations, however, are extremely destructive: the matrices are dege
 We demonstrate experimentally, that this loss of information is not benign:
 uniform and marginal traffic models severely distorting crucial network performance metrics.
 
-\input{trace_vs_uniform}
+\input{figures/trace_vs_uniform}
 
 Once traffic is represented linearly, alternatives to assuming uniformity or marginality become apparent.
 We argue that matrix factorization, which is nondestructive and does not assume uniformity or marginality, is far superior to multiplication for this problem.
@@ -404,7 +404,7 @@ We turn now, however, in a different direction, and introduce a specific linear 
 \section{The General Matrix Model}
 \sec{general-matrix-model}
 
-\input{gmm_properties}
+\input{tables/gmm_properties}
 
 The \caps{PBD} representation of flows uses 3 dimensions to encode the behavior of each flow, while $\Phi$ uses $255+2n$ dimensions, plus the continuum of dimensions of two Banach spaces (\latin{i.e.} the two copies of $L^2[\R]$).
 In this section, we define a representation, $\phi$, that splits the difference and uses a large but finite number of dimensions to represent each flow.
@@ -736,19 +736,19 @@ These metrics are commonly used to evaluate wireless protocols. We have examined
 
 \begin{sidewaysfigure*}
 \subfloat[\textbf{Application:} Average End-to-End Delay]%
-{\includegraphics[width=4.45in]{plots/Application/delay.pdf}}\hfill
+{\includegraphics[width=4.45in]{Application/delay.pdf}}\hfill
 \subfloat[\textbf{Application:} Packet Delivery Ratio]%
-{\includegraphics[width=4.45in]{plots/Application/delivery_ratio.pdf}}
+{\includegraphics[width=4.45in]{Application/delivery_ratio.pdf}}
 %
 \subfloat[\textbf{Application:} Average Received Throughput]%
-{\includegraphics[width=4.45in]{plots/Application/throughput.pdf}}\hfill
+{\includegraphics[width=4.45in]{Application/throughput.pdf}}\hfill
 \subfloat[\textbf{Network:} AODV Control Overhead]%
-{\includegraphics[width=4.45in]{plots/Network/control_packets.pdf}}
+{\includegraphics[width=4.45in]{Network/control_packets.pdf}}
 %
 \subfloat[\textbf{Network:} Packets Dropped in Routing Queue]%
-{\includegraphics[width=4.45in]{plots/Network/dropped.pdf}}\hfill
+{\includegraphics[width=4.45in]{Network/dropped.pdf}}\hfill
 \subfloat[\textbf{Link:} 802.11 Control Overhead]%
-{\includegraphics[width=4.45in]{plots/Link/overhead.pdf}}%
+{\includegraphics[width=4.45in]{Link/overhead.pdf}}%
 %
 \caption{%
 Box-and-whisker plots of log-ratio error values for all metrics and traffic models. The lower axis indicates the log-ratio, while the upper axis shows raw ratio values. Each box contains the central majority of log-ratio values: the left and right bounds are at the $25^\text{th}$ and $75^\text{th}$ percentiles. The dark middle line indicates the median value, while the diamond marks the mean. The whiskers (dotted lines) extend to the furthest non-outlier values, while the points beyond that are outliers. The notch in the middle of each bar indicates a $95\%$ confidence interval for the true underlying median value; if two notches do not overlap, they are very unlikely to have the same median.
@@ -808,8 +808,8 @@ rather, total flow behavior is explained as a mixture of basic behaviors, so the
 The striking results of applying non-negative matrix factorization to $\mat{P}$ are shown in \Figure{basic-behaviors}. Twelve basic behaviors suffice to explain all the traffic in a ``toy''  sample of 4138 flows. The pairs of packet size and inter-packet interval distributions are almost immediately recognizable as resembling intuitive modes of network behavior. The first basic behavior, for example has all packets near the \caps{MTU}, while intervals are smoothly distributed around a fraction of a millisecond. This is what we would expect from downloading large files; and indeed, the breakdown of packets by port number bears out this interpretation---almost all of the traffic is \caps{HTTP} server traffic, with small slivers of \caps{IMAP} and \caps{SSH} server traffic. The second basic behavior is equally intuitive: tiny packets with frequency distributed around 0.1 seconds---this is all \caps{SSH} traffic, interacting with a remote terminal via keystrokes and screen updates.
 
 \begin{sidewaysfigure*}
-{\includegraphics[height=5.95in]{plots/basic_behaviors_1.pdf}}\hfill%
-{\includegraphics[height=5.95in]{plots/basic_behaviors_2.pdf}}
+{\includegraphics[height=5.95in]{basic_behaviors_1.pdf}}\hfill%
+{\includegraphics[height=5.95in]{basic_behaviors_2.pdf}}
 \caption{%
 The ten most prevalent components of flow behavior as pairs of packet payload size and of inter-packet interval distributions.
 The distributions are shown as cumulative distribution functions: the $x$-axis represents payload size (in kilobytes) or inter-packet interval duration (in log-seconds, base 10), respectively;
