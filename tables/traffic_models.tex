@@ -8,18 +8,54 @@
 \multicolumn{1}{c}{\textbf{transformation}} &
 \multicolumn{1}{c}{\textbf{description}} \\
 \hline
-\caps{GMM} & --- & the general matrix model \\\hline\hline
-time uniform & $\mat{A}'=\mat{A}(\ones{d_t \times d_t}/d_t)$ & all start times are equally likely \\\hline
-node uniform & $\mat{S}'=\mat{S}(\ones{n \times n}/n)$~~~~$\mat{D}'=\mat{D}(\ones{n \times n}/n)$ & nodes behave stochastically identically with respect to flows \\\hline
-full uniform & \textit{all uniform transformations} & applies all the uniformity assumptions of the above models \\\hline\hline
-time marginal & $\mat{A}'=(\ones{f \times f}/f)\mat{A}$ & start times chosen from marginal distribution of start times \\\hline
-size marginal & $\mat{B}'=(\ones{f \times f}/f)\mat{B}$ & flow size (bytes) is chosen independently of other properties \\\hline
-node marginal & $\mat{S}'=(\ones{f \times f}/f)\mat{S}$~~~~$\mat{D}'=(\ones{f \times f}/f)\mat{D}$ & nodes behave distinctly, but behavior is independent of flows \\\hline
-packet marginal & $\mat{Z}'=(\ones{f \times f}/f)\mat{Z}$~~~~$\mat{V}'=(\ones{f \times f}/f)\mat{V}$ & packet behavior is variable bit-rate, aggregated across all flows \\\hline
-full marginal & \textit{all marginal transformations} & applies all the marginality assumptions of the above four models \\\hline\hline
-source conditional & $\mat{F}'=(\trans{\mat{SS}}/f)\mat{F}$ & flow behaviors are aggregated on a per source-node basis \\\hline
-dest conditional & $\mat{F}'=(\trans{\mat{DD}}/f)\mat{F}$ & flow behaviors are aggregated on a per destination-node basis \\\hline
-mixed conditional & $\mat{F}'=\frac{1}{2f}(\trans{\mat{SS}}+\trans{\mat{DD}})\mat{F}$ & flow behaviors are aggregated on a mixed source/destination basis \\\hline
+\caps{GMM} &
+--- &
+the general matrix model
+\\\hline\hline
+time uniform &
+$\mat{A}'=\mat{A}(\ones{d_t \times d_t}/d_t)$ &
+all start times are equally likely
+\\\hline
+node uniform &
+$\mat{S}'=\mat{S}(\ones{n \times n}/n)$~~~~$\mat{D}'=\mat{D}(\ones{n \times n}/n)$ &
+nodes behave stochastically identically with respect to flows
+\\\hline
+full uniform &
+\textit{all uniform transformations} &
+applies all the uniformity assumptions of the above models
+\\\hline\hline
+time marginal &
+$\mat{A}'=(\ones{f \times f}/f)\mat{A}$ &
+start times chosen from marginal distribution of start times
+\\\hline
+size marginal &
+$\mat{B}'=(\ones{f \times f}/f)\mat{B}$ &
+flow size (bytes) is chosen independently of other properties
+\\\hline
+node marginal &
+$\mat{S}'=(\ones{f \times f}/f)\mat{S}$~~~~$\mat{D}'=(\ones{f \times f}/f)\mat{D}$ &
+nodes behave distinctly, but behavior is independent of flows
+\\\hline
+packet marginal &
+$\mat{Z}'=(\ones{f \times f}/f)\mat{Z}$~~~~$\mat{V}'=(\ones{f \times f}/f)\mat{V}$ &
+packet behavior is variable bit-rate, aggregated across all flows
+\\\hline
+full marginal &
+\textit{all marginal transformations} &
+applies all the marginality assumptions of the above four models
+\\\hline\hline
+source conditional &
+$\mat{F}'=(\trans{\mat{SS}}/f)\mat{F}$ &
+flow behaviors are aggregated on a per source-node basis
+\\\hline
+dest conditional &
+$\mat{F}'=(\trans{\mat{DD}}/f)\mat{F}$ &
+flow behaviors are aggregated on a per destination-node basis
+\\\hline
+mixed conditional &
+$\mat{F}'=\frac{1}{2f}(\trans{\mat{SS}}+\trans{\mat{DD}})\mat{F}$ &
+flow behaviors are aggregated on a mixed source/destination basis
+\\\hline
 \end{tabular}
 \caption{Matrix-based traffic models evaluated by paired differential simulation.}
 \label{tab:traffic-models}
