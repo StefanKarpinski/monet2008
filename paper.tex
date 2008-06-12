@@ -262,19 +262,25 @@ We formalize the packet behavior of a flow as a pair of infinite sequences of pa
 \end{align}
 Since flows contain only a finite number of packets, there exists a number of packets, $\pkts \in \N$, for each flow. Since flows are finite, we require that the sequences $\sizes$ and $\ivals$ satisfy the following requirements:
 \begin{align}
-&\forall\: k \le \pkts: \quad \size_k > 0       \eqn{positive-packets}  \\
-&\forall\: k >   \pkts: \quad \size_k = 0       \eqn{zero-packets}      \\
-&\forall\: k <   \pkts: \quad \ival_k < \infty  \eqn{finite-intervals}  \\
-&\forall\: k \ge \pkts: \quad \ival_k = \infty. \eqn{infinite-intervals}
+\forall\: k: \quad
+  \size_k >  \mathrlap{0} \phantom{\infty}
+  &\iff k \le \pkts
+  \eqn{packet-positivity} \\
+\forall\: k: \quad
+  \ival_k < \infty
+  &\iff k < \pkts.
+  \eqn{interval-finiteness}
+% \forall\: k: \quad k \le \pkts &\iff \size_k > 0       \eqn{packet-positivity} \\
+% \forall\: k: \quad k <   \pkts &\iff \ival_k < \infty. \eqn{interval-finiteness}
 \end{align}
-Packet sizes are required to be positive because we are modeling application layer data transfer:
-an empty data transmission request is a non-event.
+Actual packet sizes are required to be positive because we are modeling application layer data transfer:
+empty data transmission requests are non-events.
 The send time of the $k$th packet can be expressed as
 \begin{align}
 \time_k = \start + \sum_{i=1}^{k-1} \ival_i.
 \end{align}
-This is guaranteed to be finite if and only if $k \le \pkts$.
-Now we are ready to formalize the space of flows:
+\Equation{interval-finiteness} implies that this will be finite if and only if $k \le \pkts$.
+Finally, we formalize the space of flows:
 \begin{align}
   \Flows =
     \Types    \cross
