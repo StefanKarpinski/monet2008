@@ -498,7 +498,7 @@ Having defined our representation of network behavior and presented the procedur
 \label{sec:flow-totals}
 
 \newfootnote{\onesnote}{%
-Through out this paper, $\ones{}$ denotes a matrix of all ones; dimensions of the matrix are inferred by context.
+Through out this paper, $\ones$ denotes a matrix of all ones; dimensions of the matrix are inferred by context.
 Where necessary, we disambiguate the dimensions by explicitly specifying the dimensions of the final matrix product, as we do here.
 }
 
@@ -515,30 +515,30 @@ The vectors of representative values for $\mat{Z}$ and $\mat{V}$ respectively ar
 \end{align}
 The packet count, total byte and total duration vectors are computed as
 \begin{align}
-\vec{\Sigma}_\pkts  &= \mat{Z}\trans{\ones{}} = \mat{V}\trans{\ones{}} \in \R^f \eqn{packet-count}\\
+\vec{\Sigma}_\pkts  &= \mat{Z}\trans{\ones} = \mat{V}\trans{\ones} \in \R^f \eqn{packet-count}\\
 \vec{\Sigma}_\bytes &= \mat{Z}\trans{\vec{\sigma}} \in \R^f \eqn{total-bytes} \\
 \vec{\Sigma}_\ivals &= \mat{V}\trans{\vec{\tau}} \in \R^f \eqn{total-duration}.
 \end{align}
-Here $\ones{}$ is a row vector of all ones.\onesnote
+Here $\ones$ is a row vector of all ones.\onesnote
 Packet count and total bytes values are exact;
 the total durations are only approximate because information is irretrievably lost in the quantization process.
 Using these vectors of totals, we may readily compute the average packet sizes and inter-packet intervals:
 \begin{align}
 \vec{\mean{z}} &=
   \vec{\Sigma}_\bytes \eldiv \vec{\Sigma}_\pkts
-  \phantom{= \mat{V}\trans{\vec{\tau}} \eldiv \mat{V}\trans{\ones{}}}
-  \mathllap{= \mat{Z}\trans{\vec{\sigma}} \eldiv \mat{Z}\trans{\ones{}}} \\
+  \phantom{= \mat{V}\trans{\vec{\tau}} \eldiv \mat{V}\trans{\ones}}
+  \mathllap{= \mat{Z}\trans{\vec{\sigma}} \eldiv \mat{Z}\trans{\ones}} \\
 \vec{\mean{v}} &=
   \phantom{\vec{\Sigma}_\bytes \eldiv \vec{\Sigma}_\pkts}
   \mathllap{\vec{\Sigma_{\ivals}} \eldiv \vec{\Sigma_{\pkts}}}
-  = \mat{V}\trans{\vec{\tau}} \eldiv \mat{V}\trans{\ones{}}.
+  = \mat{V}\trans{\vec{\tau}} \eldiv \mat{V}\trans{\ones}.
 \end{align}
 The symbol $\eldiv$ here represents element-wise division of vector coordinates, as it does in Matlab.
 
 \subsubsection{Inter-Node Communication Graphs}
 \label{sec:communication-topology}
 
-The total number of source flows for each node is given by the vector $\trans{\mat{S}}\ones{f} \in \R^n$, and the total number of destination flows is given by $\trans{\mat{D}}\ones{f} \in \R^n$.
+The total number of source flows for each node is given by the vector $\trans{\mat{S}}\ones \in \R^n$, and the total number of destination flows is given by $\trans{\mat{D}}\ones \in \R^n$.
 The number of flows between each pair of nodes in the network is expressed by the matrix product $\trans{\mat{S}}\mat{D}\in\R^{n \times n}$.
 That is $(\trans{\mat{S}}\mat{D})_{ij}$ is the number of flows from node $i$ to node $j$.
 Interpreting this sparse matrix as a weighted graph immediately yields the source-destination flow communication graph.
@@ -558,65 +558,70 @@ The simplifying assumptions made by most traffic models can be classified into t
 
 \subsubsection{Uniformity}
 
-The concept of uniformity, as used here, entails that certain properties of each flow are assumed to be statistically or deterministically uniform. Examples include: assuming that each flow's packets have the same size and inter-packet interval (i.e. the \caps{CBR} flow model); assuming that each node is equally likely to be the source of a given flow; assuming that all start times for a flow are equally likely.
+The concept of uniformity, as used here, entails that certain properties of each flow are assumed to be statistically or deterministically uniform.
+Examples include:
+assuming that each flow's packets have the same size and inter-packet interval (i.e. the \caps{CBR} flow model);
+assuming that each node is equally likely to be the source of a given flow; assuming that all start times for a flow are equally likely.
 
-Since uniform behaviors entail homogeneity of properties with respect to each flow individually, a trace matrix can be transformed to a matrix satisfying the model's assumptions via right matrix multiplication. Right multiplication mixes the elements within each row, and if the mixing weights are uniform, the result is uniform behavior. For example, to make the roles of the nodes with respect to each flow statistically identical, we transform $\mat{S}$ and $\mat{D}$:
+Since uniform behaviors entail homogeneity of properties with respect to each flow individually, a trace matrix can be transformed to a matrix satisfying the model's assumptions via right matrix multiplication.
+Right multiplication mixes the elements within each row, and if the mixing weights are uniform, the result is uniform behavior.
+For example, to make the roles of the nodes with respect to each flow statistically identical, we transform $\mat{S}$ and $\mat{D}$:
 \begin{align}
-\mat{S}' &= \mat{S}\ones{n \times n}/n, & \mat{D}' &= \mat{D}\ones{n \times n}/n.
+\mat{S}' &= \rStoch(\mat{S}\ones) = \smallfrac{1}{n} \mat{S}\ones \in \R^{f \times n} \\
+\mat{D}' &= \rStoch(\mat{D}\ones) = \smallfrac{1}{n} \mat{D}\ones\in \R^{f \times n}.
 \end{align}
-This makes all the values in each flow's row identically the average of the original $n$ values. As another example, the constant bit-rate (\caps{CBR}) flow model, in its strictest sense, is an intra-flow model, which stipulates that all the packets in each flow behave identically, having identical sizes and intervals; thus each flow's bit-rate is constant, as the name implies. The strict \caps{CBR} model can be easily expressed with the packets-bytes-duration (\caps{PBD}) model used as an example in \Section{representations}. The pair of matrices $[\mat{Z}~\mat{V}]$ is transformed to \caps{PBD} form using the vectors defined in \Section{flow-totals}: $[\mat{Z}~\mat{V}]\,\mat{\Gamma}\in\R^{f \times 3}$, where
+The ``$\rStoch$'' operator scales each row to sum to unity, thus making the entire matrix row-stochastic;
+in this case, this is equivalent to scaling by $\smallfrac{1}{n}$.
+These transformations of $\mat{S}$ and $\mat{D}$ make all the values in each flow's row identically the average of the original $n$ values.
+As another example, the constant bit-rate (\caps{CBR}) flow model, in its strictest sense, is an intra-flow model, which stipulates that all the packets in each flow behave identically, having identical sizes and intervals;
+thus each flow's bit-rate is constant, as the name implies.
+The strict \caps{CBR} model can be easily expressed with the packets-bytes-duration (\caps{PBD}) model used as an example in \Section{representations}.
+The pair of matrices $[\mat{Z}~\mat{V}]$ is transformed to \caps{PBD} form using the vectors defined in \Section{flow-totals}:
+$[\mat{Z}~\mat{V}]\,\mat{\Gamma}\in\R^{f \times 3}$, where
 \begin{align}
 \mat{\Gamma}=\begin{pmatrix}
-\ones{} & \vec{\sigma} & \zeros{} \\
-\zeros{} & \zeros{} & \vec{\tau}
+\ones & \vec{\sigma} & \zeros \\
+\zeros & \zeros & \vec{\tau}
 \end{pmatrix} \in \R^{(d_v+d_z)\times{3}}.
 \end{align}
 \Figure{trace-vs-uniform} graphically depicts examples of uniform behaviors as compared to realistic behaviors from traces.
-%By replacing $\mat{S}'$ with $\mat{S}$, this can also be viewed as a set of linear constraints on the matrix $\mat{S}$, providing a proscriptive definition 
-
-%We use the term \textit{uniformity} do describe assumptions made about the ``sameness'' of various properties of flows. The constant bit-rate (\caps{CBR}) model, for example, is an assumption about the uniformity of all of a flow's packets: i.e. that they have the same size and are evenly spaced in time. While this is the strictest sense of the \caps{CBR} model, it is rare for this assumption to be made in isolation. Another common simplification is to make the sizes of flows identical, or chose them randomly from a uniform distribution; similarly for the starting time of each flow. Finally, when choosing endpoints for a given flow, lacking a better model, it is not unusual to treat all nodes identically, making each an equally likely source or destination for a given flow.
-
-%It is common in generating traffic behaviors for experiments to treat packets, nodes, and flows uniformly to varying degrees. This is largely because of the high complexity of doing otherwise and the lack of compelling alternatives. Here we examine how various notions of uniformity are expressed in the matrix model. In general, \textit{intra-flow uniformity} is effected by right multiplication, which mixes the elements in each row, whereas \textit{inter-flow uniformity} is effected by left multiplication, which mixes elements across rows. The constant bit-rate (\caps{CBR}) flow model, for example, in its strictest sense, is an intra-flow model, which stipulates that all the packets in each flow behave identically, having identical sizes and intervals; thus each flow's bit-rate is constant, as the name implies. The strict \caps{CBR} model can be easily expressed with the packets-bytes-duration (\caps{PBD}) model used as an example in \Section{representations}. The pair of matrices $\tuple{\mat{Z},\mat{V}}$ is transformed to \caps{PBD} form using the vectors defined in \Section{flow-totals}: $\tuple{\mat{Z},\mat{V}}\Gamma\in\R^{f \times 3}$, where
-%\begin{align}
-%\Gamma=\begin{pmatrix}
-%\ones{} & \vec{\sigma} & \zeros{} \\
-%\zeros{} & \zeros{} & \vec{\tau}
-%\end{pmatrix} \in \R^{(d_v+d_z)\times{3}}.
-%\end{align}
 
 \subsubsection{Marginality}
 
-Marginality is an orthogonal concept to uniformity: the distribution of some property is identical \textit{across} all flows. For example, if we determine a distribution of flow sizes across the entire network and assume that this distribution applies \textit{independent of other flow properties}, this is a marginal model for flow size. Marginal behavior is effected by left multiplication by a matrix with uniform columns. This specific example is generated by left-uniformizing the flow size matrix: $\mat{B}' = (\ones{f \times f}/f)\mat{B}$.
-The traffic models proposed by {\FHC} are all marginal: they propose certain network-wide parametric distributions for start times, flow sizes and the number of flows per node. These models do not account for non-independence between these and other flow properties. We will discuss this limitation and its implications when we analyze our experimental results.
+Marginality is an orthogonal concept to uniformity:
+the distribution of some property is identical \textit{across} all flows.
+For example, if we determine a distribution of flow sizes across the entire network and assume that this distribution applies independent of other flow properties, this is a marginal model for flow size.
+Marginal behavior is effected by left multiplication by a matrix with uniform columns.
+This specific example is generated by left-uniformizing the flow size matrix:
+$\mat{B}' = \smallfrac{1}{f}\ones\mat{B}$.
+The traffic models proposed by {\FHC} are all marginal:
+they propose certain network-wide parametric distributions for start times, flow sizes and the number of flows per node.
+These models do not account for non-independence between these and other flow properties.
+We will discuss this limitation and its implications when we analyze our experimental results.
 
 \subsubsection{Conditionality}
 
-The final form of homogenization we consider, is conditionality. This is a restricted form of marginality: we may assume that marginal distributions apply to all the flows in certain groupings. For example, we can provide a distribution of flow sizes on a per-source basis. That is, each source node can have its \textit{own} distribution, and the sizes of its flows are drawn from that distribution, independent of their other properties. This is simply accomplished by left-multiplication by a non-uniform matrix. For example, to make flow behavior uniform on a per source basis, we left-multiply by the ``source-conditioning'' matrix: $\mat{F}'=(\trans{\mat{SS}}/f)\mat{F}$. Per destination uniformity can be achieved similarly, with left-multiplication by a corresponding destination-conditioning matrix: $F'=(\trans{\mat{DD}}/f)\mat{F}$.
-%Although assumptions about uniformity across flows are common, there is little agreement about which notion of uniformity is most appropriate; often it is simply left unspecified. The confusion arises due to the lack of a unique way of associating flows with nodes. Each node can equally viably be associated with its source or its destination. Which association is more valid? Consider a web request: should the behavior of the request be determined by what the client typically does? Or should the requests that the server typically receives determine behavior? There is no armchair answer: only analysis of real data can give us the answer. The matrix model provides an analytical framework for doing so.
-The matrix model has the benefit of making the conditioning of behaviors completely explicit. It also allows us to easily define intermediate choices. If we wish make the behavior of each flow a weighted average of the aggregate behaviors of its source and destination nodes, we can express this easily:
+The final form of homogenization we consider, is conditionality.
+This is a restricted form of marginality:
+we may assume that marginal distributions apply to all the flows in certain groupings.
+For example, we can provide a distribution of flow sizes on a per-source basis.
+That is, each source node can have its \textit{own} distribution, and the sizes of its flows are drawn from that distribution, independent of their other properties.
+This is simply accomplished by left-multiplication by a non-uniform matrix.
+For example, to make flow behavior uniform per source, consider the ``source-conditioning'' matrix:
+$\trans{\mat{S}}\mat{S} \in \R^{n \times n}$.
+This matrix has $(\trans{\mat{S}}\mat{S})_{ij} = 1$ if and only if flows $i$ and $j$ have the same source node.
+To condition flow behavior by source, we left-multiply by the stochasticized source-condtioning matrix:
 \begin{align}
-\mat{F}' = \frac{1}{f}((1-\alpha)(\trans{\mat{SS}})+\alpha(\trans{\mat{DD}}))\mat{F}.
+  \mat{F}'= \rStoch(\trans{\mat{S}}\mat{S})\mat{F}.
+\end{align}
+In this case, rows do not have the same sums, so the ``$\rStoch$'' operator is not equivalent to scalar multiplication.
+Per destination uniformity can be achieved similarly, replacing $\mat{S}$ with $\mat{D}$.
+
+The \caps{GMM} has the benefit of making the conditioning of behaviors completely explicit. It also allows us to easily define intermediate choices. If we wish make the behavior of each flow a weighted average of the aggregate behaviors of its source and destination nodes, we can express this easily:
+\begin{align}
+\mat{F}' = ((1-\alpha)\,\rStoch(\trans{\mat{S}}\mat{S})+(\alpha)\,\rStoch(\trans{\mat{D}}\mat{D}))\mat{F}.
 \end{align}
 The parameter $\alpha$ allows us to smoothly vary the weighting of the source and destination behaviors. Source-only behavior is given by $\alpha=0$; destination-only by $\alpha=1$; to weight source and destination equally, take $\alpha=\frac{1}{2}$.
-
-%We use the terms here to distinguish three fundamentally different types of assumptions about behavioral homogeneity.
-
-%Existing traffic models are typically not explicit methods of generating complete synthetic traces of network traffic, but rather descriptions of some aspect of of the behavior of idealized traffic. In our algebraic modeling framework, such models can be interpreted as stipulations about the form of the behavior matrices, or as transforms that implement those stipulations given a real set of traffic matrices.
-
-%A generic traffic model is a way of generating the six matrices described in \Section{representations}. A trace-derived traffic model transforms the matrices for an actual trace of network behavior into a simplified or conditional form. For experimental comparison, the dimensions of the matrices should all be preserved. If a trace-derived model produces experimental performance metrics that are similar to those produced by the original trace data, then simplifications made by the model are viable; if the performance is distorted, then the simplifications are discarding essential information about the traffic pattern.
-
-%\subsection{Uniformity}
-
-%% TODO: differentiate between restrictive versions of models and transformative versions.
-%% TODO: distinguish uniform, marginal and conditional models.
-
-%\subsection{Marginality}
-
-%Most approaches to traffic modeling that go beyond uniformity assumptions, instead describe marginal properties of various aspects of traffic behavior. For example, {\FHC}~\cite{Hernandez06:spatio-temporal-modeling} provide highly convincing parametric models for six marginal properties of wireless network traffic: session (node) arrivals follow a time-varying Poisson process; per-session flow inter-arrival times are Lognormally distributed; flows per session (node) follow a BiPareto distribution; flow sizes follow a BiPareto distribution. This is certainly much greater detail than simply assuming that all nodes and flows are identical.
-
-%How do marginal models translate into the algebraic language of the general matrix model? Whereas uniformity assumptions for nodes, 
-
-%Another benefit of the matrix model is that all aspects of network behavior are determined concurrently. We are not left wondering what to do about source and destination nodes or flow start and end times after we have computed our simplified packet behaviors: the same transformation that average the packet behaviors also naturally averages the start and
 
 \subsection{Traffic Generation}
 \sec{traffic-generation}
@@ -662,7 +667,7 @@ However, for any vector that is a sum of vectors representing valid flows---\lat
 In the case of a row which is simple a representation of an actual flow, this makes no difference, except for the generation of packets (which are modeled independently).
 In the case of composite rows, however, this implies that flow properties are modeled independent of each other.
 \end{itemize}
-Despite these remarks, we will show in our experimental evaluation, that this procedure generates sufficiently realistic wireless workloads.
+Despite these remarks, we will show in our experimental evaluation, that this procedure generates \emph{sufficiently realistic} wireless workloads~\cite{Karpinski07:realism,Karpinski07:cbr-failure}.
 
 \input{tables/traffic_models}
 

@@ -13,11 +13,11 @@
 the general matrix model
 \\\hline\hline
 time uniform &
-$\mat{A}'=\mat{A}(\ones{d_t \times d_t}/d_t)$ &
+$\mat{A}'=\mat{A}(\ones/d_t)$ &
 all start times are equally likely
 \\\hline
 node uniform &
-$\mat{S}'=\mat{S}(\ones{n \times n}/n)$~~~~$\mat{D}'=\mat{D}(\ones{n \times n}/n)$ &
+$\mat{S}'=\mat{S}(\ones/n)$~~~~$\mat{D}'=\mat{D}(\ones/n)$ &
 nodes behave stochastically identically with respect to flows
 \\\hline
 full uniform &
@@ -25,19 +25,19 @@ full uniform &
 applies all the uniformity assumptions of the above models
 \\\hline\hline
 time marginal &
-$\mat{A}'=(\ones{f \times f}/f)\mat{A}$ &
+$\mat{A}'=(\ones/f)\mat{A}$ &
 start times chosen from marginal distribution of start times
 \\\hline
 size marginal &
-$\mat{B}'=(\ones{f \times f}/f)\mat{B}$ &
+$\mat{B}'=(\ones/f)\mat{B}$ &
 flow size (bytes) is chosen independently of other properties
 \\\hline
 node marginal &
-$\mat{S}'=(\ones{f \times f}/f)\mat{S}$~~~~$\mat{D}'=(\ones{f \times f}/f)\mat{D}$ &
+$\mat{S}'=(\ones/f)\mat{S}$~~~~$\mat{D}'=(\ones/f)\mat{D}$ &
 nodes behave distinctly, but behavior is independent of flows
 \\\hline
 packet marginal &
-$\mat{Z}'=(\ones{f \times f}/f)\mat{Z}$~~~~$\mat{V}'=(\ones{f \times f}/f)\mat{V}$ &
+$\mat{Z}'=(\ones/f)\mat{Z}$~~~~$\mat{V}'=(\ones/f)\mat{V}$ &
 packet behavior is variable bit-rate, aggregated across all flows
 \\\hline
 full marginal &
