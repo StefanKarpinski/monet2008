@@ -487,56 +487,9 @@ Arguments can certainly be made for other choices, but this choice appears to wo
 
 Two other unspecified constants appear in \Table{quantization}: $\beta$ and $\gamma$.
 These parameters are non-linear scaling exponents that allows the quantization to smoothly shift from fine-grained resolution at the low end of the spectrum to coarse-grained resolution at the high end.
-We have chosen $\beta=\fracx{1}{2.7}$ because it yields a desirable dynamic range response from bytes at the low end to megabytes at the high end.
-Similarly, we have chosen $\gamma=\fracx{1}{3}$ because this choice provides resolution that scales smoothly from microseconds for small intervals to seconds for large intervals.
+We have chosen $\beta=\fracx{1}{2.7}$ and $\gamma=\fracx{1}{3}$ because these values yield desirable dynamic ranges: from single bytes at the lower end to megabytes at the high end for flow sizes; from microseconds to seconds for intervals.
 
-\subsection{Traffic Generation}
-\sec{traffic-generation}
-
-Given an instance of the general matrix model, how do we produce an actual workload from it?
-Each row of the model is used to randomly generate the behavior of a single flow.
-To do this, we use the ``dequantization'' functions listed in \Table{quantization}.
-The dequantization procedure works as follows.
-Let $\vec{f}$
-% \begin{align}
-% \vec{f}=\tuple{\vec{t},\vec{s},\vec{d},\vec{a},\vec{b},\vec{z},\vec{v}}
-% \end{align}
-be a row of the traffic matrix, and let $\prop$ be a property.
-Write $\vec{f}_\prop$ for the corresponding component vector of $\vec{f}$.
-Chose an index value $k\in\set{1,\dots,d_\prop}$, randomly, with weight given by the coefficients of $\vec{f}_\prop$.
-Choose $u \in [0,1]$ uniformly randomly.
-Then $x = k-u \in [0,d]$, with probability of lying in the interval $[i-1,i]$ proportional to the coefficient of $\e_i$ in $\vec{f}_\prop$.
-The dequantization function for $\prop$, namely $\Df_\prop$, will map the value $x$ back into the appropriate range of property values for $\prop$.
-
-The above procedure allows us to sample random values for each property in accordance with the behavioral description implied by $\vec{f}$.
-This allows us to stochastically generate a sequence of packets in accordance with a row from an arbitrary \caps{GMM} matrix instance using the following procedure:
-\begin{enumerate}
-\item Sample random source and destination node pairs.
-Since a flow must have distinct source and destination nodes, the sampling of endpoints must be done jointly, avoiding collisions.
-The simplest technique is the rejection method:
-if the same node is chosen for both source and destination, reject that pair and begin the selection process again.
-\item Next, randomly sample the number of bytes.
-\item The packet size and inter-packet interval vectors, $\vec{z}$ and $\vec{v}$, allow us to compute the expected average packet size and inter-packet intervals for the flow (see~\Section{flow-totals}), call them $\mean{z}$ and $\mean{v}$.
-From these, together with the flow size in bytes, we estimate the expected duration of the flow:
-$\mean{d} = \fracx{b\mean{v}}{\mean{z}}$.
-\item Randomly sample a start time for the flow. Ensure that the start time plus the expected duration, $\mean{d}$, does not exceed the maximum simulation time for the workflow by using the rejection method.
-\item The first packet is sent at the chosen start time.
-The size of each packet is determined by sampling a random size value.
-The interval until the next packet is determined by sampling a random interval value.
-The packet stream ends when the number of bytes allocated to the flow have been emitted or when the packet emission time exceeds $t_{\max}$.
-The last packet is only the size of the remaining number of bytes.
-\end{enumerate}
-Some remarks about the procedure:
-\begin{itemize}
-\item For some vectors in $\R^{f \cross N}$, it may be impossible to choose distinct source and destination nodes or flow sizes and start times satisfying the procedure.
-However, for any vector that is a sum of vectors representing valid flows---\latin{i.e.} ones having distinct source and destination nodes and feasible combinations of start time, duration, and packet behaviors---the procedure will terminate.
-\item Because the representation $\phi$ models the seven properties independent of each other, it is impossible to do better than to sample the properties independently, modulo the requirements of the procedure.
-In the case of a row which is simple a representation of an actual flow, this makes no difference, except for the generation of packets (which are modeled independently).
-In the case of composite rows, however, this implies that flow properties are modeled independent of each other.
-\end{itemize}
-Despite these remarks, we will show in our experimental evaluation, that this procedure generates sufficiently realistic wireless workloads.
-
-\subsection{Expression of Common Properties}
+\subsection{Computation of Common Properties}
 \label{sec:common-properties}
 
 Having defined our representation of network behavior and presented the procedure for stochastically generating workload, we turn to deriving useful expressions for commonly used network properties in terms of these algebraic building blocks.
@@ -545,8 +498,8 @@ Having defined our representation of network behavior and presented the procedur
 \label{sec:flow-totals}
 
 \newfootnote{\onesnote}{%
-Through out this paper, $\ones{}$ denotes a matrix of all ones, but the dimensions of the matrix must be inferred by context.
-Where necessary, we disambiguate the dimensions by explicitly specifying the dimensions of the final matrix product.
+Through out this paper, $\ones{}$ denotes a matrix of all ones; dimensions of the matrix are inferred by context.
+Where necessary, we disambiguate the dimensions by explicitly specifying the dimensions of the final matrix product, as we do here.
 }
 
 From the matrices $\mat{Z}$ and $\mat{V}$ we can compute a variety of statistics about packet sizes and inter-packet intervals.
@@ -560,13 +513,13 @@ The vectors of representative values for $\mat{Z}$ and $\mat{V}$ respectively ar
 \vec{\sigma} &= \tuple{1,2,3,\dots,d_z} \\
 \vec{\tau}   &= \tuple{\Df_\ival\left(k-\fracx{1}{2}\right)}_{k=1}^{d_v}.
 \end{align}
-The packet count, total byte and total duration vectors are computed as\onesnote
+The packet count, total byte and total duration vectors are computed as
 \begin{align}
 \vec{\Sigma}_\pkts  &= \mat{Z}\trans{\ones{}} = \mat{V}\trans{\ones{}} \in \R^f \eqn{packet-count}\\
 \vec{\Sigma}_\bytes &= \mat{Z}\trans{\vec{\sigma}} \in \R^f \eqn{total-bytes} \\
 \vec{\Sigma}_\ivals &= \mat{V}\trans{\vec{\tau}} \in \R^f \eqn{total-duration}.
 \end{align}
-Here $\ones{}$ is a row vector of all ones.
+Here $\ones{}$ is a row vector of all ones.\onesnote
 Packet count and total bytes values are exact;
 the total durations are only approximate because information is irretrievably lost in the quantization process.
 Using these vectors of totals, we may readily compute the average packet sizes and inter-packet intervals:
@@ -589,8 +542,9 @@ The total number of source flows for each node is given by the vector $\trans{\m
 The number of flows between each pair of nodes in the network is expressed by the matrix product $\trans{\mat{S}}\mat{D}\in\R^{n \times n}$.
 That is $(\trans{\mat{S}}\mat{D})_{ij}$ is the number of flows from node $i$ to node $j$.
 Interpreting this sparse matrix as a weighted graph immediately yields the source-destination flow communication graph.
+\Figure{trace-vs-uniform} gives two visual examples of such graphs.
 Similar graphs counting other quantities can readily be computed by inserting the appropriate weighting matrix.
-For example, we may compute the packet transmission graph:
+For example, we may compute the inter-node packet transmission graph:
 \begin{align}
 \trans{\mat{S}}\diag(\vec{\Sigma}_\pkts)\mat{D}\in\R^{n \times n}.
 \end{align}
@@ -600,7 +554,7 @@ Similar graphs for total bytes and total duration of flows may be computed using
 \subsection{Expression of Common Modeling Concepts}
 \sec{modeling-concepts}
 
-The simplifying assumptions made by most traffic models can be classified into three categories. We use the terms \textit{uniformity}, \textit{marginality}, and \textit{conditionality} to describe these classes of assumptions. They are all assumptions about the ``sameness'' of aspects of network behaviors; they differ, however, in whether they make stipulations about uniformity within each flow, across all flows, or within groups of flows. In the following sections, we explore how various modeling concepts can be expressed in the framework of the general matrix model. Models are expressed as transformations that will convert arbitrary traffic matrix instances into similar ones that satisfy the model's assumptions. These transformations will later allow us to evaluate the effect of each model's simplifications on the realism of generated workloads.
+The simplifying assumptions made by most traffic models can be classified into three categories. We use the terms \textit{uniformity}, \textit{marginality}, and \textit{conditionality} to describe these classes of assumptions. They are all assumptions about the ``sameness'' of aspects of network behaviors; they differ, however, in whether they make stipulations about uniformity within each flow, across all flows, or within groups of flows. In the following sections, we explore how various modeling concepts can be expressed in the framework of the general matrix model. Models are expressed as transformations that convert arbitrary traffic matrix instances into similar ones that satisfy the model's assumptions. These transformations later allow us to evaluate the effect of each model's simplifications on the realism of generated workloads.
 
 \subsubsection{Uniformity}
 
@@ -663,6 +617,52 @@ The parameter $\alpha$ allows us to smoothly vary the weighting of the source an
 %How do marginal models translate into the algebraic language of the general matrix model? Whereas uniformity assumptions for nodes, 
 
 %Another benefit of the matrix model is that all aspects of network behavior are determined concurrently. We are not left wondering what to do about source and destination nodes or flow start and end times after we have computed our simplified packet behaviors: the same transformation that average the packet behaviors also naturally averages the start and
+
+\subsection{Traffic Generation}
+\sec{traffic-generation}
+
+Given an instance of the general matrix model, how do we produce an actual workload from it?
+Each row of the model is used to randomly generate the behavior of a single flow.
+To do this, we use the ``dequantization'' functions listed in \Table{quantization}.
+The dequantization procedure works as follows.
+Let $\vec{f}$
+% \begin{align}
+% \vec{f}=\tuple{\vec{t},\vec{s},\vec{d},\vec{a},\vec{b},\vec{z},\vec{v}}
+% \end{align}
+be a row of the traffic matrix, and let $\prop$ be a property.
+Write $\vec{f}_\prop$ for the corresponding component vector of $\vec{f}$.
+Chose an index value $k\in\set{1,\dots,d_\prop}$, randomly, with weight given by the coefficients of $\vec{f}_\prop$.
+Choose $u \in [0,1]$ uniformly randomly.
+Then $x = k-u \in [0,d]$, with probability of lying in the interval $[i-1,i]$ proportional to the coefficient of $\e_i$ in $\vec{f}_\prop$.
+The dequantization function for $\prop$, namely $\Df_\prop$, will map the value $x$ back into the appropriate range of property values for $\prop$.
+
+The above procedure allows us to sample random values for each property in accordance with the behavioral description implied by $\vec{f}$.
+This allows us to stochastically generate a sequence of packets in accordance with a row from an arbitrary \caps{GMM} matrix instance using the following procedure:
+\begin{enumerate}
+\item Sample random source and destination node pairs.
+Since a flow must have distinct source and destination nodes, the sampling of endpoints must be done jointly, avoiding collisions.
+The simplest technique is the rejection method:
+if the same node is chosen for both source and destination, reject that pair and begin the selection process again.
+\item Next, randomly sample the number of bytes.
+\item The packet size and inter-packet interval vectors, $\vec{z}$ and $\vec{v}$, allow us to compute the expected average packet size and inter-packet intervals for the flow (see~\Section{flow-totals}), call them $\mean{z}$ and $\mean{v}$.
+From these, together with the flow size in bytes, we estimate the expected duration of the flow:
+$\mean{d} = \fracx{b\mean{v}}{\mean{z}}$.
+\item Randomly sample a start time for the flow. Ensure that the start time plus the expected duration, $\mean{d}$, does not exceed the maximum simulation time for the workflow by using the rejection method.
+\item The first packet is sent at the chosen start time.
+The size of each packet is determined by sampling a random size value.
+The interval until the next packet is determined by sampling a random interval value.
+The packet stream ends when the number of bytes allocated to the flow have been emitted or when the packet emission time exceeds $t_{\max}$.
+The last packet is only the size of the remaining number of bytes.
+\end{enumerate}
+Some remarks about the procedure:
+\begin{itemize}
+\item For some vectors in $\R^{f \cross N}$, it may be impossible to choose distinct source and destination nodes or flow sizes and start times satisfying the procedure.
+However, for any vector that is a sum of vectors representing valid flows---\latin{i.e.} ones having distinct source and destination nodes and feasible combinations of start time, duration, and packet behaviors---the procedure will terminate.
+\item Because the representation $\phi$ models the seven properties independent of each other, it is impossible to do better than to sample the properties independently, modulo the requirements of the procedure.
+In the case of a row which is simple a representation of an actual flow, this makes no difference, except for the generation of packets (which are modeled independently).
+In the case of composite rows, however, this implies that flow properties are modeled independent of each other.
+\end{itemize}
+Despite these remarks, we will show in our experimental evaluation, that this procedure generates sufficiently realistic wireless workloads.
 
 \input{tables/traffic_models}
 
