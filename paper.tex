@@ -433,7 +433,7 @@ The histogram-vector approach produces some representations of properties that a
 However, this approach automatically satisfies the ``naturalness'' criterion for linear representations.
 That is, the representation, $\phi(T)$, naturally describes the aggregate behavior of flows in $T$.
 Perhaps even more importantly, arbitrary linear combinations of vectors can be meaningfully interpreted as describing some realizable, hypothetical traffic instance.
-In \Section{traffic-generation} we will describe how to generate a flow for any sum of representation vectors.
+In \Section{traffic-generation} we will describe how to generate flows from arbitrary composite representation vectors.
 % This is how we generate workload from transformed traffic matrices.
 
 The quantization functions specified in \Table{quantization} allow us to define the representation $\phi: \Traffic \to \R^N$: \begin{align}
@@ -441,23 +441,23 @@ The quantization functions specified in \Table{quantization} allow us to define 
 \end{align}
 where $N=255+2n+d_t+d_b+d_z+d_v$ and vectors are
 \begin{align*}
-\vec{t} &= \e_k & k &= \Qf^{\text{t}}(\type) \\
-\vec{s} &= \e_k & k &= \Qf^{\text{s}}(\src) \\
-\vec{d} &= \e_k & k &= \Qf^{\text{d}}(\dst) \\
-\vec{a} &= \e_k & k &= \Qf^{\text{a}}(\start) \\
-\vec{b} &= \e_k & k &= \Qf^{\text{b}}(\bytes) \\
-\vec{z} &= {\textstyle \sum \e_k} & k &\in \set{\Qf^{\text{z}}(\size_i) : i \le \pkts} \\
-\vec{v} &= {\textstyle \sum \e_k} & k &\in \set{\Qf^{\text{v}}(\ival_i) : i <   \pkts}.
+\vec{t} &= \e_k & k &= \Qf_\type(\type) \\
+\vec{s} &= \e_k & k &= \Qf_\node(\src) \\
+\vec{d} &= \e_k & k &= \Qf_\node(\dst) \\
+\vec{a} &= \e_k & k &= \Qf_\time(\start) \\
+\vec{b} &= \e_k & k &= \Qf_\bytes(\bytes) \\
+\vec{z} &= {\textstyle \sum \e_k} & k &\in \set{\Qf_\size(\size_i) : i \le \pkts} \\
+\vec{v} &= {\textstyle \sum \e_k} & k &\in \set{\Qf_\ival(\ival_i) : i <   \pkts}.
 \end{align*}
-The functions $\Qf^\text{x}$ are the respective quantization functions for each property.
+The functions $\Qf_\prop$ are the respective quantization functions for each property.
 If there are $f$ flows in a traffic instance, then the collective behavior can be described with seven matrices---one for each property;
 the rows of each matrix are the behavior vectors of the flows, indexed in some chosen order.
-We use the following notations for the behavior matrices:
+We use the following notations for the matrices and indexed flow vectors:
 \vspace{-0.25em}
 \begin{tabbing}
 \hspace{1em}\=\bullet\hspace{0.5em}\=\hspace{9.75em}\=
 $\mat{D}\:$\=$=\parensx{\vec{d}_i}\:$\=$=\parensx{d_{ij}}\:$\=\kill
-\>\bullet\> type: \>$\mat{T}$\>$=\parensx{\vec{t}_i}$\>$=\parensx{t_{ij}}$\>$\in\R^{f \times 255}$\\
+\>\bullet\> types: \>$\mat{T}$\>$=\parensx{\vec{t}_i}$\>$=\parensx{t_{ij}}$\>$\in\R^{f \times 255}$\\
 \>\bullet\> sources: \>$\mat{S}$\>$=\parensx{\vec{s}_i}$\>$=\parensx{s_{ij}}$\>$\in\R^{f \times n}$\\
 \>\bullet\> destinations: \>$\mat{D}$\>$=\parensx{\vec{d}_i}$\>$=\parensx{d_{ij}}$\>$\in\R^{f \times n}$\\
 \>\bullet\> start times: \>$\mat{A}$\>$=\parensx{\vec{a}_i}$\>$=\parensx{a_{ij}}$\>$\in\R^{f \times d_t}$\\
@@ -469,8 +469,8 @@ The total behavior matrix is the horizontal concatenation of these component mat
 \begin{align}
 \mat{F} = \left[\,\mat{T}~\mat{S}~\mat{D}~\mat{A}~\mat{B}~\mat{Z}~\mat{V}\,\right] \in \R^{f \times N}.
 \end{align}
-We call this total representation the general matrix model.
-While it is by no means the only possible representation of traffic in terms of matrices, as demonstrate in the following sections, many common traffic modeling assumptions can be expressed succinctly and precisely in terms of transformations or conditions of the \caps{GMM} and its components.
+We call this total representation the \emph{general matrix model}.
+While it is by no means the only possible representation of traffic in terms of matrices, as we demonstrate in the following sections, many common traffic modeling assumptions can be expressed succinctly and precisely in terms of transformations or conditions of the \caps{GMM} and its components.
 Furthermore, realistic workload can be generated from matrix instances.
 
 \subsection{Choosing Constants}
@@ -541,28 +541,51 @@ Despite these remarks, we will show in our experimental evaluation, that this pr
 
 Having defined our representation of network behavior and presented the procedure for stochastically generating workload, we turn to deriving useful expressions for commonly used network properties in terms of these algebraic building blocks.
 
-\subsubsection{Communication Topology}
-\label{sec:communication-topology}
-
-The number of flows between each pair of nodes in the network is expressed by the matrix product $\trans{\mat{SD}}\in\R^{n \times n}$ ($\trans{\,\diamond\,}$~denotes transpose). That is $(\trans{\mat{SD}})_{ij}$ is the number of flows from node $i$ to node $j$. The total number of source flows for each node is given by the vector $\trans{\mat{S}}\ones{f}$, and the total number of destination flows is given by $\trans{\mat{D}}\ones{f}$. ($\ones{f}$ is the $f$-dimensional column vector consisting of all ones.)
-
-\subsubsection{Expected Average Packet Size \& Intervals}
+\subsubsection{Packet Size \& Inter-Packet Interval Statistics}
 \label{sec:flow-totals}
 
-From the matrices $\mat{Z}$ and $\mat{V}$, we can compute the expected average packet size, $\mean{z}$, and average inter-packet interval, $\mean{v}$, for each flow.
-The computations require knowing the values that each matrix column represents.
-The computed duration is approximate because information is irrecoverably lost in the quantization process.
-The vectors of representative values for $\mat{Z}$ and $\mat{V}$ are:
+From the matrices $\mat{Z}$ and $\mat{V}$ we can compute a variety of statistics about packet sizes and inter-packet intervals.
+The flows vectors in the matrices may represent individual flows or composites of many flows.
+% about packet sizes, total packet count, inter-packet intervals, and total duration for each representation vector, which may represent a single actual flow, or the composite behavior of many flows.
+% We begin by expressing the vectors for total bytes, total packets and total duration for a matrix of flow representations, with size and interval matrices $\mat{Z}$ and $\mat{V}$.
+The computations require knowing the values that each size of interval matrix column represents.
+% The computed duration is approximate because information is irretrievably lost in the quantization process.
+The vectors of representative values for $\mat{Z}$ and $\mat{V}$ respectively are:
 \begin{align}
-\vec{\sigma}&=\tuple{1,2,3,\dots,d_z},\\
-\vec{\tau}&=\tuple{\Di\left(k,\fracx{1}{2}\right)}_{k=1}^{d_v}.
+\vec{\sigma} &= \tuple{1,2,3,\dots,d_z} \\
+\vec{\tau}   &= \tuple{\Df_\ival\left(k-\fracx{1}{2}\right)}_{k=1}^{d_v}.
 \end{align}
-Using these representative values, the expected average packet size and expected average inter-packet interval size for a flow may be computed as
+The packet count, total byte and total duration vectors are computed as
 \begin{align}
-  \mean{z}&=\frac{\inner{\vec{z}}{\vec{\sigma}}}{\inner{\vec{z}}{\ones{}}}, &
-  \mean{v}&=\frac{\inner{\vec{v}}{\vec{\tau}}}{\inner{\vec{v}}{\ones{}}},
+\vec{\Sigma_{\pkts}}  &= \mat{Z}\trans{\ones{}} = \mat{V}\trans{\ones{}} \\
+\vec{\Sigma_{\bytes}} &= \mat{Z}\trans{\vec{\sigma}} \\
+\vec{\Sigma_{\ivals}} &= \mat{V}\trans{\vec{\tau}}.
 \end{align}
-respectively, where $\inner{\vec{x}}{\vec{y}}$ denotes the standard inner product of vectors.
+Packet count and total bytes values are exact;
+the total durations are only approximate because information is irretrievably lost in the quantization process.
+Using these vectors of totals, we may readily compute the average packet sizes and inter-packet intervals:
+\begin{align}
+\vec{\mean{z}} &=
+  \vec{\Sigma_{\bytes}} \eldiv \vec{\Sigma_{\pkts}}
+  \phantom{= \mat{V}\trans{\vec{\tau}}   \eldiv \mat{V}\trans{\ones{}}}
+  \mathllap{= \mat{Z}\trans{\vec{\sigma}} \eldiv \mat{Z}\trans{\ones{}}} \\
+\vec{\mean{v}} &=
+  \phantom{\vec{\Sigma_{\bytes}} \eldiv \vec{\Sigma_{\pkts}}}
+  \mathllap{\vec{\Sigma_{\ivals}} \eldiv \vec{\Sigma_{\pkts}}}
+  = \mat{V}\trans{\vec{\tau}}   \eldiv \mat{V}\trans{\ones{}}.
+\end{align}
+The symbol $\eldiv$ here represents element-wise division of vector coordinates, as it does in Matlab.
+
+\subsubsection{Inter-Node Communication Graphs}
+\label{sec:communication-topology}
+
+The total number of source flows for each node is given by the vector $\trans{\mat{S}}\ones{f}$, and the total number of destination flows is given by $\trans{\mat{D}}\ones{f}$.
+($\ones{f}$ is the $f$-dimensional column vector consisting of all ones.)
+The number of flows between each pair of nodes in the network is expressed by the matrix product $\trans{\mat{SD}}\in\R^{n \times n}$ ($\trans{\,\diamond\,}$~denotes transpose).
+That is $(\trans{\mat{SD}})_{ij}$ is the number of flows from node $i$ to node $j$.
+Interpreting this sparse matrix as a weighted graph immediately yields a simple and efficient means to compute this and other useful communication graphs.
+Other graphs can readily be computed with a few additional matrix multiplications.
+For example, using the computations given 
 
 \subsection{Expression of Common Modeling Concepts}
 \sec{modeling-concepts}
@@ -602,7 +625,7 @@ This makes all the values in each flow's row identically the average of the orig
 Marginality is an orthogonal concept to uniformity: the distribution of some property is identical \textit{across} all flows. For example, if we determine a distribution of flow sizes across the entire network and assume that this distribution applies \textit{independent of other flow properties}, this is a marginal model for flow size. Marginal behavior is effected by left multiplication by a matrix with uniform columns. This specific example is generated by left-uniformizing the flow size matrix: $\mat{B}' = (\ones{f \times f}/f)\mat{B}$.
 The traffic models proposed by {\FHC} are all marginal: they propose certain network-wide parametric distributions for start times, flow sizes and the number of flows per node. These models do not account for non-independence between these and other flow properties. We will discuss this limitation and its implications when we analyze our experimental results.
 
-\subsection{Conditionality}
+\subsubsection{Conditionality}
 
 The final form of homogenization we consider, is conditionality. This is a restricted form of marginality: we may assume that marginal distributions apply to all the flows in certain groupings. For example, we can provide a distribution of flow sizes on a per-source basis. That is, each source node can have its \textit{own} distribution, and the sizes of its flows are drawn from that distribution, independent of their other properties. This is simply accomplished by left-multiplication by a non-uniform matrix. For example, to make flow behavior uniform on a per source basis, we left-multiply by the ``source-conditioning'' matrix: $\mat{F}'=(\trans{\mat{SS}}/f)\mat{F}$. Per destination uniformity can be achieved similarly, with left-multiplication by a corresponding destination-conditioning matrix: $F'=(\trans{\mat{DD}}/f)\mat{F}$.
 %Although assumptions about uniformity across flows are common, there is little agreement about which notion of uniformity is most appropriate; often it is simply left unspecified. The confusion arises due to the lack of a unique way of associating flows with nodes. Each node can equally viably be associated with its source or its destination. Which association is more valid? Consider a web request: should the behavior of the request be determined by what the client typically does? Or should the requests that the server typically receives determine behavior? There is no armchair answer: only analysis of real data can give us the answer. The matrix model provides an analytical framework for doing so.

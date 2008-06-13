@@ -59,7 +59,7 @@
 
 % standard notations
 \newcommand{\trans}[1]{{#1}^T}
-\newcommand{\inner}[2]{{#1}\cdot{#2}}
+\newcommand{\inner}[2]{{#1}\trans{#2}}
 \newcommand{\cross}{\times}
 \newcommand{\tensor}{\otimes}
 \newcommand{\directsum}{\oplus}
@@ -75,6 +75,7 @@
 \newcommand{\defeq}{=}
 \renewcommand{\emptyset}{\varnothing}
 \renewcommand{\setminus}{\,\raisebox{1pt}{$\smallsetminus$}\,}
+\newcommand{\eldiv}{\,./\,}
 
 % non-standard notations
 \newcommand{\ones}[1]{\mathbf{1}_{#1}}
@@ -99,6 +100,7 @@
 \newcommand{\FlowElt}[1]{\mathsym{#1}}
 \newcommand{\flow}{\FlowElt{flow}}
 \newcommand{\type}{\FlowElt{type}}
+\newcommand{\node}{\FlowElt{node}}
 \newcommand{\src}{\FlowElt{src}}
 \newcommand{\dst}{\FlowElt{dst}}
 \newcommand{\start}{\FlowElt{start}}
@@ -113,10 +115,6 @@
 
 \newcommand{\Qf}{\mathcal{Q}}
 \newcommand{\Df}{\Qf^{-1}}
-\newcommand{\Qt}{\Qf_{\text{time}}}
-\newcommand{\Qb}{\Qf_{\text{byte}}}
-\newcommand{\Qi}{\Qf_{\text{ival}}}
-\newcommand{\Di}{\Qf^{-1}_{\text{ival}}}
 
 \newcommand{\pbd}{\mathsym{pbd}}
 \newcommand{\FlowVec}{\mathcal{X}}
