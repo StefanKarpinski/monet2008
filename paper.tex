@@ -442,9 +442,9 @@ The quantization functions specified in \Table{quantization} allow us to define 
 where $N=255+2n+d_t+d_b+d_z+d_v$ and vectors are
 \begin{align*}
 \vec{t} &= \e_k & k &= \Qf_\type(\type) \\
-\vec{s} &= \e_k & k &= \Qf_\node(\src) \\
-\vec{d} &= \e_k & k &= \Qf_\node(\dst) \\
-\vec{a} &= \e_k & k &= \Qf_\time(\start) \\
+\vec{s} &= \e_k & k &= \Qf_\src(\src) \\
+\vec{d} &= \e_k & k &= \Qf_\dst(\dst) \\
+\vec{a} &= \e_k & k &= \Qf_\start(\start) \\
 \vec{b} &= \e_k & k &= \Qf_\bytes(\bytes) \\
 \vec{z} &= {\textstyle \sum \e_k} & k &\in \set{\Qf_\size(\size_i) : i \le \pkts} \\
 \vec{v} &= {\textstyle \sum \e_k} & k &\in \set{\Qf_\ival(\ival_i) : i <   \pkts}.
@@ -505,14 +505,14 @@ be a row of the traffic matrix, and let $\prop$ be a property.
 Write $\vec{f}_\prop$ for the corresponding component vector of $\vec{f}$.
 Chose an index value $k\in\set{1,\dots,d_\prop}$, randomly, with weight given by the coefficients of $\vec{f}_\prop$.
 Choose $u \in [0,1]$ uniformly randomly.
-Then $x = k-u \in [0,d]$, with probability of lying in the interval $(i-1,i]$ proportional to the coefficient of $\e_i$ in $\vec{f}_\prop$.
-The dequantization function for $\prop$, call it $\Df_\prop$, will map the value $x$ back into the appropriate range of property values for $\prop$.
+Then $x = k-u \in [0,d]$, with probability of lying in the interval $[i-1,i]$ proportional to the coefficient of $\e_i$ in $\vec{f}_\prop$.
+The dequantization function for $\prop$, namely $\Df_\prop$, will map the value $x$ back into the appropriate range of property values for $\prop$.
 
 The above procedure allows us to sample random values for each property in accordance with the behavioral description implied by $\vec{f}$.
 This allows us to stochastically generate a sequence of packets in accordance with a row from an arbitrary \caps{GMM} matrix instance using the following procedure:
 \begin{enumerate}
 \item Sample random source and destination node pairs.
-Since a flow must have distinct source and destination nodes, the sampling of endpoints must be done jointly, avoiding the collisions.
+Since a flow must have distinct source and destination nodes, the sampling of endpoints must be done jointly, avoiding collisions.
 The simplest technique is the rejection method:
 if the same node is chosen for both source and destination, reject that pair and begin the selection process again.
 \item Next, randomly sample the number of bytes.
@@ -544,6 +544,11 @@ Having defined our representation of network behavior and presented the procedur
 \subsubsection{Packet Size \& Inter-Packet Interval Statistics}
 \label{sec:flow-totals}
 
+\newfootnote{\onesnote}{%
+Through out this paper, $\ones{}$ denotes a matrix of all ones, but the dimensions of the matrix must be inferred by context.
+Where necessary, we disambiguate the dimensions by explicitly specifying the dimensions of the final matrix product.
+}
+
 From the matrices $\mat{Z}$ and $\mat{V}$ we can compute a variety of statistics about packet sizes and inter-packet intervals.
 The flows vectors in the matrices may represent individual flows or composites of many flows.
 % about packet sizes, total packet count, inter-packet intervals, and total duration for each representation vector, which may represent a single actual flow, or the composite behavior of many flows.
@@ -555,54 +560,59 @@ The vectors of representative values for $\mat{Z}$ and $\mat{V}$ respectively ar
 \vec{\sigma} &= \tuple{1,2,3,\dots,d_z} \\
 \vec{\tau}   &= \tuple{\Df_\ival\left(k-\fracx{1}{2}\right)}_{k=1}^{d_v}.
 \end{align}
-The packet count, total byte and total duration vectors are computed as
+The packet count, total byte and total duration vectors are computed as\onesnote
 \begin{align}
-\vec{\Sigma_{\pkts}}  &= \mat{Z}\trans{\ones{}} = \mat{V}\trans{\ones{}} \\
-\vec{\Sigma_{\bytes}} &= \mat{Z}\trans{\vec{\sigma}} \\
-\vec{\Sigma_{\ivals}} &= \mat{V}\trans{\vec{\tau}}.
+\vec{\Sigma}_\pkts  &= \mat{Z}\trans{\ones{}} = \mat{V}\trans{\ones{}} \in \R^f \eqn{packet-count}\\
+\vec{\Sigma}_\bytes &= \mat{Z}\trans{\vec{\sigma}} \in \R^f \eqn{total-bytes} \\
+\vec{\Sigma}_\ivals &= \mat{V}\trans{\vec{\tau}} \in \R^f \eqn{total-duration}.
 \end{align}
+Here $\ones{}$ is a row vector of all ones.
 Packet count and total bytes values are exact;
 the total durations are only approximate because information is irretrievably lost in the quantization process.
 Using these vectors of totals, we may readily compute the average packet sizes and inter-packet intervals:
 \begin{align}
 \vec{\mean{z}} &=
-  \vec{\Sigma_{\bytes}} \eldiv \vec{\Sigma_{\pkts}}
-  \phantom{= \mat{V}\trans{\vec{\tau}}   \eldiv \mat{V}\trans{\ones{}}}
+  \vec{\Sigma}_\bytes \eldiv \vec{\Sigma}_\pkts
+  \phantom{= \mat{V}\trans{\vec{\tau}} \eldiv \mat{V}\trans{\ones{}}}
   \mathllap{= \mat{Z}\trans{\vec{\sigma}} \eldiv \mat{Z}\trans{\ones{}}} \\
 \vec{\mean{v}} &=
-  \phantom{\vec{\Sigma_{\bytes}} \eldiv \vec{\Sigma_{\pkts}}}
+  \phantom{\vec{\Sigma}_\bytes \eldiv \vec{\Sigma}_\pkts}
   \mathllap{\vec{\Sigma_{\ivals}} \eldiv \vec{\Sigma_{\pkts}}}
-  = \mat{V}\trans{\vec{\tau}}   \eldiv \mat{V}\trans{\ones{}}.
+  = \mat{V}\trans{\vec{\tau}} \eldiv \mat{V}\trans{\ones{}}.
 \end{align}
 The symbol $\eldiv$ here represents element-wise division of vector coordinates, as it does in Matlab.
 
 \subsubsection{Inter-Node Communication Graphs}
 \label{sec:communication-topology}
 
-The total number of source flows for each node is given by the vector $\trans{\mat{S}}\ones{f}$, and the total number of destination flows is given by $\trans{\mat{D}}\ones{f}$.
-($\ones{f}$ is the $f$-dimensional column vector consisting of all ones.)
-The number of flows between each pair of nodes in the network is expressed by the matrix product $\trans{\mat{SD}}\in\R^{n \times n}$ ($\trans{\,\diamond\,}$~denotes transpose).
-That is $(\trans{\mat{SD}})_{ij}$ is the number of flows from node $i$ to node $j$.
-Interpreting this sparse matrix as a weighted graph immediately yields a simple and efficient means to compute this and other useful communication graphs.
-Other graphs can readily be computed with a few additional matrix multiplications.
-For example, using the computations given 
+The total number of source flows for each node is given by the vector $\trans{\mat{S}}\ones{f} \in \R^n$, and the total number of destination flows is given by $\trans{\mat{D}}\ones{f} \in \R^n$.
+The number of flows between each pair of nodes in the network is expressed by the matrix product $\trans{\mat{S}}\mat{D}\in\R^{n \times n}$.
+That is $(\trans{\mat{S}}\mat{D})_{ij}$ is the number of flows from node $i$ to node $j$.
+Interpreting this sparse matrix as a weighted graph immediately yields the source-destination flow communication graph.
+Similar graphs counting other quantities can readily be computed by inserting the appropriate weighting matrix.
+For example, we may compute the packet transmission graph:
+\begin{align}
+\trans{\mat{S}}\diag(\vec{\Sigma}_\pkts)\mat{D}\in\R^{n \times n}.
+\end{align}
+Here $\vec{\Sigma}_\pkts$ is the byte vector defined in \Equation{packet-count}, and the ``$\diag$'' operator gives the square, diagonal matrix with the given vector of values on its diagonal.
+Similar graphs for total bytes and total duration of flows may be computed using $\mat{\Sigma}_\bytes$ or $\mat{\Sigma}_\ival$ in place of $\mat{\Sigma}_\pkts$.
 
 \subsection{Expression of Common Modeling Concepts}
 \sec{modeling-concepts}
 
-The simplifying assumptions made by most traffic models can be classified into three categories. We use the terms \textit{uniformity}, \textit{marginality}, and \textit{conditionality} to describe these classes of assumptions. They are all assumptions about the ``sameness'' of aspects of network behaviors; they differ, however, in whether the make stipulations about uniformity within each flow, across all flows, or within groups of flows. In the following sections, we explore how various modeling concepts can be expressed in the framework of the general matrix model. Models are expressed as transformations that will convert arbitrary traffic matrix instances into similar ones that satisfy the model's assumptions. These transformations will later allow us to evaluate the effect of each model's simplifications on the realism of generated workloads.
+The simplifying assumptions made by most traffic models can be classified into three categories. We use the terms \textit{uniformity}, \textit{marginality}, and \textit{conditionality} to describe these classes of assumptions. They are all assumptions about the ``sameness'' of aspects of network behaviors; they differ, however, in whether they make stipulations about uniformity within each flow, across all flows, or within groups of flows. In the following sections, we explore how various modeling concepts can be expressed in the framework of the general matrix model. Models are expressed as transformations that will convert arbitrary traffic matrix instances into similar ones that satisfy the model's assumptions. These transformations will later allow us to evaluate the effect of each model's simplifications on the realism of generated workloads.
 
 \subsubsection{Uniformity}
 
 The concept of uniformity, as used here, entails that certain properties of each flow are assumed to be statistically or deterministically uniform. Examples include: assuming that each flow's packets have the same size and inter-packet interval (i.e. the \caps{CBR} flow model); assuming that each node is equally likely to be the source of a given flow; assuming that all start times for a flow are equally likely.
 
 Since uniform behaviors entail homogeneity of properties with respect to each flow individually, a trace matrix can be transformed to a matrix satisfying the model's assumptions via right matrix multiplication. Right multiplication mixes the elements within each row, and if the mixing weights are uniform, the result is uniform behavior. For example, to make the roles of the nodes with respect to each flow statistically identical, we transform $\mat{S}$ and $\mat{D}$:
-\begin{align*}
-\mat{S}' &= \mat{S}\ones{n \times n}/n, & \mat{D}' &= \mat{D}\ones{n \times n}/n.
-\end{align*}
-This makes all the values in each flow's row identically the average of the original $n$ values. As another example, the constant bit-rate (\caps{CBR}) flow model, in its strictest sense, is an intra-flow model, which stipulates that all the packets in each flow behave identically, having identical sizes and intervals; thus each flow's bit-rate is constant, as the name implies. The strict \caps{CBR} model can be easily expressed with the packets-bytes-duration (\caps{PBD}) model used as an example in \Section{representations}. The pair of matrices $[\mat{Z}~\mat{V}]$ is transformed to \caps{PBD} form using the vectors defined in \Section{flow-totals}: $[\mat{Z}~\mat{V}]\,\Gamma\in\R^{f \times 3}$, where
 \begin{align}
-\Gamma=\begin{pmatrix}
+\mat{S}' &= \mat{S}\ones{n \times n}/n, & \mat{D}' &= \mat{D}\ones{n \times n}/n.
+\end{align}
+This makes all the values in each flow's row identically the average of the original $n$ values. As another example, the constant bit-rate (\caps{CBR}) flow model, in its strictest sense, is an intra-flow model, which stipulates that all the packets in each flow behave identically, having identical sizes and intervals; thus each flow's bit-rate is constant, as the name implies. The strict \caps{CBR} model can be easily expressed with the packets-bytes-duration (\caps{PBD}) model used as an example in \Section{representations}. The pair of matrices $[\mat{Z}~\mat{V}]$ is transformed to \caps{PBD} form using the vectors defined in \Section{flow-totals}: $[\mat{Z}~\mat{V}]\,\mat{\Gamma}\in\R^{f \times 3}$, where
+\begin{align}
+\mat{\Gamma}=\begin{pmatrix}
 \ones{} & \vec{\sigma} & \zeros{} \\
 \zeros{} & \zeros{} & \vec{\tau}
 \end{pmatrix} \in \R^{(d_v+d_z)\times{3}}.
