@@ -13,31 +13,34 @@
 the general matrix model
 \\\hline\hline
 time uniform &
-$\mat{A}'=\mat{A}(\ones/d_t)$ &
+$\mat{A}' = (\nicefrac{1}{n})\,\mat{A}\ones$ &
 all start times are equally likely
 \\\hline
 node uniform &
-$\mat{S}'=\mat{S}(\ones/n)$~~~~$\mat{D}'=\mat{D}(\ones/n)$ &
-nodes behave stochastically identically with respect to flows
+$\mat{S}' = (\nicefrac{1}{n})\,\mat{S}\ones \quad
+ \mat{D}' = (\nicefrac{1}{n})\,\mat{D}\ones$ &
+all nodes equally likely as source or destination
 \\\hline
 full uniform &
 \textit{all uniform transformations} &
-applies all the uniformity assumptions of the above models
+all start times, sources and destinations equally likely
 \\\hline\hline
 time marginal &
-$\mat{A}'=(\ones/f)\mat{A}$ &
+$\mat{A}' = (\nicefrac{1}{f})\,\ones\mat{A}$ &
 start times chosen from marginal distribution of start times
 \\\hline
 size marginal &
-$\mat{B}'=(\ones/f)\mat{B}$ &
+$\mat{B}' = (\nicefrac{1}{f})\,\ones\mat{B}$ &
 flow size (bytes) is chosen independently of other properties
 \\\hline
 node marginal &
-$\mat{S}'=(\ones/f)\mat{S}$~~~~$\mat{D}'=(\ones/f)\mat{D}$ &
+$\mat{S}' = (\nicefrac{1}{f})\,\ones\mat{S} \quad
+ \mat{D}' = (\nicefrac{1}{f})\,\ones\mat{D}$ &
 nodes behave distinctly, but behavior is independent of flows
 \\\hline
 packet marginal &
-$\mat{Z}'=(\ones/f)\mat{Z}$~~~~$\mat{V}'=(\ones/f)\mat{V}$ &
+$\mat{Z}' = (\nicefrac{1}{f})\,\ones\mat{Z} \quad
+ \mat{V}' = (\nicefrac{1}{f})\,\ones\mat{V}$ &
 packet behavior is variable bit-rate, aggregated across all flows
 \\\hline
 full marginal &
@@ -45,20 +48,23 @@ full marginal &
 applies all the marginality assumptions of the above four models
 \\\hline\hline
 source conditional &
-$\mat{F}'=(\trans{\mat{SS}}/f)\mat{F}$ &
+$\mat{F}' = \rStoch(\trans{\mat{S}}\mat{S})\,\mat{F}$ &
 flow behaviors are aggregated on a per source-node basis
 \\\hline
 dest conditional &
-$\mat{F}'=(\trans{\mat{DD}}/f)\mat{F}$ &
+$\mat{F}' = \rStoch(\trans{\mat{D}}\mat{D})\,\mat{F}$ &
 flow behaviors are aggregated on a per destination-node basis
 \\\hline
 mixed conditional &
-$\mat{F}'=\frac{1}{2f}(\trans{\mat{SS}}+\trans{\mat{DD}})\mat{F}$ &
+$\mat{F}' = \nicefrac{1}{2}\,(
+              \rStoch(\trans{\mat{S}}\mat{S}) +
+              \rStoch(\trans{\mat{D}}\mat{D})
+            )\,\mat{F}$ &
 flow behaviors are aggregated on a mixed source/destination basis
 \\\hline
 \end{tabular}
 \caption{Matrix-based traffic models evaluated by paired differential simulation.}
 \label{tab:traffic-models}
 \end{center}
-\vspace{-2em}
+\vspace{-1em}
 \end{table*}

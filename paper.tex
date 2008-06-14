@@ -11,7 +11,7 @@
 
 \usepackage[labelfont=bf,small]{caption}
 \usepackage[font=small,labelfont=bf,position=top,nearskip=0em]{subfig}
-\usepackage{cite,amsmath,amssymb,rotating,multirow,bigstrut,url,wrapfig,relsize,paralist,array,mathtools}
+\usepackage{cite,amsmath,amssymb,rotating,multirow,bigstrut,url,wrapfig,relsize,paralist,array,mathtools,units}
 \usepackage[hyperfigures,bookmarks,bookmarksopen,bookmarksnumbered,colorlinks,linkcolor=black,citecolor=black,filecolor=blue,menucolor=black,pagecolor=blue,frenchlinks=true,pdftitle={\thetitle: \thesubtitle}]{hyperref}
 
 \title{\thetitle}
@@ -506,7 +506,7 @@ Using these vectors of totals, we may readily compute the average packet sizes a
   \mathllap{\vec{\Sigma_{\ivals}} \eldiv \vec{\Sigma_{\pkts}}}
   = \mat{V}\trans{\vec{\tau}} \eldiv \mat{V}\trans{\ones}.
 \end{align}
-The symbol $\eldiv$ here represents element-wise division of vector coordinates, as it does in Matlab.
+The symbol $\eldiv$ here represents element-wise division of vectors, as it does in Matlab.
 
 \subsubsection{Inter-Node Communication Graphs}
 \label{sec:communication-topology}
@@ -594,7 +594,7 @@ The \caps{GMM} has the benefit of making the conditioning of behaviors completel
 \begin{align}
 \mat{F}' = ((1-\alpha)\,\rStoch(\trans{\mat{S}}\mat{S})+(\alpha)\,\rStoch(\trans{\mat{D}}\mat{D}))\mat{F}.
 \end{align}
-The parameter $\alpha$ allows us to smoothly vary the weighting of the source and destination behaviors. Source-only behavior is given by $\alpha=0$; destination-only by $\alpha=1$; to weight source and destination equally, take $\alpha=\frac{1}{2}$.
+The parameter $\alpha$ allows us to smoothly vary the weighting of the source and destination behaviors. Source-only behavior is given by $\alpha=0$; destination-only by $\alpha=1$; to weight source and destination equally, take $\alpha=\nicefrac{1}{2}$.
 
 \subsection{Traffic Generation}
 \sec{traffic-generation}

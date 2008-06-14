@@ -51,7 +51,8 @@ $x \mapsto \ceil{x}$ \\
 \vphantom{\Bigg|}
 inter-packet interval &
 $\ival \in [0,v_\text{max}]$ &
-$v \mapsto \max\set{1,\ceil{d_v\fracp{v-v_{\min}}{v_{\max}-v_{\min}}^\gamma}}$ &
+$v \mapsto \max\set{1,
+  \ceil{d_v\fracp{\text{\raisebox{2pt}{$v-v_{\min}$}}}{v_{\max}-v_{\min}}^\gamma}}$ &
 $d_v$ &
 $x \mapsto v_{\min}+(v_{\max}-v_{\min})\parens{\frac{x}{d_v}}^{\frac{1}{\gamma}}$ \\
 \hline
