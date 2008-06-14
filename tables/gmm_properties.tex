@@ -28,12 +28,14 @@ $d \mapsto d$ &
 n &
 $x \mapsto \ceil{x}$ \\
 \hline
+\vphantom{\bigg|}
 start time &
 $\start \in [0,t_\text{max}]$ &
 $t \mapsto \max\set{1,\ceil{d_t\fracp{t}{t_{\max}}}}$ &
 $d_t$ &
 $x \mapsto (t_{\max})\parens{\frac{x}{d_t}}$ \\
 \hline
+\vphantom{\Bigg|}
 bytes (flow size) &
 $\bytes \in \set{1,\dots,b_{\max}}$ &
 $b \mapsto 1 + \ceil{(d_b-1)\fracp{b-1}{b_{\max}-1}^\beta}$ &
@@ -46,6 +48,7 @@ $z \mapsto z$ &
 $d_z$ &
 $x \mapsto \ceil{x}$ \\
 \hline
+\vphantom{\Bigg|}
 inter-packet interval &
 $\ival \in [0,v_\text{max}]$ &
 $v \mapsto \max\set{1,\ceil{d_v\fracp{v-v_{\min}}{v_{\max}-v_{\min}}^\gamma}}$ &
