@@ -10,12 +10,16 @@
 
 \input{definitions}
 
-\newenvironment{thebibliography}[1]{%
-\section{References}%
-\begin{enumerate}%
-}{%
-\end{enumerate}%
+\newcounter{topic}
+\newcommand{\topic}[1]{
+\addtocounter{topic}{1}
+\textbf{\arabic{topic}. #1}
 }
+
+\newenvironment{reviewer}[1]%
+{\begin{quote}\textbf{Reviewer #1:} \it}{\end{quote}}
+
+\newenvironment{thebibliography}[1]{\textbf{References:}\smaller\begin{enumerate}}{\end{enumerate}}
 
 \name{%
 Stefan~Karpinski\\
@@ -30,23 +34,32 @@ John~R.~Gilbert%
 \opening{Dear Reviewers,}
 
 Thank you for your thoughtful and helpful reviews of out \caps{ACM}/Monet submission.
-From your responses and feedback from other peers, we believe that the first version of our paper did not adequately make clear the motivation, purpose or contribution of our work.
-Therefore, we have significantly revised the introductory and motivational material of our paper as well as presentation of the technical concepts regarding the linear representation of network traffic as vectors and matrices.
-The simulation results that support our claim that the general matrix model captures enough of the behavior of real traffic to be sufficiently realistic as a basis for generative models of network traffic remains the same except for the \model{mixed conditional} model (previously called \model{mixed regular}).
-There was an error in the code generating traffic for this model, which caused the simulation results to be incorrect.
-We have corrected this error.
-In the new version, we have omitted the discussion of measures of error and statistical tests, which already appeared in our previous work~\cite{Karpinski07:cbr-failure}; it was deemed too far from the central topic of the paper.
-Since the utility and significance of the general matrix model was not made clear in our previous version of the paper, we have added in the discussion section preliminary results from using the numerical linear technique of nonnegative matrix factorization on the \caps{GMM} matrices describing the packet behaviors of flows.
-We believe these results are very exciting and promising, and indicate the utility and potential of the representing network traffic linearly.
+Based on your responses and feedback from other colleagues, we believe that the first version of our paper did not adequately make clear the motivation, purpose or contribution of our work.
+Therefore, we have significantly revised the introductory and motivational material as well as the presentation of the technical concepts regarding the linear representation of network traffic as vectors and matrices.
+We hope that the new version more clearly conveys our overall motivation, contribution and technical approach.
+
+The simulation results supporting our claim that the general matrix model sufficiently realistic as a generative workload model remains the unchanged, with one exception:
+the \model{mixed conditional} model (previously called \model{mixed regular}).
+There was an error in the code generating traffic for this model, which caused the simulation results to be incorrect;
+we have corrected this error.
+
+In the new version, we have omitted the discussion of measures of error and statistical tests, which already appeared in our previous work~\cite{Karpinski07:cbr-failure}. It was deemed too far from the central topic of the paper; since it has already been published, we have omitted it and referenced the earlier work.
+
+Since the utility and significance of the general matrix model was not made clear in our previous version of the paper, we have added in the discussion section preliminary results from using nonnegative matrix factorization on the \caps{GMM} matrices describing the packet behaviors of flows. This recently developed numerical linear technique~\cite{Lee01} produces results that we believe are very exciting and promising.
+We hope that this example demonstrates the utility and potential of the representing network traffic linearly.
+
 In what follows, we indicate where in the paper revision, we address specific comments, questions and concerns raised by our collective reviewers.
 
-\begin{enumerate}
+\topic{Information destruction in uniform, marginal and conditional models (previously called regular), seen through the lens of linear representation.}
 
-\item \textbf{Information destruction in uniform, marginal and conditional (n\'e regular) models, seen through linear representation.}
-It was mentioned that it was unclear how the transformations allow to understand the effect and drawbacks of each simplified uniform, marginal or conditional model.
+\begin{reviewer}{1}
+It is clearly shown in section V that how common modeling concepts can be expressed using matrix transformation. However, it is not very clear how this transformation allow us to evaluate the effect of each model’s simplistics on the realism of generated workload as the authors claimed.
+\end{reviewer}
+
+% It was mentioned that it was unclear how the transformations allow to understand the effect and drawbacks of each simplified uniform, marginal or conditional model.
 In the revised paper, we have observed that the uniform, marginal and conditional transformations are all multiplications by specific low-rank matrices.
 Since low-rank matrices are by definition uninvertible, the information content of the original traffic matrix is irrevocably destroyed by these transformations.
-The revised paper discusses this issue in several places:
+The revised paper discusses this issue in two places:
 \begin{enumerate}
 \item Introduction, page 2, column 2, paragraph 2;
 % TODO: add another paragraph about this?
@@ -54,35 +67,91 @@ The revised paper discusses this issue in several places:
 \end{enumerate}
 In the discussion section, moreover, we propose matrix factorization, rather matrix multiplication as a less destructive and thus more faithful method of reducing the complexity, size and dimension of traffic representations.
 
-\item \textbf{Computational complexity of \caps{GMM} compared with simplified models.}
+\topic{Computational complexity of \caps{GMM} compared with simplified models.}
+
+\begin{reviewer}{1}
+Due to the vast size of the matrix and its sparseness, the requirement of processing and computational power might be quite demanding in order to smoothly express and generate traffic based on the GMM. There is no detail about how the matrix representation from the trace data is derived. Therefore, it is not clear how GMM can efficiently express the 
+characteristics of total 2.1 million flows traced for 24 hours.
+\end{reviewer}
+
+\begin{reviewer}{2}
+[S]ince GMM is a more complicated model, I would assume that it is computationally more complicated to generate GMM-based traffic. There is no discussion on this issue in the paper.
+\end{reviewer}
+
 % TODO: address complexity in discussion.
 This issue is now addressed in our discussion section.
 We admit that large matrix representations are more computationally costly than simpler models.
 The purpose of this work, however, is to establish how traffic can be represented and generated realistically at all, not how it can be done most efficiently.
 Currently, realistic traffic modeling is an unsolved problem.
 We observe, however, that generating application traffic for a simulation takes orders of magnitude less \caps{CPU}-time than running the simulation itself.
-Therefore, traffic model complexity is considered a non-issue.
+Therefore, traffic model generation complexity is considered a non-issue.
 
-\item \textbf{Comprehensiveness of performance metrics used in evaluation.}
+\topic{Comprehensiveness of performance metrics used in evaluation.}
+
+\begin{reviewer}{1}
+The authors used the six performance metrics to prove how accurately GMM capture the characteristics of the real network. However, what if some other performance metrics, e.g., delay jitter, MAC-layer bandwidth share, etc., are concerned? Can we say these metrics also be accurately reflected with high confidence?
+\end{reviewer}
+
 % TODO: address comprehensiveness of metrics in discussion.
 We already briefly addressed this issue in the original version of the paper:
 we have evaluated a variety of other performance metrics, but omit them here due to lack of space.
 Moreover, the performance comparisons for the metrics presented here are indicative of other performance metrics.
 We address this now in our discussion section in greater detail.
 
-\item \textbf{Miscellaneous other questions and concerns.}
-% TODO: make sure this is addressed adequately.
+\topic{Miscellaneous other questions and concerns.}
+
+% \begin{reviewer}{1}
+% \begin{enumerate}
+% \item What is a flow size exactly? Based on my understanding, it is the sum of all the bytes ﬂown between a pair of host. If so, flow size, packet size, and inter-packet interval are closely related to each other. Is there any inconsistency problem when considering them separately?
+% \item Does 24-hour trace data used in the paper really good enough? 
+% \item What theoretical and computational tools of modern linear algebra can be adopted and used for traffic generation specifically? One thing they mentioned as their current work is using matrix factorization and clustering technique to extract hidden structure from a large and diverse body of real traffic. But this haven’t verified yet and isn’t it too soon to claim this?
+% \item Wouldn‘t it be better if the authors come up with the criteria to determine whether the seven properties characterize the traced traffic adequately instead of proving the adequacy of GMM model by showing the six performance metrics closely resembled those of traced traffic? For example, by comparing distribution of packet size of GMM model and that of traced data.
+% \item Paxson and Floyd observed TCP traffic which protocol itself has closed-loop behavior. However, can we generalized this to the entire network as the authors mentioned?
+% \end{enumerate}
+% \end{reviewer}
+
+\begin{reviewer}{1}
+What is a flow size exactly? Based on my understanding, it is the sum of all the bytes ﬂown between a pair of host. If so, flow size, packet size, and inter-packet interval are closely related to each other. Is there any inconsistency problem when considering them separately?
+\end{reviewer}
 We have addressed the inter-relation between flow size, packet behavior, duration and start time in the section describing traffic generation (page 10, section 4.4).
-The adequacy of the 24-hour trace is discussed in the discussion section: in short, 24 hours of data is not enough to draw general conclusions about all traffic, but is enough to demonstrate the potential effectiveness, or provide counter-examples to the effectiveness of modeling techniques; this is all we attempt to do here.
+
+\begin{reviewer}{1}
+Does 24-hour trace data used in the paper really good enough?
+\end{reviewer}
+% TODO: make sure this is addressed adequately.
+The adequacy of the 24-hour trace is discussed in the discussion section: in short, 24 hours of data is not enough to draw general conclusions about all traffic, but is enough to demonstrate the potential effectiveness of \caps{GMM}, and provide counter-examples to the effectiveness of uniform, marginal and conditional modeling techniques;
+this is all we attempt to do here.
 Further validation of methods on larger sets of data is required in the future.
-We provide a concrete example of theoretical and numerical tools and their application to the \caps{GMM} in the use of nonnegative matrix factorization to understand and explain flow packet behaviors.
-This technique and preliminary results from its application are shown in the discussion section.
-The seven properties used in the \caps{GMM} are 
-We note in our revised related work section that the work of \FHC~\cite{Hernandez06:dissertation} perfectly complements ours in that it provides the means to emulate the closed-loop behavior of applications using \caps{TCP}, but does not provide any models of application behavior;
-our work provides the necessary models of applications behavior.
+
+\begin{reviewer}{1}
+What theoretical and computational tools of modern linear algebra can be adopted and used for traffic generation specifically? One thing they mentioned as their current work is using matrix factorization and clustering technique to extract hidden structure from a large and diverse body of real traffic. But this haven’t verified yet and isn’t it too soon to claim this?
+\end{reviewer}
+We provide a concrete example of a powerful technique that can be applied immediately to the \caps{GMM}: we use nonnegative matrix factorization to understand and explain flow packet behaviors.
+This technique and some exemplary results from its application are shown in the discussion section.
+It is also noted that all the traffic models used in this paper are written in only 19 lines of Matlab code, demonstrating the power of and simplicity of linear representation and the \caps{GMM} for traffic modeling explorations.
+
+\begin{reviewer}{1}
+Wouldn‘t it be better if the authors come up with the criteria to determine whether the seven properties characterize the traced traffic adequately instead of proving the adequacy of GMM model by showing the six performance metrics closely resembled those of traced traffic? For example, by comparing distribution of packet size of GMM model and that of traced data.
+\end{reviewer}
+The seven properties used in the \caps{GMM} are % TODO finish this...
+
+\begin{reviewer}{1}
+Paxson and Floyd observed TCP traffic which protocol itself has closed-loop behavior. However, can we generalized this to the entire network as the authors mentioned?
+\end{reviewer}
+We note in our revised related work section that the work of \FHC~\cite{Hernandez06:dissertation} perfectly complements ours in that it provides the means to emulate the closed-loop behavior of applications using \caps{TCP}, but does not provide any models of application behavior.
+Our work, on the other hand, provides the necessary models of applications behavior.
+Taken together, the \caps{TCP} flow generation technique of \FHC and our application-level workload modeling address both halves of the closed-loop network traffic modeling problem.
 See Related Work, page 3, column 2, paragraph 2 for our discussion of this issue.
 
-\end{enumerate}
+% The adequacy of the 24-hour trace is discussed in the discussion section: in short, 24 hours of data is not enough to draw general conclusions about all traffic, but is enough to demonstrate the potential effectiveness, or provide counter-examples to the effectiveness of modeling techniques; this is all we attempt to do here.
+% Further validation of methods on larger sets of data is required in the future.
+% We provide a concrete example of theoretical and numerical tools and their application to the \caps{GMM} in the use of nonnegative matrix factorization to understand and explain flow packet behaviors.
+% This technique and preliminary results from its application are shown in the discussion section.
+% The seven properties used in the \caps{GMM} are 
+% 
+% We note in our revised related work section that the work of \FHC~\cite{Hernandez06:dissertation} perfectly complements ours in that it provides the means to emulate the closed-loop behavior of applications using \caps{TCP}, but does not provide any models of application behavior;
+% our work provides the necessary models of applications behavior.
+% See Related Work, page 3, column 2, paragraph 2 for our discussion of this issue.
 
 We hope that the revised version addresses your concerns and questions adequately and that it meets your expectations for professional scholarly publications.
 
