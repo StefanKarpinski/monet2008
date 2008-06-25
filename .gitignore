@@ -4,6 +4,5 @@
 *.bbl
 *.blg
 *.out
-paper.pdf
-graphs
-notes.oo3
+/paper.pdf
+/letter.pdf
