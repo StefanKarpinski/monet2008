@@ -51,17 +51,17 @@ source conditional &
 $\mat{F}' = \rStoch(\trans{\mat{S}}\mat{S})\,\mat{F}$ &
 flow behaviors are aggregated on a per source-node basis
 \\\hline
-dest conditional &
+dest. conditional &
 $\mat{F}' = \rStoch(\trans{\mat{D}}\mat{D})\,\mat{F}$ &
 flow behaviors are aggregated on a per destination-node basis
 \\\hline
-mixed conditional &
-$\mat{F}' = \nicefrac{1}{2}\,(
-              \rStoch(\trans{\mat{S}}\mat{S}) +
-              \rStoch(\trans{\mat{D}}\mat{D})
-            )\,\mat{F}$ &
-flow behaviors are aggregated on a mixed source/destination basis
-\\\hline
+% mixed conditional &
+% $\mat{F}' = \nicefrac{1}{2}\,(
+%               \rStoch(\trans{\mat{S}}\mat{S}) +
+%               \rStoch(\trans{\mat{D}}\mat{D})
+%             )\,\mat{F}$ &
+% flow behaviors are aggregated on a mixed source/destination basis
+% \\\hline
 \end{tabular}
 \caption{Matrix-based traffic models evaluated by paired differential simulation.}
 \label{tab:traffic-models}
