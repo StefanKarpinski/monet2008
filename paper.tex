@@ -759,10 +759,63 @@ In our discussion, we present and demonstrate a far more compelling method of re
 \section{Discussion}
 \label{sec:discussion}
 
-%The story of network analysis and modeling is one of variety. Assumptions of ``sameness'' have fallen repeatedly. ...
-%The matrix model gives new insight into 
+Although we have shown it to be sufficiently realistic for driving wireless simulations, the general matrix model is not intended to be a final model used by networking researchers.
+Nor is it intended to be the ultimate perfect model of network behavior.
+Rather it serves as both a research tool and a stepping stone to better understanding of network traffic.
+Because it captures so much detail about traffic sample---%
+without making assumptions of uniformity or marginality of flow behavior---%
+it serves as a basis for deriving more advanced models that preserve more of the original behavior of networks than any uniform or marginal model ever can.
+The first important role it plays is in allowing us to succinctly mathematically express common models.
+All of the traffic models included in this paper are implemented in only 19 lines of Matlab code, applying simple matrix transformations to the \caps{GMM} representation of traffic.
+Through the lens of linear algebra, we see why uniform, marginal and even conditional models fail to adequately capture the gestalt behavior of networks:
+these simplifying assumptions force us to ignore most of the information present in a trace.
+In what follows, we address limitations of the the results presented in this paper, but conclude with an exciting and promising new technique for traffic analysis that amply demonstrates the potential of linear representation of network traffic.
 
-Thus far, we have addressed two out of three of the originally posed questions regarding traffic modeling. First, we have proposed a general approach for representing whole-network traffic without making assumptions of uniformity or marginality. To this end, we introduced the concept of a linear representation of traffic. The general matrix model entails a specific linear representation, such that network traffic patterns can easily be expressed as matrices. Our experimental results show that the \caps{GMM} is sufficiently realistic for generating wireless workloads derived from traces. When uniform or marginal assumptions are applied, however, sufficient realism eludes us, indicating that if we are to simplify and reduce the representation of network behaviors, we must do so by some other technique. In \Section{modeling-concepts}, we observed that application of uniformity and marginality assumptions to traffic instances is equivalent, in the \caps{GMM}, to right and left multiplication, respectively, by matrices of rank one. These transformations destroy almost all of the information in the original traffic matrix.
+\subsection{Generality of Results}
+
+% The point of our analysis is not to show that no synthetic models can be accurate, but rather, that the commonly used models, and obvious variations thereof, are not accurate.
+
+A significant limitation on the generality of our results is that they are based on a single data set from \caps{IETF}60---albeit a large and varied one. It is possible that traffic in this trace happens to produce network performance that is unusually dissimilar to standard traffic behavior.
+This data set, however, represents a highly heterogeneous collection of network usage behaviors, from slow and steady off-peak usage, to extremely heavy peak usage:
+over 800 users, 33 thousand flows, and 1 million packets in a single 10-minute trace segment.
+Despite the broad variety of behaviors, the results are consistent:
+in all types of usage scenarios, uniform and marginal models, and to a lesser degree conditional ones, systematically skew important performance measurements at all levels of the network.
+While the precise results for other data sets might differ, it is very unlikely that these traffic models will happen to accurately reproduce realistic performance in other experiments.
+This paper provides strong evidence that better traffic models are needed for performance evaluations.
+Thus, while it is necessarily limited, our evaluation points us strongly in the direction away from uniform and marginal models.
+
+Another potential concern about generality is the relatively limited set of performance metrics evaluated.
+As mentioned in \Section{performance-metrics}, we have evaluated a broad variety of performance metrics---28 in all.
+The metrics evaluated here were selected both because they are among the most commonly used in evaluations, and because they are representative of the results for other metrics.
+In general, metrics at the same level of the protocol stack tend to behave in related ways:
+they may be positively or negatively correlated, but if one metric is severely distorted, it is unlikely that others are left intact.
+The direction of the distortion of metrics is highly sensitive to the experimental setup;
+the presence of error, however, is not.
+In other words, models that are sufficiently realistic in one experimental setup tend to be sufficiently realistic in other experiments;
+models that misrepresent performance metrics in certain cases tend to do so in other cases as well.
+The direction of the distortion may change, but the fact that they are inaccurate does not.
+See previous work using the same technique for evaluating realism for further examples with different experimental conditions and sets of performance metrics considered~\cite{Karpinski07:realism,Karpinski07:cbr-failure}.
+
+\subsection{Computational Complexity and Overhead}
+
+Another potential concern about the approach of linear representation is the additional computational overhead it may induce in experimental settings.
+Large matrix representations of traffic models are certainly more computationally costly than simpler models.
+Currently, however, realistic local-area traffic modeling is an unsolved problem.
+The purpose of this work is to establish how traffic can be represented and generated realistically at all, not how it can be done most efficiently.
+We observe, however, that generating application traffic for a simulation takes orders of magnitude less \caps{CPU}-time than running the simulation itself.
+Therefore, traffic model generation complexity is considered a non-issue.
+A related issue is the significant simulation time incurred when experiments use realistic volumes of traffic.
+Indeed, this is a problem:
+we have run our simulations on a 64-node Itanium cluster, and the experiments still take weeks to complete.
+However, with the current state of the art in simulators and \caps{CPU} power, this problem is unavoidable.
+Including model preparation times, running simulations with uniform or marginal models takes negligibly less time than running simulations using realistic models like the \caps{GMM}.
+One of the possible effects of this research, however, is the potential ability to classify and catalog an realistic set of ``exemplary'' traffic scenarios for various applications.
+Such a catalog is far from existing, but its existence would allow researchers to run far fewer simulations to achieve infinitely more reliable results.
+
+\subsection{Nonnegative Factorization of Packet Behavior}
+
+We have addressed two out of three of the originally posed questions regarding traffic modeling; in this section, we address the third.
+First, we have proposed a general approach for representing whole-network traffic without making assumptions of uniformity or marginality. To this end, we introduced the concept of a linear representation of traffic. The general matrix model entails a specific linear representation, such that network traffic patterns can easily be expressed as matrices. Our experimental results show that the \caps{GMM} is sufficiently realistic for generating wireless workloads derived from traces. When uniform or marginal assumptions are applied, however, sufficient realism eludes us, indicating that if we are to simplify and reduce the representation of network behaviors, we must do so by some other technique. In \Section{modeling-concepts}, we observed that application of uniformity and marginality assumptions to traffic instances is equivalent, in the \caps{GMM}, to right and left multiplication, respectively, by matrices of rank one. These transformations destroy almost all of the information in the original traffic matrix.
 Conditional models are equivalent to left-multiplication by somewhat less degenerate matrices, but they achieve realism only by approaching the \caps{GMM} itself.
 
 \input{figures/basic_behaviors}

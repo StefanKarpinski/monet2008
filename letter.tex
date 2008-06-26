@@ -91,23 +91,12 @@ Therefore, traffic model generation complexity is considered a non-issue.
 The authors used the six performance metrics to prove how accurately GMM capture the characteristics of the real network. However, what if some other performance metrics, e.g., delay jitter, MAC-layer bandwidth share, etc., are concerned? Can we say these metrics also be accurately reflected with high confidence?
 \end{reviewer}
 
-% TODO: address comprehensiveness of metrics in discussion.
 We already briefly addressed this issue in the original version of the paper:
 we have evaluated a variety of other performance metrics, but omit them here due to lack of space.
 Moreover, the performance comparisons for the metrics presented here are indicative of other performance metrics.
 We address this now in our discussion section in greater detail.
 
 \topic{Miscellaneous other questions and concerns.}
-
-% \begin{reviewer}{1}
-% \begin{enumerate}
-% \item What is a flow size exactly? Based on my understanding, it is the sum of all the bytes ﬂown between a pair of host. If so, flow size, packet size, and inter-packet interval are closely related to each other. Is there any inconsistency problem when considering them separately?
-% \item Does 24-hour trace data used in the paper really good enough? 
-% \item What theoretical and computational tools of modern linear algebra can be adopted and used for traffic generation specifically? One thing they mentioned as their current work is using matrix factorization and clustering technique to extract hidden structure from a large and diverse body of real traffic. But this haven’t verified yet and isn’t it too soon to claim this?
-% \item Wouldn‘t it be better if the authors come up with the criteria to determine whether the seven properties characterize the traced traffic adequately instead of proving the adequacy of GMM model by showing the six performance metrics closely resembled those of traced traffic? For example, by comparing distribution of packet size of GMM model and that of traced data.
-% \item Paxson and Floyd observed TCP traffic which protocol itself has closed-loop behavior. However, can we generalized this to the entire network as the authors mentioned?
-% \end{enumerate}
-% \end{reviewer}
 
 \begin{reviewer}{1}
 What is a flow size exactly? Based on my understanding, it is the sum of all the bytes ﬂown between a pair of host. If so, flow size, packet size, and inter-packet interval are closely related to each other. Is there any inconsistency problem when considering them separately?
@@ -117,7 +106,6 @@ We have addressed the inter-relation between flow size, packet behavior, duratio
 \begin{reviewer}{1}
 Does 24-hour trace data used in the paper really good enough?
 \end{reviewer}
-% TODO: make sure this is addressed adequately.
 The adequacy of the 24-hour trace is discussed in the discussion section: in short, 24 hours of data is not enough to draw general conclusions about all traffic, but is enough to demonstrate the potential effectiveness of \caps{GMM}, and provide counter-examples to the effectiveness of uniform, marginal and conditional modeling techniques;
 this is all we attempt to do here.
 Further validation of methods on larger sets of data is required in the future.
@@ -132,7 +120,14 @@ It is also noted that all the traffic models used in this paper are written in o
 \begin{reviewer}{1}
 Wouldn‘t it be better if the authors come up with the criteria to determine whether the seven properties characterize the traced traffic adequately instead of proving the adequacy of GMM model by showing the six performance metrics closely resembled those of traced traffic? For example, by comparing distribution of packet size of GMM model and that of traced data.
 \end{reviewer}
-The seven properties used in the \caps{GMM} are % TODO finish this...
+The seven properties used in the \caps{GMM} are not meant to be comprehensive, but rather representative.
+In the section in which we introduce the metrics, we state that we have collected and analyzed other performance metrics in our, experiments, but these performance metrics are representative of the overall results.
+At a higher level, comparing empirical distributions of models to the originals is meaningless:
+if the model is based on the trace, and includes packet size distribution then the two will necessarily match;
+running experiments is not necessary to show that.
+The real question is whether this matters or not:
+does it affect experimental results?
+We refer the reviewer to our earlier work for a more in-depth discussion of the issue~\cite{Karpinski07:realism,Karpinski07:cbr-failure}.
 
 \begin{reviewer}{1}
 Paxson and Floyd observed TCP traffic which protocol itself has closed-loop behavior. However, can we generalized this to the entire network as the authors mentioned?
@@ -155,7 +150,6 @@ See Related Work, page 3, column 2, paragraph 2 for our discussion of this issue
 We hope that the revised version addresses your concerns and questions adequately and that it meets your expectations for professional scholarly publications.
 
 \closing{Yours Respectfully,}
-\signature{Stefan~Karpinski}
 
 \vfill
 \bibliographystyle{plain}
