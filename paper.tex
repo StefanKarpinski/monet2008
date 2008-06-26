@@ -117,8 +117,6 @@ This factorization extracts a small set of ``basic behaviors'' from the traffic 
 Although the factorization is computed without examining port numbers, basic behaviors nevertheless correspond to intuitive expectations for protocols.
 We find basic behaviors corresponding to typical network activities, including file transfer, typing via \caps{SSH}, web surfing, ping traffic, peer-to-peer, and others.
 
-% TODO: update roadmap paragraph.
-
 The rest of the paper is organized as follows.
 In \Section{motivation} we discuss motivation and related work.
 The notion of linear representation is presented in \Section{representations} and the general matrix model is presented in \Section{general-matrix-model}.
@@ -595,7 +593,7 @@ To condition flow behavior by source, we left-multiply by the stochasticized sou
 In this case, rows do not have the same sums, so the ``$\rStoch$'' operator is not equivalent to scalar multiplication.
 Per destination uniformity can be achieved similarly, replacing $\mat{S}$ with $\mat{D}$.
 
-The \caps{GMM} has the benefit of making the conditioning of behaviors completely explicit. It also allows us to easily define intermediate choices. If we wish make the behavior of each flow a weighted average of the composite behaviors of its source and destination nodes, we can express this easily:
+The \caps{GMM} has the benefit of making the conditioning of behaviors completely explicit. It also allows us to easily define intermediate choices. If we wish, for example, to make the behavior of each flow a weighted average of the composite behaviors of its source and destination nodes, we can express this easily:
 \begin{align}
 \mat{F}' = ((1-\alpha)\,\rStoch(\trans{\mat{S}}\mat{S})+(\alpha)\,\rStoch(\trans{\mat{D}}\mat{D}))\mat{F}.
 \end{align}
@@ -725,7 +723,6 @@ These metrics are commonly used to evaluate wireless protocols. We have examined
 \section{Results}
 \label{sec:results}
 
-% TODO: remove mixed conditional from plots.
 \input{figures/box_plots}
 
 Our simulation results are summarized in \Figure{box-plots}. Each subfigure shows a single performance metric. The distribution of log-ratio error values for each traffic model is visualized with a box-and-whisker plot. The box indicates the range from the 25th to 75th percentiles of values, while the ``whiskers'' indicate the full range, excluding outliners (which are shown as isolated points). These plots allow immediate assessment of realism: a good traffic model should have error values that are tightly clustered around the center, with a small, evenly balanced box, and relatively small whiskers. Additionally, the mean and median markers should be close to the center. It should be noted that the error scale is logarithmic, so even a slight increase in spread or deviation from the center indicates a disproportionately large decrease in model quality. Non-logarithmic scale markers are shown above each plot; the values indicate the factor of over- or under-representation for the performance metric.
@@ -744,10 +741,10 @@ Finally, we turn to the conditional models. These demonstrate neither exceptiona
 Neither source nor destination conditioning appears to out-perform the other:
 they perform identically in each case;
 neither is perfect, but both are better in general than any marginal or uniform model.
-The node-conditional models tend to err in the same direction as the \model{full marginal} model, but in a few cases where the aspects of marginality lead to errors in different directions, the outcome follows one of the aspects more than others.
+The \model{source/dest. conditional} models tend to err in the same direction as the \model{full marginal} model, but in a few cases where the aspects of marginality lead to errors in different directions, the outcome follows one of the aspects more than others.
 In the case of received throughput, for example, the \model{packet marginal} tendency to overestimate error overshadows the tendency of the other marginal aspects to underestimate.
-
-% TODO: rerun the mixed model simulations.
+Overall, we see that the conditional models are more realistic than other models, but this is effect occurs only as the number of nodes---\latin{i.e.} the number of conditioning classes---approaches the full rank of the original traffic matrix.
+In our discussion, we present and demonstrate a far more compelling method of reducing and simplifying the representation of the behavior of large collections of flows.
 
 % The mixed case uses the average behavior of the other two cases. It is interesting to note that the mixed case is universally worse than either the source or destination case. Clearly, hybridizing the conditioning here is not an effective technique. We believe that the cause of this effect is like mixing too many colors yielding an unpleasant shade of brown: any of the colors individually would be better than the nondescript average. As a more general conclusion, arbitrarily mixing model may not always be a good idea, despite the ease with which it is done in the matrix representation of workload behavior.
 
