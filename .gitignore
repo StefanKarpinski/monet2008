@@ -4,5 +4,6 @@
 *.bbl
 *.blg
 *.out
+/tmp
 /paper.pdf
 /letter.pdf
