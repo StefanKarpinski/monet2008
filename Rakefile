@@ -52,6 +52,11 @@ file "pub/svjour3.cls" => ["svjour3.cls","pub"] do |t|
   cp "svjour3.cls", t.name
 end
 
-task :default => ["pub/paper.tex","pub/references.bib"]
+file "pub.tar" => ["pub/paper.tex","pub/references.bib"] do |t|
+  files = FileList["pub/*.{tex,bib,clo,cls,pdf}"]
+  run "tar cf #{t.name} #{files.join(' ')}"
+end
+
+task :default => "pub.tar"
 
 task(:clean){ rm_rf "pub" }
