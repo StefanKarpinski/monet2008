@@ -59,4 +59,4 @@ end
 
 task :default => "pub.tar"
 
-task(:clean){ rm_rf "pub" }
+task(:clean){ rm_rf ["pub", "pub.tar"] }
