@@ -29,11 +29,10 @@ def process_tex(r,w)
     when /\\includegraphics(\[.*?\])?\{(.*?)(\.pdf)?\}/
       pre, post = $~.pre_match, $~.post_match
       opts, name = $1, $2
-      pdf = "graphics/#{$2}.pdf"
-      eps = pdf.downcase.gsub(/[-\/]/,'_').sub(/\.pdf$/,'.pdf')
-      # run "pdf2ps #{pdf} #{eps}" rescue warn $!
-      cp pdf, "pub/#{eps}"
-      w.print(pre,"\\includegraphics#{opts}{#{eps}}",post)
+      pdf_src = "graphics/#{$2}.pdf"
+      pdf_dst = pdf_src.downcase.gsub(/[-\/]/,'_').sub(/\.pdf$/,'.pdf')
+      cp pdf_src, "pub/#{pdf_dst}"
+      w.print(pre,"\\includegraphics#{opts}{#{pdf_dst}}",post)
     else w.print(line)
     end
   end
@@ -52,11 +51,11 @@ file "pub/svjour3.cls" => ["svjour3.cls","pub"] do |t|
   cp "svjour3.cls", t.name
 end
 
-file "pub.tar" => ["pub/paper.tex","pub/references.bib"] do |t|
+file "pub.tar.bz2" => ["pub/paper.tex","pub/references.bib"] do |t|
   files = FileList["pub/*.{tex,bib,clo,cls,pdf}"]
-  run "tar cf #{t.name} #{files.join(' ')}"
+  run "tar cf - #{files.join(' ')} | bzip2 -9 >#{t.name}"
 end
 
-task :default => "pub.tar"
+task :default => "pub.tar.bz2"
 
-task(:clean){ rm_rf ["pub", "pub.tar"] }
+task(:clean){ rm_rf ["pub", "pub.tar.bz2"] }
