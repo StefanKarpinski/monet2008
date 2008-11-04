@@ -1,0 +1,89 @@
+Change #1
+Location: 571-575
+Original: Having defined our representation of network behavior and presented the procedure for stochastically generating workload, we turn to deriving useful expressions for commonly used network properties in terms of these algebraic building blocks.
+Replacement: Having defined a specific matrix representation of network behavior, we turn now to deriving useful expressions for commonly used network properties in terms of these algebraic building blocks.
+
+Change #2
+Location: 580-582
+Original: The computations require knowing the values that each size of interval matrix column represents.
+Replacement: The computations require knowing the values that each matrix column represents, whether size or interval.
+
+Change #3
+Location: 615-617
+Original: We use the terms \textit{uniformity}, \textit{marginality}, and \textit{conditionality} to describe these classes of assumptions.
+Replacement: We use the terms \textit{uniform}, \textit{marginal}, and \textit{conditional} to describe these classes of assumptions.
+
+Change #4
+Location: t2.4, Description
+Original: all nodes equally likely as source or destination
+Replacement: all nodes are equally likely as source or destination
+
+Change #5
+Location: t2.5, Description
+Original: all start times, sources and destinations equally likely
+Replacement: all start times, sources and destinations are equally likely
+
+Change #6
+Location: t2.7, Description
+Original: flow size (bytes) is chosen independently of other properties
+Replacement: flow size (bytes) is chosen from marginal distribution of sizes
+
+Change #7
+Location: t2.8, Description
+Original: nodes behave distinctly, but behavior is independent of flows
+Replacement: source and dest. chosen marginally, independent of other properties
+
+Change #8
+Location: t2.9, Description
+Original: packet behavior is variable bit-rate, aggregated across all flows
+Replacement: packet behavior is variable bit-rate, marginal across all flows
+
+Change #9
+Location: t2.1, Description
+Original: Matrix-based traffic models evaluated by paired differential simulation.
+Replacement: Matrix-based traffic models used in paired differential simulation experiments.
+
+Change #10
+Location: 845
+Original: parametric simplifications
+Replacement: parametric approximations
+
+Change #11
+Location: 1192-1195
+Original: The direction of the distortion may change, but the fact that they are inaccurate does not. See previous work using the same technique for evaluating realism for further examples with different experimental conditions and sets of performance metrics considered~\cite{Karpinski07:realism,Karpinski07:cbr-failure}.
+Replacement: The direction of the distortion may change, but the presence or absence of accuracy does not. See previous work using the same technique for evaluating realism for further examples with different experimental conditions and more performance metrics considered~\cite{Karpinski07:realism,Karpinski07:cbr-failure}.
+
+Change #12
+Location: 1221
+Original: catalog an realistic
+Replacement: catalog a realistic
+
+Change #13
+Location: 1240-1247
+Original: In this section we describe matrix factorization, which provides an approximate low-rank representation of the original traffic. This technique not only allows us to model and analyze traffic without destroying the information content, but also leads us to a deep analytical understanding of network behaviors that matches our intuitive understanding of typical modes of network behavior.
+Replacement: In this section we describe a matrix factorization technique that can provide an approximate low-rank representation of the original traffic without assuming uniformity or marginality. This technique not only allows us to simplify and analyze traffic without destroying the information content, but also leads us to a deep analytical understanding of network behaviors that matches our intuitive understanding of typical modes of network behavior.
+
+Change #14
+Location: 1256-1259
+Original: where $\mat{W} \in \R^{f \times b}$ and $\mat{H} \in \R^{b \times (d_z+d_v)}$ are both row-stochastic, while $\mat{\Sigma} \in \R^{b \times b}$ is diagonal with descending diagonal entries. $b\in\N$ is the rank of this factorization, which must be determined somehow as well.
+Replacement: $\mat{W} \in \R^{f \times b}$ is column-stochastic, $\mat{\Sigma} \in \R^{b \times b}$ is diagonal with descending diagonal entries, and $\mat{H} \in \R^{b \times (d_z+d_v)}$ is row-stochastic. The inner dimension, $b\in\N$, must be determined as well.
+
+Change #15
+Location: 1276-1277
+Original: for example has all packets near
+Replacement: for example, has all packet sizes near
+
+Change #16
+Location: 1307-1310
+Original: Our experimental validation demonstrates clearly that the general matrix model accurately reproduces the performance characteristics of of real traffic.
+Replacement: Our experimental validation demonstrates that the general matrix model accurately reproduces performance characteristics of of real traffic.
+
+Change #17
+Location: 1325-1326
+Original: we can see clearly now that both
+Replacement: we can see that both
+
+Change #18
+Location: t3.12
+Original: behavior and with
+Replacement: behavior and
