@@ -19,11 +19,11 @@ all start times are equally likely
 node uniform &
 $\mat{S}' = (\nicefrac{1}{n})\,\mat{S}\ones \quad
  \mat{D}' = (\nicefrac{1}{n})\,\mat{D}\ones$ &
-all nodes equally likely as source or destination
+all nodes are equally likely as source or destination
 \\\hline
 full uniform &
 \textit{all uniform transformations} &
-all start times, sources and destinations equally likely
+all start times, sources and destinations are equally likely
 \\\hline\hline
 time marginal &
 $\mat{A}' = (\nicefrac{1}{f})\,\ones\mat{A}$ &
@@ -31,17 +31,17 @@ start times chosen from marginal distribution of start times
 \\\hline
 size marginal &
 $\mat{B}' = (\nicefrac{1}{f})\,\ones\mat{B}$ &
-flow size (bytes) is chosen independently of other properties
+flow size (bytes) is chosen from marginal distribution of sizes
 \\\hline
 node marginal &
 $\mat{S}' = (\nicefrac{1}{f})\,\ones\mat{S} \quad
  \mat{D}' = (\nicefrac{1}{f})\,\ones\mat{D}$ &
-nodes behave distinctly, but behavior is independent of flows
+source and dest. chosen marginally, independent of other properties
 \\\hline
 packet marginal &
 $\mat{Z}' = (\nicefrac{1}{f})\,\ones\mat{Z} \quad
  \mat{V}' = (\nicefrac{1}{f})\,\ones\mat{V}$ &
-packet behavior is variable bit-rate, aggregated across all flows
+packet behavior is variable bit-rate, marginal across all flows
 \\\hline
 full marginal &
 \textit{all marginal transformations} &
@@ -63,7 +63,7 @@ flow behaviors are aggregated on a per destination-node basis
 % flow behaviors are aggregated on a mixed source/destination basis
 % \\\hline
 \end{tabular}
-\caption{Matrix-based traffic models evaluated by paired differential simulation.}
+\caption{Matrix-based traffic models used in paired differential simulation experiments.}
 \label{tab:traffic-models}
 \end{center}
 \vspace{-1em}

@@ -468,7 +468,9 @@ We have chosen $\beta=\nicefrac{1}{2.7}$ and $\gamma=\nicefrac{1}{3}$ because th
 \subsection{Computation of Common Properties}
 \label{sec:common-properties}
 
-Having defined our representation of network behavior and presented the procedure for stochastically generating workload, we turn to deriving useful expressions for commonly used network properties in terms of these algebraic building blocks.
+Having defined a specific matrix representation of network behavior,
+% and a procedure for stochastically generating workload from a given matrix,
+we turn now to deriving useful expressions for commonly used network properties in terms of these algebraic building blocks.
 
 \subsubsection{Packet Size \& Inter-Packet Interval Statistics}
 \label{sec:flow-totals}
@@ -482,7 +484,7 @@ From the matrices $\mat{Z}$ and $\mat{V}$ we can compute a variety of statistics
 The row vectors in the matrices may represent individual flows or composites of many flows.
 % about packet sizes, total packet count, inter-packet intervals, and total duration for each representation vector, which may represent a single actual flow, or the composite behavior of many flows.
 % We begin by expressing the vectors for total bytes, total packets and total duration for a matrix of flow representations, with size and interval matrices $\mat{Z}$ and $\mat{V}$.
-The computations require knowing the values that each size of interval matrix column represents.
+The computations require knowing the values that each matrix column represents, whether size or interval.
 % The computed duration is approximate because information is irretrievably lost in the quantization process.
 The vectors of representative values for $\mat{Z}$ and $\mat{V}$ respectively are:
 \begin{align}
@@ -530,7 +532,7 @@ Similar graphs for total bytes and total duration of flows may be computed using
 \subsection{Expression of Common Modeling Concepts}
 \sec{modeling-concepts}
 
-The simplifying assumptions made by most traffic models can be classified into three categories. We use the terms \textit{uniformity}, \textit{marginality}, and \textit{conditionality} to describe these classes of assumptions. They are all assumptions about the ``sameness'' of aspects of network behaviors; they differ, however, in whether they make stipulations about uniformity within each flow, across all flows, or within groups of flows. In the following sections, we explore how various modeling concepts can be expressed in the framework of the general matrix model. Models are expressed as transformations that convert arbitrary traffic matrix instances into similar ones that satisfy the model's assumptions. These transformations later allow us to evaluate the effect of each model's simplifications on the realism of generated workloads.
+The simplifying assumptions made by most traffic models can be classified into three categories. We use the terms \textit{uniform}, \textit{marginal}, and \textit{conditional} to describe these classes of assumptions. They are all assumptions about the ``sameness'' of aspects of network behaviors; they differ, however, in whether they make stipulations about uniformity within each flow, across all flows, or within groups of flows. In the following sections, we explore how various modeling concepts can be expressed in the framework of the general matrix model. Models are expressed as transformations that convert arbitrary traffic matrix instances into similar ones that satisfy the model's assumptions. These transformations later allow us to evaluate the effect of each model's simplifications on the realism of generated workloads.
 
 \subsubsection{Uniform Modeling}
 
@@ -677,7 +679,7 @@ The first model we evaluate is the general matrix model itself. We derive the ma
 
 After validating the \caps{GMM}, we explore the effects of various uniformity, marginality, and conditioning assumptions on the realism of traffic models. The uniform models are the most common, being the simplest both to conceptualize and to implement: simply make no distinction between start times, source or destination nodes. Choose them at random, using no information from reality other than the number of nodes and the possible range of start times. We do not evaluate uniform packet behavior because it has been sufficiently discredited in our previous work.
 
-In more sophisticated modeling work, where uniformity is discarded as too simple a model for behavior, marginality is often applied instead. It is assumed---often implicitly---that marginal models are adequate to capture the essential aspects of network behavior. We put that implicit assumption to the test here. How well do perfect marginal models represent real behavior? When we say that our marginal models are ``perfect,'' we mean that they are nonparametric and calculated directly from trace behavior. These are the marginal models that most accurately describe the trace traffic, because they are directly derived from it and make no parametric simplifications. This provides an upper bound on the quality of marginal models in general, since parametric marginal models are derived, in turn, as simplifications of these nonparametric marginal behaviors. \Table{traffic-models} provides a complete list of all the traffic models we compare in our evaluation.
+In more sophisticated modeling work, where uniformity is discarded as too simple a model for behavior, marginality is often applied instead. It is assumed---often implicitly---that marginal models are adequate to capture the essential aspects of network behavior. We put that implicit assumption to the test here. How well do perfect marginal models represent real behavior? When we say that our marginal models are ``perfect,'' we mean that they are nonparametric and calculated directly from trace behavior. These are the marginal models that most accurately describe the trace traffic, because they are directly derived from it and make no parametric approximations. This provides an upper bound on the quality of marginal models in general, since parametric marginal models are derived, in turn, as simplifications of these nonparametric marginal behaviors. \Table{traffic-models} provides a complete list of all the traffic models we compare in our evaluation.
 
 %The original trace traffic serves as a control group against which to compare all other models. Before we can evaluate the general matrix model (\caps{GMM}), we must establish that one potentially important aspect of traffic behavior that is \textit{not} represented in the \caps{GMM} can legitimately be discarded. That aspect of behavior is \textit{\caps{TCP} feedback}. The \caps{GMM} does not specify the \caps{IP} protocol type of each flow. Therefore we must establish the extent to which using \caps{UDP} flows, without reliable delivery or congestion control, affects performance metrics.
 %%\caps{GMM} also does not indicate which flows are paired with each other in a client-server relationship. While this pairing does not affect non-\caps{TCP} flows, we implement.
@@ -793,8 +795,8 @@ The direction of the distortion of metrics is highly sensitive to the experiment
 the presence of error, however, is not.
 In other words, models that are sufficiently realistic in one experimental setup tend to be sufficiently realistic in other experiments;
 models that misrepresent performance metrics in certain cases tend to do so in other cases as well.
-The direction of the distortion may change, but the fact that they are inaccurate does not.
-See previous work using the same technique for evaluating realism for further examples with different experimental conditions and sets of performance metrics considered~\cite{Karpinski07:realism,Karpinski07:cbr-failure}.
+The direction of the distortion may change, but the presence or absence of accuracy does not.
+See previous work using the same technique for evaluating realism for further examples with different experimental conditions and more performance metrics considered~\cite{Karpinski07:realism,Karpinski07:cbr-failure}.
 
 \subsection{Computational Complexity and Overhead}
 
@@ -810,7 +812,7 @@ Indeed, this is a problem:
 we have run our simulations on a 64-node Itanium cluster, and the experiments still take weeks to complete.
 Given the current state of the art in simulators and \caps{CPU} power, however, this problem is unavoidable.
 Including model preparation times, running simulations with uniform or marginal models takes negligibly less time than running simulations using realistic models like the \caps{GMM}.
-One of the possible effects of this research, however, may be the ability to classify and catalog an realistic set of ``exemplary'' traffic scenarios for various applications.
+One of the possible effects of this research, however, may be the ability to classify and catalog a realistic set of ``exemplary'' traffic scenarios for various applications.
 Such a catalog is far from existing, but its existence would allow researchers to run far fewer simulations to achieve incomparably more general and reliable results.
 
 \subsection{Nonnegative Factorization of Packet Behavior}
@@ -824,17 +826,16 @@ Such a catalog is far from existing, but its existence would allow researchers t
 It remains to show how we can simplify and reduce the representation of network behaviors without making unwarranted and manifestly false assumptions of uniformity or marginality of network behaviors.
 In \Section{modeling-concepts}, we observed that application of uniformity and marginality assumptions to traffic instances is equivalent, in the \caps{GMM}, to right and left multiplication, respectively, by matrices of rank one. These transformations destroy almost all of the information in the original traffic matrix.
 Conditional models are equivalent to left-multiplication by somewhat less degenerate matrices, but they achieve realism only by approaching the \caps{GMM} itself.
-In this section we describe matrix factorization, which provides an approximate low-rank representation of the original traffic.
-This technique not only allows us to model and analyze traffic without destroying the information content, but also leads us to a deep analytical understanding of network behaviors that matches our intuitive understanding of typical modes of network behavior.
+In this section we describe a matrix factorization technique that can provide an approximate low-rank representation of the original traffic without assuming uniformity or marginality.
+This technique not only allows us to simplify and analyze traffic without destroying the information content, but also leads us to a deep analytical understanding of network behaviors that matches our intuitive understanding of typical modes of network behavior.
 
 We present here preliminary results from applying nonnegative matrix factorization (\caps{NMF}) to the packet behaviors of real flows. Recall from \Section{general-matrix-model} that the matrices $\mat{Z}$ and $\mat{V}$ represent the packet size and inter-packet interval histograms of a collection of flows.
 We apply \caps{NMF} to the concatenation of these matrices, $\mat{P}=[\mat{Z}~\mat{V}] \in \R^{f \times (d_z+d_v)}$. \caps{NMF} attempts to approximate $\mat{P}$ as the product of nonnegative matrices:
 \begin{align}
 \mat{P} \approx \mat{W}\mat{\Sigma}\mat{H},
 \end{align}
-where $\mat{W} \in \R^{f \times b}$ and $\mat{H} \in \R^{b \times (d_z+d_v)}$ are both row-stochastic, while
-$\mat{\Sigma} \in \R^{b \times b}$ is diagonal with descending diagonal entries.
-$b\in\N$ is the rank of this factorization, which must be determined somehow as well.
+$\mat{W} \in \R^{f \times b}$ is column-stochastic, $\mat{\Sigma} \in \R^{b \times b}$ is diagonal with descending diagonal entries, and $\mat{H} \in \R^{b \times (d_z+d_v)}$ is row-stochastic.
+The inner dimension, $b\in\N$, must be determined as well.
 What is the interpretation of such a factorization?
 The rows of $\mat{H}$ are \emph{basic behaviors}---pairs of packet size and inter-packet interval distributions, such that each flow's packet behavior can be approximated as a linear combination of these basic behaviors.
 Specifically, the matrix $\mat{M}\mat{\Sigma}$ gives the mixing coefficients for each flow.
@@ -844,7 +845,7 @@ Thus the basic behaviors are sorted in descending order of how much traffic they
 % Note that the factorization does not associate basic behaviors with individual packets;
 % rather, total flow behavior is explained as a mixture of basic behaviors, so the fraction of packets in each flow explained by a given behavior is known, while the specific packets are unknown.
 
-The striking results of applying nonnegative matrix factorization to $\mat{P}$ are shown in \Figure{basic-behaviors}. Twelve basic behaviors suffice to explain all the traffic in a ``toy''  sample of 4138 flows. The pairs of packet size and inter-packet interval distributions are almost immediately recognizable as resembling intuitive modes of network behavior. The first basic behavior, for example has all packets near the \caps{MTU}, while intervals are smoothly distributed around a fraction of a millisecond. This is what we would expect from downloading large files; and indeed, the breakdown of packets by port number bears out this interpretation---almost all of the traffic is \caps{HTTP} server traffic, with small slivers of \caps{IMAP} and \caps{SSH} server traffic. The second basic behavior is equally intuitive: tiny packets with frequency distributed around 0.1 seconds---this is all interactive \caps{SSH} traffic, as indicated by the associate pie chart.
+The striking results of applying nonnegative matrix factorization to $\mat{P}$ are shown in \Figure{basic-behaviors}. Twelve basic behaviors suffice to explain all the traffic in a ``toy''  sample of 4138 flows. The pairs of packet size and inter-packet interval distributions are readily recognizable as resembling intuitive modes of network behavior. The first basic behavior, for example, has all packet sizes near the \caps{MTU}, while intervals are smoothly distributed around a fraction of a millisecond. This is what we would expect from downloading large files; and indeed, the breakdown of packets by port number bears out this interpretation---almost all of the traffic is \caps{HTTP} server traffic, with small slivers of \caps{IMAP} and \caps{SSH} server traffic. The second basic behavior is equally intuitive: tiny packets with frequency distributed around 0.1 seconds---this is all interactive \caps{SSH} traffic, as indicated by the associate pie chart.
 The other behaviors are listed in \Table{basic-behaviors} with interpretations.
 % This is precisely the behavior we expect from interacting with a remote terminal via keystrokes and screen updates.
 The true significance of this result lies in the fact that \caps{NMF} succeeds in classifying flows by network behavior completely automatically, not only without using port numbers, but also without \emph{any} information about the number or kind of plausible interpretations.´
@@ -854,9 +855,9 @@ The algorithm not only agrees with our intuition about network behavior, but exc
 
 \section{Conclusions}\label{sec:conclusions}
 
-We have presented a fundamentally new, algebraic way of representing traffic patterns in local area networks. We call this representation the general matrix model. Each flow of a traffic collection is represented as a single high-dimensional vector with components representing the \caps{IP} protocol type, source and destination nodes, start time, flow size, and packet behavior. The essential property of the algebraic representation is that standard vector operations compute natural and useful descriptions of aggregate behavior over the collection of flows represented. Our experimental validation demonstrates clearly that the general matrix model accurately reproduces the performance characteristics of of real traffic.
+We have presented a fundamentally new, algebraic way of representing traffic patterns in local area networks. We call this representation the general matrix model. Each flow of a traffic collection is represented as a single high-dimensional vector with components representing the \caps{IP} protocol type, source and destination nodes, start time, flow size, and packet behavior. The essential property of the algebraic representation is that standard vector operations compute natural and useful descriptions of aggregate behavior over the collection of flows represented. Our experimental validation demonstrates that the general matrix model accurately reproduces performance characteristics of of real traffic.
 
-The benefits of a performance-preserving algebraic representation are multifold. The algebraic forms of the simplifying assumptions made by many common modeling approaches provide unprecedented clarity and coherence to a complex and confusing subject. For example, assumptions that various aspects of flow behavior are stochastically or deterministically uniform all take the same form algebraically: left matrix multiplication. The other major class of common simplifying assumptions made by traffic models is to apply some marginal behavior across the entire collection of flows or to disjoint subsets of the flows. Such simplifications correspond to right matrix multiplication in \caps{GMM}. Because of the simplicity and clarity that the algebraic structure brings to the subject, we can see clearly now that both common types of simplifying assumptions are na\"ive and simplistic. Our experimental results bolster this conclusion: both uniform and marginal models significantly misrepresent many important network performance metrics. With the general matrix model, however, we stand poised to use the powerful tools of modern linear algebra to develop general, elegant and effective models of network behavior.
+The benefits of a performance-preserving algebraic representation are multifold. The algebraic forms of the simplifying assumptions made by many common modeling approaches provide unprecedented clarity and coherence to a complex and confusing subject. For example, assumptions that various aspects of flow behavior are stochastically or deterministically uniform all take the same form algebraically: left matrix multiplication. The other major class of common simplifying assumptions made by traffic models is to apply some marginal behavior across the entire collection of flows or to disjoint subsets of the flows. Such simplifications correspond to right matrix multiplication in \caps{GMM}. Because of the simplicity and clarity that the algebraic structure brings to the subject, we can see that both common types of simplifying assumptions are na\"ive and simplistic. Our experimental results bolster this conclusion: both uniform and marginal models significantly misrepresent many important network performance metrics. With the general matrix model, however, we stand poised to use the powerful tools of modern linear algebra to develop general, elegant and effective models of network behavior.
 
 %\section{Acknowledgments}
 %This work was funded in part through NSF Career Award CNS-0347886.
